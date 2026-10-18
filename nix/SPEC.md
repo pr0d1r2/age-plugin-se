@@ -15,6 +15,7 @@ sib|fixtures|format-freeze corpus: identities, recipients & stanzas made by upst
 sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
 sib|Documentation|upstream man page sources, unchanged; ⊥ node
 sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node
+sib|release|fork Alpine keygen & its bats test, fork public keys; ⊥ node
 
 ## §C CONSTRAINTS
 

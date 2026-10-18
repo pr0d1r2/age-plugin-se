@@ -18,6 +18,7 @@ nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (roo
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
 Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
+release|fork Alpine keygen & its bats test, fork public keys; ⊥ node|upstream packaging, private keys|-
 
 ## §N NAV
 
@@ -50,6 +51,7 @@ self|.|-
 - nix: `packages.aarch64-darwin.default` (`age-plugin-se`), `checks.aarch64-darwin.*`, `devShells.aarch64-darwin.default` (`nix` node).
 - file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`; `.bats` beside each.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
+- file: `release/alpine-keygen.sh [--new] [PREFIX [DIR]]` — `<prefix>-<hex epoch>.rsa` & `.pub`, PKCS#8 RSA 4096, ⊥ in git; existing pair checked, new only w/ `--new`; `.pub` → `release/keys/`.
 - file: `.pklith` → `hk.pkl` (gate), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
 - tag: `v<upstream>-fork.<n>`, first `v0.2.1-fork.1` (D19). binary keeps upstream version string.
 - trailer: `Paradigm-Stage: <stage>` per paradigm §I.trailer.
@@ -68,7 +70,7 @@ R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swif
 R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
 R10|gate 2026-10-18|36 steps on commit, +3 on push, 2 on commit-msg; coverage 87.67% (995/1,135 `Sources/` lines). recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
 R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/OptionsHelpTests.swift`
-R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme
+R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
 
 ## §V INVARIANTS
 
@@ -114,7 +116,8 @@ T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks 
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|.|coverage exclusions w/ reasons (D14); owner picks their home (sherd#138), then floor re-recorded|V10
 T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as file ceilings; owner picks|-
-T22|.|owner: enable fork Actions (UI only), then require `gate (macos-latest)` on `main` (D8)|V6
+T22|.|owner: require `gate (macos-latest)` on `main` (D8); Actions on, first run green|V6
+T23|.|fork-signed Alpine apk (path B): `ALPINE_KEY` from `release/alpine-keygen.sh`; fork script runs `dir2apk.go --key=<fork key>` ∵ `Makefile` hard-codes upstream key; `build.yml`, `Makefile` ⊥ changed. ⊥ D12 (darwin only): owner reconciles|-
 
 ## §B BUGS
 
