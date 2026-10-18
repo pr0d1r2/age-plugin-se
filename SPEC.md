@@ -88,11 +88,11 @@ T1|.|`nix` node: flake builds `57ccea1` unchanged w/ host Swift, runs `swift tes
 T2|.|owner installs Xcode 26 machine-wide via the owner's machine config, outside this repo (D21, R3); dev shell sets `DEVELOPER_DIR` & refuses w/o XCTest; CI macOS runner has Xcode|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|.|`fixtures` node: make corpus w/ upstream `v0.2.1` & `57ccea1` binaries on a Mac w/ Secure Enclave; record commands|V1,V2,V15
-T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2
+T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
 T6|.|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet|V6,V7,V8,V9,V10
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|.|`Tests`: help ↔ parser drift test|V11
-T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5
+T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5,V3
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
 T11|.|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval|V14,V5
 T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
