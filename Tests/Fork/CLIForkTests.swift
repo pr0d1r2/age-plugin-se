@@ -256,6 +256,25 @@ final class ForkCLITests: XCTestCase {
     XCTAssertFalse(FileManager.default.fileExists(atPath: file))
   }
 
+  func testRecipients_StandardInputEmpty() throws {
+    var printed: [String] = []
+    try CLI.run(
+      ["_", "recipients"], plugin: Plugin(crypto: DummyCrypto(), stream: MemoryStream()),
+      readStandardInput: { nil }, print: { printed.append($0) })
+    XCTAssertEqual([], printed)
+  }
+
+  func testRecipients_StandardInputNotUTF8() throws {
+    XCTAssertThrowsError(
+      try CLI.run(
+        ["_", "recipients"], plugin: Plugin(crypto: DummyCrypto(), stream: MemoryStream()),
+        readStandardInput: { Data([0xff, 0xfe]) }, print: { XCTFail("printed \($0)") })
+    ) { error in
+      XCTAssertEqual(CLIError.invalidStandardInput, error as? CLIError)
+      XCTAssertEqual("standard input is not valid UTF-8", error.localizedDescription)
+    }
+  }
+
   func testRecipientsOutput_WriteFails_Process() throws {
     let file = directory.appendingPathComponent("missing/recipients.txt").path
     let (status, output) = try BuiltBinary.run(
