@@ -125,6 +125,9 @@ steps: Mapping<String, Config.Step> = new {
     glob = List("flake.lock")
     check = #"command -v jq >/dev/null 2>&1 || { echo 'flake-lock-graph: jq is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; jq -e '[.nodes[] | select(.locked.repo? == "nixpkgs")] | length == 1' flake.lock || { echo 'flake-lock-graph: flake.lock holds more or fewer than one nixpkgs (paradigm/V20)' >&2; exit 1; }"#
   }
+  ["toolchain"] {
+    check = "command -v nix/toolchain-test.sh >/dev/null 2>&1 || { echo 'toolchain: nix/toolchain-test.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; nix/toolchain-test.sh nix/toolchain.sh || { echo 'toolchain: the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)' >&2; exit 1; }"
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
