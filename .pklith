@@ -29,6 +29,7 @@ coverage|coverage|sherd|**/*.swift, Package.swift, .coverage|sherd coverage --ch
 flake-lock-graph|supply|jq|flake.lock|jq -e '[.nodes[] \| select(.locked.repo? == "nixpkgs")] \| length == 1' flake.lock|-|-|flake.lock holds more or fewer than one nixpkgs (paradigm/V20)
 toolchain|supply|-|-|nix/toolchain-test.sh nix/toolchain.sh|-|-|the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)
 gen-check|gate|-|-|pklith gen --check|-|-|a step in hk.pklith.pkl no longer matches .pklith; run `pklith gen`
+no-stash|gate|gnugrep|-|! grep -nE 'stash *= *(true\|"git"\|"patch-file")' hk.pkl|-|-|hk.pkl stashes in a hook; parallel worktrees share git stash (paradigm/V15)
 
 ## types
 type|checks|min|exempt
@@ -51,6 +52,7 @@ path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdo
 path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
 path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
+pkl|no-stash|-|-
 pklith|gen-check|-|-
 pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)

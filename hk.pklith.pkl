@@ -131,6 +131,9 @@ steps: Mapping<String, Config.Step> = new {
   ["gen-check"] {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'gen-check: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith gen --check || { echo 'gen-check: a step in hk.pklith.pkl no longer matches .pklith; run `pklith gen`' >&2; exit 1; }"
   }
+  ["no-stash"] {
+    check = #"command -v grep >/dev/null 2>&1 || { echo 'no-stash: grep is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; ! grep -nE 'stash *= *(true|"git"|"patch-file")' hk.pkl || { echo 'no-stash: hk.pkl stashes in a hook; parallel worktrees share git stash (paradigm/V15)' >&2; exit 1; }"#
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
