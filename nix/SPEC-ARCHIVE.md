@@ -12,3 +12,4 @@ correctly and uselessly. The verb that reads it is `mth tasks`.
 T1|x|`toolchain.sh` guard, planted old-Swift & no-XCTest runs refused (`.:T1`, `.:T2`)|V1
 T2|x|package builds `57ccea1` + `f62703c` w/o source change (`.:T1`)|V2
 T3|x|checks & dev shell via pklith `lib.devShell` (`.:T1`)|V2
+T4|x|pre-push step (`.:T6`) runs `swift test` as `checks.aarch64-darwin.tests` does: both call `nix/test.sh`|V2

@@ -46,4 +46,4 @@ id|status|task|cites
 T1|x|ARCHIVED to SPEC-ARCHIVE.md|V1
 T2|x|ARCHIVED to SPEC-ARCHIVE.md|V2
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V2
-T4|.|pre-push step (`.:T6`) runs `swift test` as `checks.aarch64-darwin.tests` does|V2
+T4|x|ARCHIVED to SPEC-ARCHIVE.md|V2
