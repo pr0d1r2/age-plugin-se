@@ -24,9 +24,10 @@
       inputs.sherd.follows = "sherd";
     };
     # Newer than the sherd pklith's catalog pins: sherd main, for SwiftPM
-    # line coverage (`sherd coverage`, sherd PRs 139 and 140), which no tag
-    # carries yet; back to a tag once one does. pklith follows it, so the
-    # lock keeps one sherd and `catalog.sherd` is this one.
+    # line coverage and its function exclusions (`sherd coverage`, sherd
+    # PRs 139, 140 and 142), which no tag carries yet; back to a tag once
+    # one does. pklith follows it, so the lock keeps one sherd and
+    # `catalog.sherd` is this one.
     sherd = {
       url = "git+https://github.com/pr0d1r2/sherd?ref=main&shallow=1";
       inputs.nixpkgs-lock.follows = "nixpkgs-lock";
