@@ -3,6 +3,7 @@
 # with pklith's catalog namespace (nixpkgs plus the tools nixpkgs lacks).
 catalog: [
   catalog.editorconfig-checker
+  catalog.gnugrep
   catalog.ripsecrets
   catalog.typos
 ]
