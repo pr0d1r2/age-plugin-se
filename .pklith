@@ -71,6 +71,7 @@ path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
 path:gate/*.sh|shellcheck, shfmt, gate-tests|-|-
 path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
+path:release/*.bats|bats-parse|-|-
 pkl|no-stash|-|-
 pklith|gen-check, pklith-check, confirm|-|-
 pre-commit|-|-|written by pklith (seed or gen)
