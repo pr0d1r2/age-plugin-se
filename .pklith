@@ -25,12 +25,14 @@ id|category|nix|glob|check|fix|env|msg
 shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash {{files}}|-|-|shell script finding
 build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tests -Xswiftc -warnings-as-errors|-|-|the build or a compiler warning failed (root V7)
 test|test|-|**/*.swift, Package.swift, Package.resolved, nix/test.sh|nix/test.sh swift|-|-|a test failed (root V15, nix V2)
+coverage|coverage|sherd|**/*.swift, Package.swift, .coverage|sherd coverage --check|-|-|line coverage fell below the floor in .coverage (root V10)
 
 ## types
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 context-limits|sherd-budget|-|-
+coverage|coverage|-|-
 editorconfig|-|-|written by pklith (seed or gen)
 envrc|shellcheck|-|-
 gitattributes|-|-|written by pklith (seed or gen)
@@ -50,7 +52,7 @@ pre-push|-|-|written by pklith (seed or gen)
 resolved|build, test|-|-
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
 sh|shellcheck, shfmt|-|-
-swift|swift-format, build, test|-|-
+swift|swift-format, build, test, coverage|-|-
 toml|taplo|-|-
 txt|-|-|license text, no linter reads it
 yaml|yamllint|-|-

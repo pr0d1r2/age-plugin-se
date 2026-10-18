@@ -128,4 +128,8 @@ push: Mapping<String, Config.Step> = new {
     glob = List("**/*.swift", "Package.swift", "Package.resolved", "nix/test.sh")
     check = "command -v nix/test.sh >/dev/null 2>&1 || { echo 'test: nix/test.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; nix/test.sh swift || { echo 'test: a test failed (root V15, nix V2)' >&2; exit 1; }"
   }
+  ["coverage"] {
+    glob = List("**/*.swift", "Package.swift", ".coverage")
+    check = "command -v sherd >/dev/null 2>&1 || { echo 'coverage: sherd is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; sherd coverage --check || { echo 'coverage: line coverage fell below the floor in .coverage (root V10)' >&2; exit 1; }"
+  }
 }
