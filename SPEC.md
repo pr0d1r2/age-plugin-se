@@ -98,6 +98,7 @@ T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swif
 T14|.|fork CI rendered by actlith on macOS runner; required status checks on `main` (D8, D12)|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
+T17|.|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in `Tests/ForkCLITests.swift` ∴ `Tests` worker in same wave ⊥ touches that file|V5,V15
 
 ## §B BUGS
 
