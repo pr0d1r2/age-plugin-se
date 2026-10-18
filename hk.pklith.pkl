@@ -169,6 +169,9 @@ push: Mapping<String, Config.Step> = new {
     glob = List("**/*.swift", "Package.swift", "Package.resolved", "nix/test.sh")
     check = "command -v nix/test.sh >/dev/null 2>&1 || { echo 'test: nix/test.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; nix/test.sh swift || { echo 'test: a test failed (root V15, nix V2)' >&2; exit 1; }"
   }
+  ["tdd-order"] {
+    check = "command -v pklith >/dev/null 2>&1 || { echo 'tdd-order: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith check --pushed || { echo 'tdd-order: a commit changed a file before its test; commit the test first or with it' >&2; exit 1; }"
+  }
   ["gate-tests"] {
     glob = List("gate/*.sh", "gate/*.bats")
     check = #"command -v bats >/dev/null 2>&1 || { echo 'gate-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats gate || { echo 'gate-tests: a gate script'\''s bats test failed (root T6)' >&2; exit 1; }"#

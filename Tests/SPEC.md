@@ -33,6 +33,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
 - helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift`.
 - `.pklith` rules (V4): `swift-test` exists `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except; `swift-orphan` orphan `Tests/*Tests.swift` (`*` crosses `/` ∴ `Fork/` too) → `Sources/{stem\|chop:ForkTests\|chop:Tests}.swift`, except `Tests/StanzaTests.swift` ∵ upstream's, tests `Stanza` in `Plugin.swift`. upstream has no `HPKE`, `Stream` test ∴ ⊥ upstream exists row.
+- `.pklith` rule (V5): `swift-tdd` tdd-order `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except. judged pre-push by check `tdd-order` (`pklith check --pushed`); in CI by `pklith check --range origin/main..HEAD` ∵ CI's commits already on the remote ∴ `--pushed` judges none.
 
 ## §V INVARIANTS
 
@@ -40,6 +41,7 @@ V1: suite deterministic: fixed clock, fixed randomness via `DummyCrypto`; same t
 V2: format-freeze failure prints fixture path & first differing byte offset.
 V3: ∀ fork test file ⊥ duplicates an upstream test; covers fork invariant it names in its doc comment.
 V4: ∀ `Sources/X.swift` ∃ `Tests/Fork/XForkTests.swift`; ∀ `*Tests.swift` maps to 1 source | is an except in §I.
+V5: ∀ commit changing `Sources/X.swift` changes `Tests/Fork/XForkTests.swift` in it | an earlier judged commit (test first). commits before a push | PR ⊥ judged; deleting a source needs ⊥ test.
 
 ## §T TASKS
 

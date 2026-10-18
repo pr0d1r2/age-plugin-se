@@ -8,10 +8,15 @@ format 1
 # The command hands the pinned Xcode to the dev shell as
 # HOST_DEVELOPER_DIR: `nix develop` overwrites DEVELOPER_DIR with the
 # stdenv's apple-sdk before the shell hook runs (nix §C).
+#
+# After the gate it runs `pklith check --range origin/main..HEAD` (Tests
+# V5): the checkout's commits are already on the remote, so the pre-push
+# `--pushed` step judges none here, and the range judges a pull request's
+# commits (merges skipped); on a push to main the range is empty.
 
 ## workflows
 id|kind|systems|cache|args
-ci|gate|aarch64-darwin|pr0d1r2|xcode=26.6, timeout=60, command=HOST_DEVELOPER_DIR="$DEVELOPER_DIR" nix develop --command hk check --all --check
+ci|gate|aarch64-darwin|pr0d1r2|xcode=26.6, timeout=60, command=HOST_DEVELOPER_DIR="$DEVELOPER_DIR" nix develop --command sh -c 'hk check --all --check && pklith check --range origin/main..HEAD'
 
 ## hand-written
 path|reason
