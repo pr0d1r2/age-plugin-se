@@ -11,4 +11,13 @@
 # Raised 2026-10-18 by `sherd coverage --record` in the wave 1 reconcile
 # (root T17, paradigm/V18): 88.57%, 1,015 of 1,146 lines under Sources/.
 # B1's fix (root T11, PR #6) and its tests added the gain.
-lines 88.57
+#
+# Raised 2026-10-18 by `sherd coverage --record` (root T20, before any
+# refactor): 92.96%, 1,070 of 1,151 lines under Sources/. main stood at
+# 88.62%, 1,020 of 1,151, after T9 (PR #11). Tests/CoverageTests.swift
+# added the 50 lines, with no Sources/ change. The 81 still unrun: 42
+# need a refactor (CLI.main's dispatch, the unreachable `assert(false)`
+# in Options.parse, the SecAccessControl failure in generateKey) and 39
+# need a Secure Enclave, macOS older than 26, a terminal or the process
+# entry point.
+lines 92.96
