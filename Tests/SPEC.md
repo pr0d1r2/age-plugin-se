@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-XCTest target `Tests`: upstream's suite as-is & fork tests beside it, all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` runs the built binary as a child, ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`.
+XCTest target `Tests`: upstream's suite as-is & fork tests in `Tests/Fork/`, 1 file per source (V4), all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` & `StandardIOStreamProcessTests` run the built binary as a child (`BuiltBinary`), ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`.
 
 ## §N NAV
 
@@ -21,7 +21,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §C CONSTRAINTS
 
-- upstream test files edited only per `.:V4`. fork tests in own files: `FormatFreezeTests.swift`, `OptionsHelpTests.swift`, `ForkCLITests.swift`, `CoverageTests.swift` (`.:V10`).
+- upstream test files edited only per `.:V4` ∴ fork tests ⊥ merged into them: `Tests/Fork/<Stem>ForkTests.swift` ∀ `Sources/<Stem>.swift`; `FormatFreezeTests` (T1, T2) → class in its source's mirror. suffix `ForkTests` ∵ swiftc refuses 2 files w/ 1 basename in a module (`Fork/CLITests.swift` ⊥). `Package.swift` unchanged: flat `path: "Tests"` compiles `Fork/`.
 - fixture bytes read from `fixtures/` by path from `#filePath` ⊥ SwiftPM resources ∴ `Package.swift` unchanged beyond D22.
 - RED commit compiles: tests land w/ stubs answering wrong (`paradigm/V44`).
 - XCTest needs Xcode (D21); `swift test` from dev shell | CI macOS runner.
@@ -31,12 +31,15 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 - cmd: `swift test` — whole suite; pre-push & `checks.aarch64-darwin` (`nix`).
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
+- helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift`.
+- `.pklith` rules (V4): `swift-test` exists `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except; `swift-orphan` orphan `Tests/*Tests.swift` (`*` crosses `/` ∴ `Fork/` too) → `Sources/{stem\|chop:ForkTests\|chop:Tests}.swift`, except `Tests/StanzaTests.swift` ∵ upstream's, tests `Stanza` in `Plugin.swift`. upstream has no `HPKE`, `Stream` test ∴ ⊥ upstream exists row.
 
 ## §V INVARIANTS
 
 V1: suite deterministic: fixed clock, fixed randomness via `DummyCrypto`; same tree → same result (`.:V15`).
 V2: format-freeze failure prints fixture path & first differing byte offset.
 V3: ∀ fork test file ⊥ duplicates an upstream test; covers fork invariant it names in its doc comment.
+V4: ∀ `Sources/X.swift` ∃ `Tests/Fork/XForkTests.swift`; ∀ `*Tests.swift` maps to 1 source | is an except in §I.
 
 ## §T TASKS
 
