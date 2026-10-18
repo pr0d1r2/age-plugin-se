@@ -58,11 +58,15 @@ func keygenOutput(_ result: (String, String), output: String?) throws -> String 
   guard let outputFile = output else {
     return result.0
   }
-  FileManager.default.createFile(
-    atPath: outputFile,
-    contents: Data(result.0.utf8),
-    attributes: [.posixPermissions: 0o600]
-  )
+  guard
+    FileManager.default.createFile(
+      atPath: outputFile,
+      contents: Data(result.0.utf8),
+      attributes: [.posixPermissions: 0o600]
+    )
+  else {
+    throw CLIError.cannotWriteOutput(outputFile)
+  }
   return "Public key: \(result.1)"
 }
 
