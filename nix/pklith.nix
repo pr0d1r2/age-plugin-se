@@ -4,6 +4,7 @@
 catalog: [
   catalog.deadnix
   catalog.editorconfig-checker
+  catalog.git
   catalog.gnugrep
   catalog.jq
   catalog.markdownlint-cli

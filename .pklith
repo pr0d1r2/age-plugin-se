@@ -30,10 +30,11 @@ flake-lock-graph|supply|jq|flake.lock|jq -e '[.nodes[] \| select(.locked.repo? =
 toolchain|supply|-|-|nix/toolchain-test.sh nix/toolchain.sh|-|-|the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)
 gen-check|gate|-|-|pklith gen --check|-|-|a step in hk.pklith.pkl no longer matches .pklith; run `pklith gen`
 no-stash|gate|gnugrep|-|! grep -nE 'stash *= *(true\|"git"\|"patch-file")' hk.pkl|-|-|hk.pkl stashes in a hook; parallel worktrees share git stash (paradigm/V15)
+no-core-worktree|gate|git|-|test -z "$(git config --local --get core.worktree)"|-|-|core.worktree is set in the shared .git/config, so every worktree acts on one checkout (paradigm/V15)
 
 ## types
 type|checks|min|exempt
-*|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths|-|-
+*|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, no-core-worktree|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 context-limits|sherd-budget|-|-
 coverage|coverage|-|-

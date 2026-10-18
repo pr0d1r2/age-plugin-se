@@ -134,6 +134,9 @@ steps: Mapping<String, Config.Step> = new {
   ["no-stash"] {
     check = #"command -v grep >/dev/null 2>&1 || { echo 'no-stash: grep is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; ! grep -nE 'stash *= *(true|"git"|"patch-file")' hk.pkl || { echo 'no-stash: hk.pkl stashes in a hook; parallel worktrees share git stash (paradigm/V15)' >&2; exit 1; }"#
   }
+  ["no-core-worktree"] {
+    check = #"test -z "$(git config --local --get core.worktree)" || { echo 'no-core-worktree: core.worktree is set in the shared .git/config, so every worktree acts on one checkout (paradigm/V15)' >&2; exit 1; }"#
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
