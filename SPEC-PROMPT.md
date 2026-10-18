@@ -3,8 +3,8 @@ run lands SPEC.md, mark this file HISTORICAL INPUT in its own commit; from
 then on SPEC.md and the node specs it federates are the law, and where they
 differ from this file, they win.
 
-Paradigm: paradigm, prompt round 7 (commit 6c7e6cd, no tag yet), used as
-a process only: this repository is not a fleet member for now (decision
+Paradigm: paradigm 6c7e6cd (no tag yet, decision 9), used as a process
+only: this repository is not a fleet member for now (decision
 1). There is no paradigm language page for Swift yet. This file states
 only the product and its deviations.
 
@@ -165,6 +165,24 @@ AGE_PLUGIN_SE_PROMPT=<text>   Touch ID prompt text (upstream PR 18)
    CI exists. Recount: `gh api
    repos/pr0d1r2/age-plugin-se/branches/main/protection`. Local.
 
+# Decisions, round 2 (2026-10-18)
+
+Gap round 1, read against paradigm `6c7e6cd`. Answered by the agent on the
+owner's instruction to proceed without stopping; each answer stands until
+the owner amends it by a later decision.
+
+9. Until paradigm tags `v0.1.0` (paradigm T10), this prompt and the spec
+   pin paradigm by commit `6c7e6cd`. The pin moves to the tag in its own
+   commit. Local.
+10. Build order, moved here from a `# Process` section that sat after the
+    open questions (paradigm/V3; the same slip as paradigm bug B2). The
+    rest of that section restated paradigm's lifecycle and approval rules
+    and is dropped (paradigm/V2). Order: (1) the flake builds upstream
+    `57ccea1` unchanged and runs its tests; (2) the format-freeze fixtures
+    and tests; (3) the gate; (4) the prompt env var and the denial marker,
+    each RED then GREEN, each offered upstream; (5) the first tag, and T
+    switches its input (T `nix:T3`). Local.
+
 # Non-goals
 
 - a new plugin, new key types or a new recipient type ahead of upstream
@@ -207,24 +225,3 @@ Ask before guessing. A question marked blocking stops the node it names.
    tried later for T's CI, or required now? Not blocking.
 6. Gate tools for Swift: swift-format from nixpkgs (5.10.1) as the lint,
    and what pklith row covers `.swift` files? Not blocking.
-
-# Process
-
-Built in its own session on a Mac with more resources than the one that
-wrote this prompt. The paradigm lifecycle: dev shell, then ask me to
-reload; guardrails first, one check per commit, then ask me to reload;
-TDD, with RED commits red on purpose and tests on push; federated SPEC-DAG
-built in sherd waves.
-
-Build order:
-1. The flake builds upstream `57ccea1` unchanged and runs its tests.
-2. The format-freeze fixtures and tests.
-3. The gate.
-4. The prompt env var and the denial marker, each RED then GREEN, each
-   offered upstream.
-5. The first tag; T switches its input (T `nix:T3`).
-
-Outward-facing steps need my explicit approval: every push, every upstream
-PR, tags, and comments on upstream issues or PRs. Before the first push,
-check every repository named in a committed file with `gh repo view`, and
-name no private repository.
