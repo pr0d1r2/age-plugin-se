@@ -297,10 +297,14 @@ final class CLIRunCoverageTests: XCTestCase {
 /// `LLVM_PROFILE_FILE` and its counts merge with the suite's. No case touches
 /// the Secure Enclave or Touch ID (root V15).
 final class CLIProcessCoverageTests: XCTestCase {
-  /// The binary SwiftPM built beside this test bundle; missing fails.
+  /// The binary SwiftPM built beside this test bundle; missing fails. On
+  /// macOS the bundle is a `.xctest` directory in the build directory; on
+  /// Linux the bundle URL is the build directory itself.
   func binary() throws -> URL {
-    let url = Bundle(for: Self.self).bundleURL.deletingLastPathComponent()
-      .appendingPathComponent("age-plugin-se")
+    let bundle = Bundle(for: Self.self).bundleURL
+    let directory =
+      bundle.pathExtension == "xctest" ? bundle.deletingLastPathComponent() : bundle
+    let url = directory.appendingPathComponent("age-plugin-se")
     XCTAssertTrue(
       FileManager.default.isExecutableFile(atPath: url.path), "no built binary at \(url.path)")
     return url
