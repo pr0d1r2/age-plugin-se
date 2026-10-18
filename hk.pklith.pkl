@@ -151,6 +151,9 @@ steps: Mapping<String, Config.Step> = new {
   ["confirm"] {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'confirm: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith confirm || { echo 'confirm: the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)' >&2; exit 1; }"
   }
+  ["actlith-check"] {
+    check = "command -v actlith >/dev/null 2>&1 || { echo 'actlith-check: actlith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; actlith gen --check && actlith check || { echo 'actlith-check: a workflow no longer matches .actlith, or a file in .github/workflows/ is neither generated nor listed hand-written; run `actlith gen` (root T14)' >&2; exit 1; }"
+  }
 }
 
 push: Mapping<String, Config.Step> = new {

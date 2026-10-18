@@ -39,11 +39,13 @@ no-core-worktree|gate|git|-|test -z "$(git config --local --get core.worktree)"|
 names|gate|gnugrep|**/*|gate/names.sh {{files}}|-|-|a private name is staged (paradigm/V37); the hit names the denylist entry, never the name
 gate-tests|test|bats|gate/*.sh, gate/*.bats|bats gate|-|-|a gate script's bats test failed (root T6)
 confirm|gate|-|-|pklith confirm|-|-|the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)
+actlith-check|gate|-|-|actlith gen --check && actlith check|-|-|a workflow no longer matches .actlith, or a file in .github/workflows/ is neither generated nor listed hand-written; run `actlith gen` (root T14)
 
 ## types
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, names, no-core-worktree|-|-
 bats|bats-parse, gate-tests|-|-
+actlith|actlith-check|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 commit-msg|shellcheck|-|-
 context-limits|sherd-budget|-|-
