@@ -72,3 +72,43 @@ final class Bech32CoverageTests: XCTestCase {
     }
   }
 }
+
+/// `Options` error paths, error descriptions and enum mappings.
+final class OptionsCoverageTests: XCTestCase {
+  func testParse_UnknownOption() {
+    XCTAssertThrowsError(try Options.parse(["_", "keygen", "--bogus"])) { error in
+      XCTAssertEqual(error as? Options.Error, .unknownOption("--bogus"))
+    }
+  }
+
+  func testError_Descriptions() {
+    XCTAssertEqual(
+      "unknown option: `--bogus`", Options.Error.unknownOption("--bogus").localizedDescription)
+    XCTAssertEqual(
+      "missing value for option `--output`",
+      Options.Error.missingValue("--output").localizedDescription)
+    XCTAssertEqual(
+      "invalid value for option `--access-control`: `x`",
+      Options.Error.invalidValue("--access-control", "x").localizedDescription)
+  }
+
+  func testAccessControl_KeyAccessControl() {
+    let cases: [(Options.AccessControl, KeyAccessControl)] = [
+      (.none, .none),
+      (.passcode, .passcode),
+      (.anyBiometry, .anyBiometry),
+      (.anyBiometryOrPasscode, .anyBiometryOrPasscode),
+      (.anyBiometryAndPasscode, .anyBiometryAndPasscode),
+      (.currentBiometry, .currentBiometry),
+      (.currentBiometryAndPasscode, .currentBiometryAndPasscode),
+    ]
+    for (option, expected) in cases {
+      XCTAssertEqual(expected, option.keyAccessControl, option.rawValue)
+    }
+  }
+
+  func testRecipientType_RecipientType() {
+    XCTAssertEqual(.se, Options.RecipientType.se.recipientType)
+    XCTAssertEqual(.tag, Options.RecipientType.tag.recipientType)
+  }
+}
