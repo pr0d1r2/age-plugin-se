@@ -1,0 +1,10 @@
+# Seeded by `pklith seed`; yours to edit. swift-format owns layout, so
+# the rules that fight it are off; the unwrap rules are opt-in upstream.
+disabled_rules:
+  - opening_brace
+  - trailing_comma
+  - line_length
+  - identifier_name
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional

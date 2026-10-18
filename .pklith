@@ -1,0 +1,39 @@
+format 1
+
+# age-plugin-se's registry: every tracked file type and the hk steps that
+# check it (root T6). Seeded by `pklith seed --init`; edited by hand since,
+# one check per commit (paradigm/V21), in the order `pklith lay` lays them.
+#
+# The `## checks` rows are this repository's own. Swift and XCTest come from
+# the host Xcode (D21), which the catalog's `nix` column cannot name
+# (pklith#89), so the toolchain, build and test rows name no nix package and
+# run what is on PATH; the shell's guard put the host Xcode there (nix V1),
+# and the toolchain step runs that guard again on every commit.
+#
+# Not laid, each with its reason (root T6):
+# - swiftlint: the seeded `.swiftlint.yml` finds 120 violations in upstream
+#   code, which is not reformatted (D3, D13); it waits for the owner's
+#   baseline convention (root V9, T18).
+# - itok: `.context-limits` holds sherd's chain ceilings (paradigm/V12);
+#   itok reads the same file as per-file ceilings and refuses SPEC.md at
+#   3,563 tokens against its 2,900 chain ceiling.
+# - actionlint, zizmor, yamllint on `.github/`: upstream CI is untouched
+#   (root §C); fork CI brings its own workflow and these rows (T14).
+
+## checks
+id|category|nix|glob|check|fix|env|msg
+
+## types
+type|checks|min|exempt
+Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
+editorconfig|-|-|written by pklith (seed or gen)
+gitattributes|-|-|written by pklith (seed or gen)
+gitignore|-|-|ignore patterns, no linter reads them
+path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
+path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
+path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
+path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
+path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
+pre-commit|-|-|written by pklith (seed or gen)
+pre-push|-|-|written by pklith (seed or gen)
+txt|-|-|license text, no linter reads it
