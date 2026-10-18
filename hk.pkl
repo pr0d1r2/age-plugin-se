@@ -40,6 +40,20 @@ hooks {
     stash = "none"
     steps = commit
   }
+  // The message gate (root T6): a Paradigm-Stage trailer git can parse and
+  // a cited spec id (paradigm/V43, V27), then the name guard over the
+  // message itself (paradigm/V37), one after the other.
+  ["commit-msg"] {
+    steps {
+      ["commit-msg"] {
+        check = "gate/commit-msg.sh {{commit_msg_file}}"
+      }
+      ["message-names"] {
+        check = "gate/names.sh {{commit_msg_file}}"
+        depends = List("commit-msg")
+      }
+    }
+  }
   ["pre-push"] {
     steps = all
   }

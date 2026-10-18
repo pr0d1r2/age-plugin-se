@@ -45,6 +45,7 @@ type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, names, no-core-worktree|-|-
 bats|bats-parse, gate-tests|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
+commit-msg|shellcheck|-|-
 context-limits|sherd-budget|-|-
 coverage|coverage|-|-
 editorconfig|-|-|written by pklith (seed or gen)
