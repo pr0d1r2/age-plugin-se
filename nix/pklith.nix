@@ -8,6 +8,7 @@ catalog: [
   catalog.ripsecrets
   catalog.shellcheck
   catalog.shfmt
+  catalog.statix
   catalog.swift-format
   catalog.taplo
   catalog.typos

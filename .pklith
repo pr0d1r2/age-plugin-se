@@ -32,7 +32,7 @@ editorconfig|-|-|written by pklith (seed or gen)
 envrc|shellcheck|-|-
 gitattributes|-|-|written by pklith (seed or gen)
 gitignore|-|-|ignore patterns, no linter reads them
-nix|nixfmt|-|-
+nix|nixfmt, statix|-|-
 path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
 path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
