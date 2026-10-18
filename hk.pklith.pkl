@@ -121,6 +121,10 @@ steps: Mapping<String, Config.Step> = new {
     glob = List("**/SPEC.md", ".context-limits")
     check = "command -v sherd >/dev/null 2>&1 || { echo 'sherd-budget: sherd is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; sherd budget || { echo 'sherd-budget: a spec chain is over its ceiling' >&2; exit 1; }"
   }
+  ["flake-lock-graph"] {
+    glob = List("flake.lock")
+    check = #"command -v jq >/dev/null 2>&1 || { echo 'flake-lock-graph: jq is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; jq -e '[.nodes[] | select(.locked.repo? == "nixpkgs")] | length == 1' flake.lock || { echo 'flake-lock-graph: flake.lock holds more or fewer than one nixpkgs (paradigm/V20)' >&2; exit 1; }"#
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
