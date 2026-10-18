@@ -86,3 +86,7 @@ toml|taplo|-|-
 txt|-|-|license text, no linter reads it
 yaml|yamllint|-|-
 yml|yamllint|-|-
+
+## rules
+id|kind|select|target|except
+swift-test|exists|Sources/*.swift|Tests/Fork/{stem}ForkTests.swift|-
