@@ -20,7 +20,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §C CONSTRAINTS
 
-- upstream test files edited only per `.:V4`. fork tests in own files: `FormatFreezeTests.swift`, `OptionsHelpTests.swift`, `ForkCLITests.swift`.
+- upstream test files edited only per `.:V4`. fork tests in own files: `FormatFreezeTests.swift`, `OptionsHelpTests.swift`, `ForkCLITests.swift`, `CoverageTests.swift` (`.:V10`).
 - fixture bytes read from `fixtures/` by path from `#filePath` ⊥ SwiftPM resources ∴ `Package.swift` unchanged beyond D22.
 - RED commit compiles: tests land w/ stubs answering wrong (`paradigm/V44`).
 - XCTest needs Xcode (D21); `swift test` from dev shell | CI macOS runner.
