@@ -7,5 +7,6 @@ catalog: [
   catalog.nixfmt
   catalog.ripsecrets
   catalog.shfmt
+  catalog.taplo
   catalog.typos
 ]

@@ -41,4 +41,5 @@ pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
 sh|shfmt|-|-
+toml|taplo|-|-
 txt|-|-|license text, no linter reads it
