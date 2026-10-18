@@ -9,8 +9,17 @@ import "hk.pklith.pkl" as generated
 
 // Upstream paths `.pklith` exempts (root §F: not nodes, unchanged; root
 // §C: upstream code is not reformatted, D3). An exempt type claims no
-// check, so no step reads it.
-local upstream = List(".github/**", "Documentation/**", "Scripts/**", "Makefile")
+// check, so no step reads it. The fork CI, `.github/workflows/ci.yml`, is
+// not upstream's and is read (root T14).
+local upstream = List(
+  ".github/actions/**",
+  ".github/workflows/build.yml",
+  ".github/workflows/build-main.yml",
+  ".github/workflows/release.yml",
+  "Documentation/**",
+  "Scripts/**",
+  "Makefile"
+)
 exclude = upstream
 
 // Baseline (D13): upstream files, unchanged, that a step finds fault with.

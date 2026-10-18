@@ -17,8 +17,8 @@ format 1
 # - itok: `.context-limits` holds sherd's chain ceilings (paradigm/V12);
 #   itok reads the same file as per-file ceilings and refuses SPEC.md at
 #   3,563 tokens against its 2,900 chain ceiling.
-# - actionlint, zizmor, yamllint on `.github/`: upstream CI is untouched
-#   (root §C); fork CI brings its own workflow and these rows (T14).
+# - actionlint, zizmor, yamllint on upstream `.github/` files: upstream CI
+#   is untouched (root §C); they read the fork CI, `ci.yml`, only (T14).
 # - the name guard's allowlist half (paradigm/V37): CI, which has no
 #   denylist, would check every repository named or linked against a
 #   committed list of public ones; the text already names third-party
@@ -59,7 +59,11 @@ markdownlintignore|-|-|ignore patterns, no linter reads them
 md|markdownlint|-|-
 nix|nixfmt, statix, deadnix|-|-
 path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-budget|-|-
-path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
+path:.github/actions/**|-|-|upstream composite action, untouched (root §C); the upstream workflows use it
+path:.github/workflows/build-main.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
+path:.github/workflows/build.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
+path:.github/workflows/ci.yml|actionlint|-|-
+path:.github/workflows/release.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
 path:fixtures/*/*|-|-|fixture bytes written by upstream, frozen (fixtures V2): no linter reads keys, recipients or protocol transcripts; the * steps still read them, blank, newline and editorconfig steps skip them (hk.pkl)
 path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
