@@ -31,7 +31,9 @@ openssl version 2>/dev/null | grep -q '^OpenSSL 3' ||
 	fail "needs OpenSSL 3 for \`openssl pkey -check\`; run it in the dev shell: nix develop -c $0"
 
 # The nearest directory that exists decides whether DIR is in a work tree,
-# before anything is created.
+# before anything is created. GIT_DIR and friends, as a git hook exports
+# them, would name another repository than DIR's own, so they go.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_PREFIX
 probe=$dir
 while [ ! -d "$probe" ]; do probe=$(dirname "$probe"); done
 if [ "$(git -C "$probe" rev-parse --is-inside-work-tree 2>/dev/null)" = true ] ||
