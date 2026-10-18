@@ -58,7 +58,7 @@ R3|build Mac toolchain 2026-10-18|Swift 6.3.3 (`arm64-apple-macosx26.0`), Comman
 R4|fleet nixpkgs pin 2026-10-18|nixpkgs `26f4107e` (via nixpkgs-lock): `swift` 5.10.1, `swift-format` 5.10.1, `swiftlint` 0.63.2, `swiftformat` 0.61.1, all aarch64-darwin; `periphery` absent. recount: `nix eval --raw github:NixOS/nixpkgs/<rev>#<pkg>.version`|local probe
 R5|hk 2.7.0 Swift support 2026-10-18|1 builtin: `swiftlint` (`lint {{files}}`, fix `--fix`, indicator `.swiftlint.yml`); ⊥ swift-format, ⊥ build, ⊥ test builtin|hk `pkl/builtins/swiftlint.pkl`
 R6|pklith & sherd Swift support 2026-10-18|pklith catalog: 0 Swift rows (`swift` only in vendored Config.pkl type list). sherd code verbs read Rust only; Ruby filed the same gap|pklith `src/catalog`; paradigm `docs/RUBY.md`
-R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled`|local probe
+R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); fixed on fork `main` by PR #3 (`f62703c`, issue #2) → clean build 0 warnings. non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled` (∴ D22)|local probe, PR #3
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
 
 ## §V INVARIANTS
@@ -69,7 +69,7 @@ V3: `Sources/Crypto.swift` & `Sources/HPKE.swift` ≠ upstream only in commits c
 V4: upstream test files ⊥ edited, except by upstream sync | by a carried change whose upstream PR edits them (D7).
 V5: ∀ upstream PR branch ∌ fork file (§C list) (D3).
 V6: build & dev shell refuse Swift < 6.2 ∵ `--pq` would silently become `pqUnavailable` (D11, R2).
-V7: ⊥ new compiler warning; upstream warnings (R7) in baseline that only shrinks (D13).
+V7: ⊥ compiler warning: clean build has 0 since `f62703c` (R7) ∴ build runs `-warnings-as-errors`. warning arriving by upstream sync → baseline entry in that sync PR, baseline only shrinks (D13).
 V8: `swift format lint --strict` clean on fork-written & fork-changed lines; upstream violations in baseline that only shrinks (D13).
 V9: ⊥ force unwrap `!`, `try!`, `as!`, `fatalError` in fork-written Swift (swiftlint) (D13).
 V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only & terminal-only code (`CryptoKitCrypto`, `StandardIOStream`, `CLI.main`) exempt w/ reason in `.pklith` (D14). target 100% of rest (D1).
@@ -87,13 +87,13 @@ T2|.|owner installs Xcode 26 machine-wide via the owner's machine config, outsid
 T3|x|`Package.swift`: exclude `SPEC.md` from `Sources` & `Tests` targets (D22, R7)|V7
 T4|.|`fixtures` node: make corpus w/ upstream `v0.2.1` & `57ccea1` binaries on a Mac w/ Secure Enclave; record commands|V1,V2,V15
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2
-T6|.|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings baseline, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet|V6,V7,V8,V9,V10
+T6|.|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet|V6,V7,V8,V9,V10
 T7|x|`.context-limits` measured w/ slack per node (`paradigm/V12`)|-
 T8|.|`Tests`: help ↔ parser drift test|V11
 T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
 T11|.|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval|V14,V5
-T12|.|upstream issue: `#unavailable(macOS 21.0)` → `26.0` (R7), w/ approval|V7
+T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
 T14|.|fork CI rendered by actlith on macOS runner; required status checks on `main` (D8, D12)|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
