@@ -29,6 +29,7 @@ build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tes
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
+context-limits|sherd-budget|-|-
 editorconfig|-|-|written by pklith (seed or gen)
 envrc|shellcheck|-|-
 gitattributes|-|-|written by pklith (seed or gen)
@@ -36,7 +37,7 @@ gitignore|-|-|ignore patterns, no linter reads them
 markdownlintignore|-|-|ignore patterns, no linter reads them
 md|markdownlint|-|-
 nix|nixfmt, statix, deadnix|-|-
-path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav|-|-
+path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-budget|-|-
 path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
 path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
