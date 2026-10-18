@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-XCTest target `Tests`: upstream's suite as-is & fork tests in `Tests/Fork/`, 1 file per source (V4), all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` & `StandardIOStreamProcessTests` run the built binary as a child (`BuiltBinary`), ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`.
+XCTest target `Tests`: upstream's suite as-is & fork tests in `Tests/Fork/`, 1 file per source (V4), all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` & `StandardIOStreamProcessTests` run the built binary as a child (`BuiltBinary`), ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`. exception: `CryptoKitHardwareTests` (§I): real SE, gated.
 
 ## §N NAV
 
@@ -32,6 +32,9 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 - cmd: `swift test` — whole suite; pre-push & `checks.aarch64-darwin` (`nix`).
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
 - helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift`.
+- hardware: `CryptoKitHardwareTests` (`Fork/CryptoForkTests.swift`): 4 `.coverage`-excluded `newSecureEnclave*` fns & age round trip (classic, `--pq`). runs iff `AGE_PLUGIN_SE_HARDWARE=1` ∧ `SecureEnclave.isAvailable`, else `XCTSkip` w/ why.
+- hardware safety: `.privateKeyUsage` only ∴ ⊥ Touch ID; keys = `dataRepresentation` in memory | removed `.build/tmp-hw/`; ⊥ keychain.
+- `.pklith` row `hardware` (pre-push) sets the var; `CI` set → ⊥ run. `test`, `coverage` ⊥ set it ∴ floor = CI's.
 - `.pklith` rules (V4): `swift-test` exists `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except; `swift-orphan` orphan `Tests/*Tests.swift` (`*` crosses `/` ∴ `Fork/` too) → `Sources/{stem\|chop:ForkTests\|chop:Tests}.swift`, except `Tests/StanzaTests.swift` ∵ upstream's, tests `Stanza` in `Plugin.swift`. upstream has no `HPKE`, `Stream` test ∴ ⊥ upstream exists row.
 - `.pklith` rule (V5): `swift-tdd` tdd-order `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except. judged pre-push by check `tdd-order` (`pklith check --pushed`); in CI by `pklith check --range origin/main..HEAD` ∵ CI's commits already on the remote ∴ `--pushed` judges none.
 
