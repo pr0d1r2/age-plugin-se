@@ -87,7 +87,7 @@ V6: build & dev shell refuse Swift < 6.2 ∵ `--pq` would silently become `pqUna
 V7: ⊥ compiler warning: clean build has 0 since `f62703c` (R7) ∴ build runs `-warnings-as-errors`. warning arriving by upstream sync → baseline entry in that sync PR, baseline only shrinks (D13).
 V8: `swift format lint --strict` clean on fork-written & fork-changed lines; upstream violations in baseline that only shrinks (D13).
 V9: ⊥ force unwrap `!`, `try!`, `as!`, `fatalError` in fork-written Swift (swiftlint) (D13).
-V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only & terminal-only code (`CryptoKitCrypto`, `StandardIOStream`, `CLI.main`) exempt w/ reason in `.pklith` (D14). target 100% of rest (D1).
+V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only fns exempt by `.coverage` `exclude` row w/ reason; `excluded` cap only falls (D14). target 100% of rest (D1).
 V11: ∀ option in `Options.help` parses & ∀ parsed option appears in `Options.help` (D15).
 V12: `AGE_PLUGIN_SE_PROMPT` set & non-empty → Touch ID prompt = its text; unset | empty → upstream prompt text.
 V13: Touch ID denied by user → plugin error carries denial marker; ∀ other error ∌ it.
@@ -106,7 +106,7 @@ T2|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V15
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
-T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, coverage exclusions T20, itok T21|V6,V7,V8,V9,V10,V16,V17
+T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
 T9|~|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval. fork half done (`CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`)|V12,V5,V3
@@ -120,7 +120,7 @@ T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`pa
 T17|~|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in its `Tests/Fork` mirror ∴ `Tests` worker in same wave ⊥ touches that file. W1 merged (PRs #6 #7 #8) & reconciled (`reconcile-1`). W2 ready: T9 ⊥ deps; T5 has T4, its open items (owner reads V1, V2) in `Tests` T1, T2|V5,V15
 T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
-T20|.|coverage exclusions w/ reasons (D14); owner picks their home (sherd#138), then floor re-recorded|V10
+T20|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as file ceilings; owner picks|-
 T22|.|owner: require `gate (macos-latest)` on `main` (D8); run `nix develop -c release/alpine-keygen.sh`, re-run `build (macos-26)`; Actions on, first run green|V6
 T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
@@ -129,6 +129,7 @@ T25|.|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. W4 ∵ `Sources`
 T26|.|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. W4, w/ T25|V19,V5
 T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
 T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
+T29|.|owner: HPKE `#unavailable(macOS 26)` guard in `mlkemp256Encap`: extract to own fn & exclude (carried), or 2 lines stay uncovered|V10
 
 ## §B BUGS
 

@@ -282,10 +282,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1792326228,
-        "narHash": "sha256-jr8ousnD1Ii4q5Q0KEyT+intXoaJg9zYWu2p3eELrO4=",
+        "lastModified": 1792348907,
+        "narHash": "sha256-WfT4TtWx+ywo3AI8ixixoj95j/Gsqd+ib3YzMt9lwLc=",
         "ref": "main",
-        "rev": "3372ebfdd5bde68e166aec68e5f9a0da015dec2c",
+        "rev": "3ad242c99f84554f93febe27573b7ca1ac7bc6ce",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/pr0d1r2/sherd"

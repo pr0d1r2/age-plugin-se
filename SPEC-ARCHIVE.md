@@ -16,4 +16,5 @@ T4|x|`fixtures` node: corpus made w/ upstream `v0.2.1` & `57ccea1` binaries on `
 T7|x|`.context-limits` measured w/ slack per node (`paradigm/V12`)|-
 T8|x|`Tests`: help ↔ parser drift test `OptionsHelpTests` (R11)|V11
 T14|x|fork CI `ci.yml` rendered by actlith from `.actlith` (actlith main, PR 19): gate on `macos-latest`, Xcode 26.6 pinned (R12), `hk check --all --check`; upstream workflows hand-written; actlith-check, actionlint, zizmor, yamllint on it; required checks → T22 (D8, D12)|V6
+T20|x|coverage exclusions w/ reasons (D14) as `.coverage` fn rows + cap (sherd PR 142); floor re-recorded 99.56%|V10
 T23|x|CI-only throwaway Alpine signing key (`release/alpine-keygen.sh`) so upstream `Package (Alpine)` stays green for regression; ⊥ distribution key ∴ D12 (darwin only) unaffected; owner run in T22|-
