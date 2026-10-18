@@ -1,7 +1,6 @@
-DRAFT INPUT. This file is the prompt for the first ck:spec run. When that
-run lands SPEC.md, mark this file HISTORICAL INPUT in its own commit; from
-then on SPEC.md and the node specs it federates are the law, and where they
-differ from this file, they win.
+HISTORICAL INPUT. This file was the prompt for the first ck:spec run,
+which landed SPEC.md and its node specs on 2026-10-18. They are the law
+now; where they differ from this file, they win.
 
 Paradigm: paradigm 6c7e6cd (no tag yet, decision 9), used as a process
 only: this repository is not a fleet member for now (decision
