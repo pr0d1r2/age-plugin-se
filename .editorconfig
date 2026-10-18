@@ -10,6 +10,6 @@ indent_style = space
 [{Makefile,*.mk,go.mod,*.go}]
 indent_style = tab
 
-# shfmt's default; the fork's shell scripts are tab-indented.
-[*.sh]
+# shfmt's default; the fork's shell scripts and bats tests are tab-indented.
+[*.{sh,bats}]
 indent_style = tab
