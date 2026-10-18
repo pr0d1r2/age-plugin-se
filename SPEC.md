@@ -93,7 +93,7 @@ id|status|task|cites
 T1|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T2|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
-T4|x|`fixtures` node: corpus made w/ upstream `v0.2.1` & `57ccea1` binaries on `MacBookPro18,3` w/ Secure Enclave, 2026-10-18; commands in `fixtures/README.md`|V1,V2,V15
+T4|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V15
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, coverage exclusions T20, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
