@@ -20,4 +20,12 @@
 # in Options.parse, the SecAccessControl failure in generateKey) and 39
 # need a Secure Enclave, macOS older than 26, a terminal or the process
 # entry point.
-lines 92.96
+#
+# Raised 2026-10-18 by `sherd coverage --record` (root T28): 96.02%,
+# 1,110 of 1,156 lines under Sources/. CLI.main now hands its dispatch to
+# CLI.run, which CLIRunCoverageTests drive on DummyCrypto; the move added
+# 5 lines. The 46 still unrun: 2 need a seam (the `assert(false)` and
+# the SecAccessControl failure, one line each) and 44 need a Secure
+# Enclave, macOS older than 26, a terminal or the process entry point
+# (CLI.main's 9 lines and CLI.run's 2 default arguments among them).
+lines 96.02
