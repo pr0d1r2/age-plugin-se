@@ -90,3 +90,8 @@ T13|.|issues w/ approval: pklith Swift catalog rows, sherd Swift code verbs & ll
 T14|.|fork CI rendered by actlith on macOS runner; required status checks on `main` (D8, D12)|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
+
+## §B BUGS
+
+id|date|cause|fix
+B1|2026-10-18|`keygen -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:23`) ∴ failed write loses identity yet prints `Public key:`; upstream bug, found in spec run|V14
