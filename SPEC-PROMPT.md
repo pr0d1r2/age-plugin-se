@@ -192,7 +192,7 @@ the owner amends it by a later decision.
     the build Mac had Swift 6.3.3 and Command Line Tools 26.6. Recount:
     `swift --version`, `pkgutil --pkg-info=com.apple.pkg.CLTools_Executables`.
     Deviation from paradigm/V20, revisited when nixpkgs ships Swift 6.2.
-    Local.
+    Amended by decision 21. Local.
 12. Platforms (closes open question 5): darwin only in v1. The fork's CI
     runs the gate on a GitHub macOS runner, the only platform where the
     tests mean anything; upstream's `build.yml` stays as it is for Linux
@@ -249,6 +249,26 @@ the owner amends it by a later decision.
     This repository is its first user shaped like a member; `docs/SWIFT.md`
     is drafted from it and proposed to paradigm once this repository
     ships (paradigm/V6). Amends decision 6. Candidate.
+
+# Decisions, round 3 (2026-10-18)
+
+Gap round 2, raised by probes during the spec run. Answered as round 2 was.
+
+21. Tests need Xcode: Command Line Tools 26.6 ship Swift Testing but no
+    XCTest, so upstream's XCTest suite fails with `no such module
+    'XCTest'` on a Mac without Xcode (probe 2026-10-18). Xcode cannot come
+    from the dev shell: it is not redistributable, nixpkgs only offers a
+    `requireFile` stub for a manually downloaded `.xip`, and the licence
+    step needs sudo. So Xcode is installed once per machine by the owner's
+    machine configuration, outside this repository; the dev shell sets
+    `DEVELOPER_DIR` and refuses when XCTest or Swift 6.2 is missing.
+    Porting upstream's tests to Swift Testing is rejected (decision 7).
+    Amends decision 11. Local.
+22. A node's `SPEC.md` inside a SwiftPM target directory (`Sources/`,
+    `Tests/`) makes SwiftPM warn `found 1 file(s) which are unhandled`, so
+    `Package.swift` excludes `SPEC.md` from both targets. That one-line
+    change is a fork file in effect and never goes upstream (decision 3).
+    Local.
 
 # Non-goals
 
