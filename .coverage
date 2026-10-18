@@ -38,4 +38,23 @@
 # 2 (the macOS-older-than-26 guard), CLI.swift 2 (`default:` and its
 # `assert(false)` in Options.parse; llvm-cov counts both lines) and
 # Plugin.swift 1 (the SecAccessControl failure).
-lines 97.66
+#
+# Exclusions set 2026-10-18 (root T20, sherd PR 142): one `exclude` row
+# per CryptoKitCrypto.newSecureEnclave* function, which creates or loads
+# a real Secure Enclave key that no test host has (22 lines). A row is
+# `exclude <path>:<declaration> <reason>`; sherd matches the declaration
+# to the demangled (`--simplified`) symbol's last word. `excluded` caps
+# the lines the rows remove; `--record` only lowers it. Adding a row or
+# raising the cap is a reviewed hand edit that says why here. The floor
+# was then recorded: 99.56%, 1,129 of 1,134 lines under Sources/.
+# The 5 still unrun stay counted, not excluded: HPKE.swift 2 (the
+# `#unavailable(macOS 26)` guard inside the otherwise covered
+# HPKE.mlkemp256Encap; root T29 decides), CLI.swift 2 (`default:` and
+# its `assert(false)` in Options.parse) and Plugin.swift 1 (the
+# SecAccessControl failure in generateKey), both a refactor's to remove.
+exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(dataRepresentation:) needs a real Secure Enclave
+exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(accessControl:) needs a real Secure Enclave
+exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(dataRepresentation:) needs a real Secure Enclave
+exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(accessControl:) needs a real Secure Enclave
+excluded 22
+lines 99.56
