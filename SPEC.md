@@ -94,7 +94,7 @@ T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
 T11|.|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval|V14,V5
 T12|.|upstream issue: `#unavailable(macOS 21.0)` → `26.0` (R7), w/ approval|V7
-T13|.|issues w/ approval: pklith Swift catalog rows, sherd Swift code verbs & llvm-cov coverage, paradigm Swift language page & seed (D16, D20)|V8,V9,V10
+T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
 T14|.|fork CI rendered by actlith on macOS runner; required status checks on `main` (D8, D12)|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
