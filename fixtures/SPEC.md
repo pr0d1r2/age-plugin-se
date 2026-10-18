@@ -27,7 +27,7 @@ sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their
 
 - dir: `fixtures/<rev>/` per producer rev (`v0.2.1`, `57ccea1`).
 - file: `<rev>/<se|tag>-<classic|pq>.identity`, `.recipient` — `keygen` & `recipients` output.
-- file: `<rev>/<name>.session` — recorded plugin stdio, request & response.
+- file: `<rev>/<set>-<encrypt|decrypt>.session` — recorded plugin stdio, recipient-v1 | identity-v1; each line `>` (age → plugin) | `<` (plugin → age), a space, line as sent.
 - file: `README.md` — per file: producer rev, exact command, date, Mac model; manual Secure Enclave checks (`.:V15`).
 
 ## §V INVARIANTS
@@ -38,6 +38,6 @@ V2: fixture bytes ⊥ change after first commit (append-only).
 ## §T TASKS
 
 id|status|task|cites
-T1|.|build upstream `v0.2.1` & `57ccea1`; make identity & recipient set (`.:T4`)|V1
-T2|.|record plugin sessions for each set (`.:T4`)|V1
-T3|.|`README.md` manifest & manual checks list|V1,V2
+T1|x|ARCHIVED to SPEC-ARCHIVE.md|V1
+T2|x|ARCHIVED to SPEC-ARCHIVE.md|V1
+T3|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2

@@ -2,8 +2,12 @@
 # vectors and man page read as misspellings. Upstream code is not edited
 # (D3, D7); an entry goes once upstream fixes the file. pkl/Config.pkl is
 # hk's schema, vendored by pklith seed.
+#
+# Fixture bytes (fixtures V2): bech32 and base64 written by upstream,
+# frozen, so a match is never a word.
 [files]
 extend-exclude = [
+  "fixtures/*/*",
   "pkl/Config.pkl",
   "README.md",
   "Tests/Bech32Tests.swift",

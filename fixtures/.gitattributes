@@ -1,0 +1,2 @@
+# Fixture bytes are frozen (fixtures V2): git never rewrites their line endings.
+*/* -text

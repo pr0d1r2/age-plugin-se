@@ -20,12 +20,22 @@ exclude = upstream
 // there (.typos.toml, .secretsignore, .markdownlintignore).
 local blanks = upstream + List("README.md", "Sources/CLI.swift")
 
+// Fixture bytes (fixtures V2): upstream output, frozen as written, with the
+// blank-only protocol lines and the missing final newline upstream gives
+// them. A fixer here would change the bytes the format tests compare
+// against, so the blank, newline and editorconfig steps skip them; every
+// other step still reads them.
+local frozen = List("fixtures/*/**")
+
 local commit = (generated.steps) {
   when (generated.steps.containsKey("trailing-whitespace")) {
-    ["trailing-whitespace"] { exclude = blanks }
+    ["trailing-whitespace"] { exclude = blanks + frozen }
   }
   when (generated.steps.containsKey("editorconfig-checker")) {
-    ["editorconfig-checker"] { exclude = blanks }
+    ["editorconfig-checker"] { exclude = blanks + frozen }
+  }
+  when (generated.steps.containsKey("final-newline")) {
+    ["final-newline"] { exclude = upstream + frozen }
   }
 }
 local all = (commit) { ...generated.push }
