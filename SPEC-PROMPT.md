@@ -199,6 +199,37 @@ the owner amends it by a later decision.
     and Windows builds. A Linux encrypt-only build for T's CI is a later
     node, not v1. Deviation from paradigm/V28 (three platforms): a Secure
     Enclave plugin has one. Local.
+13. Lint (closes open question 6): `swift format lint --strict` from the
+    build toolchain, with a `.swift-format` that matches upstream's
+    existing style. Upstream code is not reformatted, since a reformat
+    would conflict with every upstream PR (decision 3): violations found
+    in upstream code on day one are listed in a baseline, and new code has
+    none. swiftlint from the nixpkgs pin, if it builds there, adds the
+    rules swift-format lacks (force unwrap, force try, force cast) on new
+    code. pklith has no Swift rows yet, so they start local in `.pklith`,
+    as Ruby's did (paradigm `docs/RUBY.md`). Local.
+14. Coverage (closes open question 4): line coverage from `swift test
+    --enable-code-coverage`, read with `xcrun llvm-cov export`. The floor
+    lives in `.coverage` and only ratchets up (paradigm/V25). Code that
+    runs only against a real Secure Enclave or a real terminal
+    (`CryptoKitCrypto`, `StandardIOStream`, `CLI.main`) gets `.pklith`
+    `exempt` rows with reasons and is not counted; decision 1's 100%
+    applies to the rest. Upstream's `ProcessCoverage.swift` stays for
+    `make test COVERAGE=1` and is not the ratchet. Local.
+15. Argument parsing stays upstream's hand-written `Options.parse`, not
+    swift-argument-parser (the Swift counterpart of paradigm/V29's clap):
+    replacing it rewrites `CLI.swift` and adds a dependency upstream did
+    not choose (decisions 3 and 7). Waived by a `.pklith` `exempt` row. A
+    test that every option in `Options.help` parses, and every parsed
+    option appears in the help, guards the drift V29 exists to stop.
+    Local.
+16. Swift gaps in pklith (language detection, swift-format and swiftlint
+    rows, warnings-as-errors build, `swift test` on pre-push, an llvm-cov
+    ratchet, TDD order and mirror tests for XCTest) and in sherd (code
+    verbs and coverage for Swift) are filed upstream, one issue per gap.
+    Each is drafted while the guardrails stage lays the row locally, and
+    filed, with the owner's approval, once the row works here
+    (paradigm/V6, paradigm/V35). Candidate.
 
 # Non-goals
 
@@ -230,8 +261,6 @@ Ask before guessing. A question marked blocking stops the node it names.
 3. Versions: tag scheme for fork releases (for example
    `v0.2.1-fork.1`), and the base: upstream `57ccea1` or the v0.2.1 tag?
    Blocks the first tag.
-4. Coverage: adopt upstream's `ProcessCoverage.swift` measure as the
-   ratchet floor in `.coverage`, or measure another way? Not blocking.
+4. Coverage. Closed by decision 14.
 5. Linux build. Closed by decision 12.
-6. Gate tools for Swift: swift-format from nixpkgs (5.10.1) as the lint,
-   and what pklith row covers `.swift` files? Not blocking.
+6. Gate tools for Swift. Closed by decisions 13 and 16.
