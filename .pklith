@@ -62,7 +62,7 @@ path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-
 path:.github/actions/**|-|-|upstream composite action, untouched (root §C); the upstream workflows use it
 path:.github/workflows/build-main.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
 path:.github/workflows/build.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
-path:.github/workflows/ci.yml|actionlint|-|-
+path:.github/workflows/ci.yml|actionlint, zizmor|-|-
 path:.github/workflows/release.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
 path:fixtures/*/*|-|-|fixture bytes written by upstream, frozen (fixtures V2): no linter reads keys, recipients or protocol transcripts; the * steps still read them, blank, newline and editorconfig steps skip them (hk.pkl)
 path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
