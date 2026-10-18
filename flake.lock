@@ -1,0 +1,254 @@
+{
+  "nodes": {
+    "itok": {
+      "inputs": {
+        "hk": [
+          "pklith",
+          "microlith",
+          "nix-hk"
+        ],
+        "microlith": "microlith_2",
+        "nixpkgs": [
+          "pklith",
+          "microlith",
+          "itok",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "pklith",
+          "microlith",
+          "nixpkgs-lock"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788092230,
+        "narHash": "sha256-bKaQ5Ejf3X5ObtxiwDIDHpCbZCkjQ9Ttdr7H1cTkIxs=",
+        "owner": "pr0d1r2",
+        "repo": "itok",
+        "rev": "7bb0cc19947eaf45b97cd4d1787df91fddbdda90",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pr0d1r2",
+        "repo": "itok",
+        "type": "github"
+      }
+    },
+    "microlith": {
+      "inputs": {
+        "itok": "itok",
+        "nix-hk": [
+          "pklith",
+          "nix-hk"
+        ],
+        "nixpkgs": [
+          "pklith",
+          "microlith",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "pklith",
+          "nixpkgs-lock"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789925744,
+        "narHash": "sha256-uNVVUqzh7Od5UzDhKu5X7R3Xeje/8vmk0zOGbu5SsQE=",
+        "owner": "pr0d1r2",
+        "repo": "microlith",
+        "rev": "58a36c3bc90b76e1f561996b14cf3beaf9a40ed2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pr0d1r2",
+        "ref": "v0.7.3",
+        "repo": "microlith",
+        "type": "github"
+      }
+    },
+    "microlith_2": {
+      "inputs": {
+        "nix-hk": [
+          "pklith",
+          "microlith",
+          "itok",
+          "hk"
+        ],
+        "nixpkgs": [
+          "pklith",
+          "microlith",
+          "itok",
+          "microlith",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "pklith",
+          "microlith",
+          "itok",
+          "nixpkgs-lock"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786709569,
+        "narHash": "sha256-KLxL48Qug7X0R9F/bG0MpJTsn/kmQz17CXQN4saLsks=",
+        "owner": "pr0d1r2",
+        "repo": "microlith",
+        "rev": "aa0380ac3b51b8d46bd536de28ea83452f01be90",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pr0d1r2",
+        "ref": "v0.6.1",
+        "repo": "microlith",
+        "type": "github"
+      }
+    },
+    "nix-hk": {
+      "inputs": {
+        "nixpkgs": [
+          "pklith",
+          "nix-hk",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "pklith",
+          "nixpkgs-lock"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792235336,
+        "narHash": "sha256-qLSwbcmlJtW5QXVQV2dxwYji+D3vUjPdLwT5qQnA6Eo=",
+        "owner": "pr0d1r2",
+        "repo": "nix-hk",
+        "rev": "9c806785a2aca089d8e843d05a187167ab820d40",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pr0d1r2",
+        "repo": "nix-hk",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1792030654,
+        "narHash": "sha256-OaQwAtPMTjQiY2sT/2/62UbSPhzP/0aDnWzMm/NCiUw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "26f4107e47e3ad0ffd0db220469ba83b6f6d96e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lock": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1792140505,
+        "narHash": "sha256-aDtboVK5ghgC0H0iDvRYLSltRdN/qhF+eyPcfjz20zo=",
+        "ref": "main",
+        "rev": "1845ce3aad075a02338f61fdd7afeac3ccb1c308",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/nixpkgs-lock"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/nixpkgs-lock"
+      }
+    },
+    "pklith": {
+      "inputs": {
+        "itok": [
+          "pklith",
+          "microlith",
+          "itok"
+        ],
+        "microlith": "microlith",
+        "nix-hk": "nix-hk",
+        "nixpkgs": [
+          "pklith",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "nixpkgs-lock"
+        ],
+        "sherd": [
+          "sherd"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792252518,
+        "narHash": "sha256-BhziI2EBp16KnxzXvnzuGFCmZK0IcNAZEM9X0y8/EKE=",
+        "ref": "main",
+        "rev": "9345f469dc4166938199d61347b40692cde561c1",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/pklith"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/pklith"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": "nixpkgs-lock",
+        "pklith": "pklith",
+        "sherd": "sherd"
+      }
+    },
+    "sherd": {
+      "inputs": {
+        "nix-hk": [
+          "pklith",
+          "nix-hk"
+        ],
+        "nixpkgs": [
+          "sherd",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "nixpkgs-lock"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791090047,
+        "narHash": "sha256-wBaJu8Irb/ZHFKjeCA3kS/3vmYBECVlyTc9EEVHGizA=",
+        "ref": "refs/tags/v0.5.4",
+        "rev": "479b14c0d042c9b7700bf684c21e0113d0cf706a",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/sherd"
+      },
+      "original": {
+        "ref": "refs/tags/v0.5.4",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/sherd"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

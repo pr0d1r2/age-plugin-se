@@ -3,3 +3,7 @@
 /manual-tests
 /.vscode/launch.json
 /default.profraw
+# Fork: agent state (paradigm/V16), nix build links and direnv's cache.
+.claude/
+/result*
+/.direnv
