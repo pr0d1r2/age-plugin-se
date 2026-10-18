@@ -19,6 +19,9 @@ let package = Package(
       path: "Sources",
       // Fork: the sherd node spec is not part of the target (fork decision 22).
       exclude: ["SPEC.md"]),
-    .testTarget(name: "Tests", dependencies: ["age-plugin-se"], path: "Tests"),
+    .testTarget(
+      name: "Tests", dependencies: ["age-plugin-se"], path: "Tests",
+      // Fork: the sherd node spec is not part of the target (fork decision 22).
+      exclude: ["SPEC.md"]),
   ]
 )

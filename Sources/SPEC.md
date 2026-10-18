@@ -9,6 +9,7 @@ upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here are
 rel|path|lens
 up|.|-
 self|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)
+sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`
 
 ## §C CONSTRAINTS
 
