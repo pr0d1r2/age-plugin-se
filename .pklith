@@ -36,7 +36,9 @@ path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a n
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
 path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
+path:nix/toolchain*.sh|shfmt|-|-
 pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
+sh|shfmt|-|-
 txt|-|-|license text, no linter reads it
