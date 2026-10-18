@@ -1,0 +1,300 @@
+HISTORICAL INPUT. This file was the prompt for the first ck:spec run,
+which landed SPEC.md and its node specs on 2026-10-18. They are the law
+now; where they differ from this file, they win.
+
+Paradigm: paradigm 6c7e6cd (no tag yet, decision 9), used as a process
+only: this repository is not a fleet member for now (decision
+1). There is no paradigm language page for Swift yet. This file states
+only the product and its deviations.
+
+age-plugin-se (fork)
+
+A fork of `remko/age-plugin-se`, the age plugin that keeps an age identity
+in the Mac's Secure Enclave and asks for Touch ID on every decrypt. The
+fork is used daily by T, a private secrets tool named here by letter only
+(paradigm/V37), built with the same spec-first process and gate, and
+offers every change back upstream.
+
+# Problem and goals
+
+T encrypts a project's secrets to one Secure Enclave key per Mac
+through this plugin (T decisions 4, 17, 26, 27). That puts the
+plugin in the trust path of every secret T guards, so three things
+follow:
+
+- Upstream is healthy but slow: one maintainer wrote 161 of 164 commits,
+  commit counts fell from 72 (2023) and 67 (2024) to 20 (2025) and 5
+  (2026), and outside PRs wait for months (PR 15 since 2026-04-19, PR 18
+  since 2026-05-17). A bug T hits today could wait as long.
+- The changes T wants are small and belong in the plugin, not in
+  T: a Touch ID prompt that names the file being decrypted (PR 18),
+  and a stable marker when the user denies the prompt, so a caller can tell
+  "touch denied" from a real error.
+- The fleet builds with nix and gates with hk. Upstream builds with
+  SwiftPM and a Makefile, and its `main` declares Swift 6.2 while the fleet
+  nixpkgs pin ships Swift 5.10.1.
+
+Goals:
+- a nix flake that builds `age-plugin-se` from this tree against the fleet
+  nixpkgs, on aarch64-darwin first, with the Swift tests as flake checks
+- the same gate a fleet repository has: hk from `.pklith`, a spec, TDD
+  order, a coverage ratchet, CI on GitHub Actions
+- identity and recipient formats byte-for-byte compatible with upstream,
+  proven by tests, so a key made by either build works with the other
+- every change offered upstream as a PR from a clean branch, and every
+  carried change dropped once upstream merges it
+- tagged releases that T pins as a flake input
+
+# Naming
+
+- Repository and binary name stay `age-plugin-se`. age finds a plugin by
+  its binary name (`age-plugin-<name>`) and the recipient prefix
+  (`age1se1...`), so a renamed binary would not be found by age, sops or
+  rage, and a renamed repository would hide that this is a fork. A
+  deviation from the `-lith` naming rule; local.
+- `pr0d1r2/age-plugin-se` created 2026-10-18 as a PUBLIC GitHub fork of
+  `remko/age-plugin-se`, `main` identical to upstream `57ccea1` that day.
+  Recount: `gh repo view pr0d1r2/age-plugin-se --json isFork,parent`, `gh
+  api repos/remko/age-plugin-se/compare/main...pr0d1r2:main`.
+- Rejected: a `-lith` name such as `enclavelith` for the repository: free
+  to take, but it breaks the fork relation GitHub shows and says nothing to
+  an age user looking for the plugin.
+
+# Survey (2026-10-18)
+
+The tree at `57ccea1`:
+- 1,531 lines of Swift in `Sources/` (`Plugin.swift` 681, `CLI.swift` 249,
+  `Bech32.swift` 233, `Crypto.swift` 185, `HPKE.swift` 183) and 1,851 in
+  `Tests/`; 108 test functions (`PluginTests` 58, `CLITests` 17,
+  `StanzaTests` 14, `Base64Tests` 10, `CryptoTests` 5, `Bech32Tests` 4).
+  Tests run against `DummyCrypto`, so they need no Secure Enclave.
+- One dependency: `apple/swift-crypto` `2.0.0..<5.0.0`, used on Linux and
+  Windows only.
+- `Package.swift`: `swift-tools-version: 6.2`, `.macOS(.v26)`. `make
+  patch-package-swift-legacy` rewrites both to `5.9` and `.macOS(.v14)`;
+  upstream CI uses it for older runners.
+- Makefile targets: `all package package-linux test test-loop lint install
+  install-doc man clean patch-package-swift-legacy smoke-test
+  smoke-test-noninteractive smoke-test-encrypt gen-manual-tests
+  run-manual-tests`. `make test COVERAGE=1` measures coverage with
+  `Scripts/ProcessCoverage.swift`.
+- CI: `build.yml` on macos-14, macos-15, macos-26, ubuntu-24.04 and
+  windows-2022 (Windows builds, does not test); `build-main.yml`;
+  `release.yml`.
+- CLI: `keygen [--pq] [-o OUTPUT] [--access-control ACCESS_CONTROL]
+  [--recipient-type se|tag]`, `recipients [--pq] [-o OUTPUT] [-i INPUT]
+  [--recipient-type se|tag]`, and `--age-plugin` for the plugin protocol.
+  Access controls: `none`, `passcode`, `any-biometry`,
+  `any-biometry-or-passcode` (default), `any-biometry-and-passcode`,
+  `current-biometry`, `current-biometry-and-passcode`.
+- Tags: `v0.1.2` to `v0.2.1`; v0.2.1 released 2025-12-27. Merged after it:
+  PR 16 and PR 17 (post-quantum key fixes), PR 21 (ISO 8601 fallback for
+  older Swift). Open: PR 15 (build with older SDKs), PR 18 (custom Touch ID
+  prompt via `AGE_PLUGIN_SE_PROMPT`), issues 12 (`age1tag1` and
+  `age1tagpq1` recipients), 13, 14.
+- Forks: 9 besides this one; only `dcosson` carries real changes (PR 18's
+  prompt, a stable presence-denial marker, better classification of
+  unavailable authentication, fork release CI), idle since 2026-07-23.
+- nixpkgs: the fleet pin (nixos-26.05 `a5cc6f2c`) ships `age-plugin-se`
+  0.1.4 and `swift` 5.10.1; its `age-plugin-se` builds on darwin and
+  linux.
+- Recount: `find Sources Tests -name '*.swift' | xargs wc -l`, `grep -c
+  'func test' Tests/*.swift`, `git log --format=%ad --date=short | cut
+  -c1-4 | uniq -c`, `gh pr list -R remko/age-plugin-se --state all`, `nix
+  eval --raw <pin>#swift.version`.
+
+# Flake and gate sketch
+
+Sketch, not final:
+- `packages.aarch64-darwin.default`: `age-plugin-se` built by SwiftPM
+  inside nix, Swift tools from the fleet nixpkgs pin.
+- Linux packages, if nix can build them (open question 5): encrypt-only
+  use in CI, since encrypting to a Secure Enclave recipient needs the
+  plugin but not the chip.
+- `checks.<system>`: `swift test` with `DummyCrypto`; the smoke encrypt
+  test; the format-compatibility tests below.
+- `devShells.default`: Swift toolchain, swift-format, hk, pklith, mth,
+  sherd, itok.
+- Format freeze: fixtures of identities and recipients made by upstream
+  v0.2.1 and by upstream `main` (`se` and `tag`, classic and `--pq`) that
+  every build must parse and reproduce byte for byte.
+
+# CLI sketch
+
+Upstream's CLI stays as it is. Additions, each one also offered upstream:
+
+```
+AGE_PLUGIN_SE_PROMPT=<text>   Touch ID prompt text (upstream PR 18)
+```
+
+- On a denied prompt, the plugin reports a fixed, documented error string,
+  so a caller such as T can say "touch denied" instead of a raw
+  failure (from the `dcosson` fork).
+
+# Decisions (2026-10-18)
+
+1. This repository is a fork, not a fleet member for now: it is not in
+   the paradigm registry and the fleet loop does not tend it. It keeps
+   upstream's history, binary name and formats, and adds a flake, a gate
+   and a spec built the fleet's way. Once its guardrails meet the fleet's
+   standard, 100% line coverage included, it is handed to the fleet loop
+   if the loop can run it (it needs a Mac). Narrows T decision 27.
+   Local.
+2. Formats are frozen: no change may alter the identity or recipient
+   encoding, the stanza format, or the plugin protocol messages. A change
+   that needs one is proposed upstream first and waits there. Local.
+3. Every functional change goes upstream as a PR from a branch cut from
+   `upstream/main`, with none of this fork's flake, gate or spec files in
+   it. A carried change is dropped once upstream merges it. Local.
+4. Cryptography is not rewritten here: `Crypto.swift` and `HPKE.swift`
+   change only to follow upstream or to fix a bug proven by a failing test,
+   and every such change needs a human review. Local.
+5. Every PR needs a human review, as in T (T decisions 11
+   and 23). Local.
+6. Swift is not a fleet language. What this repository learns about
+   gating it is noted for a paradigm `docs/SWIFT.md`, proposed only if the
+   repository joins the fleet. Amended by decision 20. Local.
+7. Upstream's tests are kept and run as they are; this fork's tests are
+   added beside them, not in their place. Local.
+8. `main` is protected on GitHub, set 2026-10-18: every change lands by
+   PR, admins included (`enforce_admins`), with 0 required approvals
+   because GitHub does not let the owner approve their own PR; no force
+   push, no deletion, conversations resolved before merge. Syncing from
+   upstream also goes through a PR. Required status checks are added when
+   CI exists. Recount: `gh api
+   repos/pr0d1r2/age-plugin-se/branches/main/protection`. Local.
+
+# Decisions, round 2 (2026-10-18)
+
+Gap round 1, read against paradigm `6c7e6cd`. Answered by the agent on the
+owner's instruction to proceed without stopping; each answer stands until
+the owner amends it by a later decision.
+
+9. Until paradigm tags `v0.1.0` (paradigm T10), this prompt and the spec
+   pin paradigm by commit `6c7e6cd`. The pin moves to the tag in its own
+   commit. Local.
+10. Build order, moved here from a `# Process` section that sat after the
+    open questions (paradigm/V3; the same slip as paradigm bug B2). The
+    rest of that section restated paradigm's lifecycle and approval rules
+    and is dropped (paradigm/V2). Order: (1) the flake builds upstream
+    `57ccea1` unchanged and runs its tests; (2) the format-freeze fixtures
+    and tests; (3) the gate; (4) the prompt env var and the denial marker,
+    each RED then GREEN, each offered upstream; (5) the first tag, and T
+    switches its input (T `nix:T3`). Local.
+11. Swift toolchain (closes open question 1): the build needs Swift 6.2 or
+    newer. Post-quantum Secure Enclave keys (`SecureEnclave.MLKEM768`)
+    compile only under `#if compiler(>=6.2)` (`Sources/Crypto.swift:108`),
+    so a 5.10.1 build would quietly lose `--pq`. The fleet nixpkgs pin
+    ships 5.10.1, so the flake takes Swift and the macOS SDK from the
+    host's Command Line Tools and nix pins every other tool. A gate step
+    refuses a Swift older than 6.2. `.macOS(.v26)` stays. On 2026-10-18
+    the build Mac had Swift 6.3.3 and Command Line Tools 26.6. Recount:
+    `swift --version`, `pkgutil --pkg-info=com.apple.pkg.CLTools_Executables`.
+    Deviation from paradigm/V20, revisited when nixpkgs ships Swift 6.2.
+    Amended by decision 21. Local.
+12. Platforms (closes open question 5): darwin only in v1. The fork's CI
+    runs the gate on a GitHub macOS runner, the only platform where the
+    tests mean anything; upstream's `build.yml` stays as it is for Linux
+    and Windows builds. A Linux encrypt-only build for T's CI is a later
+    node, not v1. Deviation from paradigm/V28 (three platforms): a Secure
+    Enclave plugin has one. Local.
+13. Lint (closes open question 6): `swift format lint --strict` from the
+    build toolchain, with a `.swift-format` that matches upstream's
+    existing style. Upstream code is not reformatted, since a reformat
+    would conflict with every upstream PR (decision 3): violations found
+    in upstream code on day one are listed in a baseline, and new code has
+    none. swiftlint from the nixpkgs pin, if it builds there, adds the
+    rules swift-format lacks (force unwrap, force try, force cast) on new
+    code. pklith has no Swift rows yet, so they start local in `.pklith`,
+    as Ruby's did (paradigm `docs/RUBY.md`). Local.
+14. Coverage (closes open question 4): line coverage from `swift test
+    --enable-code-coverage`, read with `xcrun llvm-cov export`. The floor
+    lives in `.coverage` and only ratchets up (paradigm/V25). Code that
+    runs only against a real Secure Enclave or a real terminal
+    (`CryptoKitCrypto`, `StandardIOStream`, `CLI.main`) gets `.pklith`
+    `exempt` rows with reasons and is not counted; decision 1's 100%
+    applies to the rest. Upstream's `ProcessCoverage.swift` stays for
+    `make test COVERAGE=1` and is not the ratchet. Local.
+15. Argument parsing stays upstream's hand-written `Options.parse`, not
+    swift-argument-parser (the Swift counterpart of paradigm/V29's clap):
+    replacing it rewrites `CLI.swift` and adds a dependency upstream did
+    not choose (decisions 3 and 7). Waived by a `.pklith` `exempt` row. A
+    test that every option in `Options.help` parses, and every parsed
+    option appears in the help, guards the drift V29 exists to stop.
+    Local.
+16. Swift gaps in pklith (language detection, swift-format and swiftlint
+    rows, warnings-as-errors build, `swift test` on pre-push, an llvm-cov
+    ratchet, TDD order and mirror tests for XCTest) and in sherd (code
+    verbs and coverage for Swift) are filed upstream, one issue per gap.
+    Each is drafted while the guardrails stage lays the row locally, and
+    filed, with the owner's approval, once the row works here
+    (paradigm/V6, paradigm/V35). Candidate.
+17. Federation: upstream's `Sources/` and `Tests/` stay flat and are one
+    node each, because moving upstream files would conflict with every
+    upstream PR (decision 3). The fork's own work lives in new
+    directories, each its own node, so waves can run workers side by side
+    there. Two workers never share the `Sources` node in one wave. Local.
+18. Branches (closes open question 2): fork `main` is upstream plus this
+    fork's flake, gate and spec files on top. It follows upstream by merge
+    commit through a PR, since decision 8 forbids force pushes to `main`.
+    Upstream PR branches are cut from `upstream/main` (decision 3). Local.
+19. Versions (closes open question 3): fork tags are
+    `v<upstream version>-fork.<n>`, the first `v0.2.1-fork.1`, on a base
+    that contains `57ccea1` (it carries PRs 16, 17 and 21, merged after
+    v0.2.1). T pins the tag; nothing relies on semver precedence. The
+    binary keeps reporting upstream's version string, so no carried diff
+    touches it. Local.
+20. Swift is a candidate fleet language for private macOS and iOS tools.
+    This repository is its first user shaped like a member; `docs/SWIFT.md`
+    is drafted from it and proposed to paradigm once this repository
+    ships (paradigm/V6). Amends decision 6. Candidate.
+
+# Decisions, round 3 (2026-10-18)
+
+Gap round 2, raised by probes during the spec run. Answered as round 2 was.
+
+21. Tests need Xcode: Command Line Tools 26.6 ship Swift Testing but no
+    XCTest, so upstream's XCTest suite fails with `no such module
+    'XCTest'` on a Mac without Xcode (probe 2026-10-18). Xcode cannot come
+    from the dev shell: it is not redistributable, nixpkgs only offers a
+    `requireFile` stub for a manually downloaded `.xip`, and the licence
+    step needs sudo. So Xcode is installed once per machine by the owner's
+    machine configuration, outside this repository; the dev shell sets
+    `DEVELOPER_DIR` and refuses when XCTest or Swift 6.2 is missing.
+    Porting upstream's tests to Swift Testing is rejected (decision 7).
+    Amends decision 11. Local.
+22. A node's `SPEC.md` inside a SwiftPM target directory (`Sources/`,
+    `Tests/`) makes SwiftPM warn `found 1 file(s) which are unhandled`, so
+    `Package.swift` excludes `SPEC.md` from both targets. That one-line
+    change is a fork file in effect and never goes upstream (decision 3).
+    Local.
+
+# Non-goals
+
+- a new plugin, new key types or a new recipient type ahead of upstream
+- Linux or Windows Secure-Enclave-like backends (TPM): a separate plugin
+- releasing to Homebrew or other package managers; T pins the flake
+- T-specific behaviour: anything only T needs belongs in T
+
+# Prior art and rejected designs
+
+- Pin upstream without a fork (T decision 26): rejected by T decision
+  27; the fork lets T fix bugs on its own schedule.
+- Soft fork (patch files on top of an upstream commit, built inside T):
+  rejected by T decision 27 for a gated member.
+- The `dcosson` fork: right changes, but fork-only release CI and idle
+  after two months; its changes are ported here and offered upstream.
+- `age-plugin-yubikey`: touch-gated and portable, but a different key
+  holder; a possible recovery backend in T, not a replacement.
+
+# Open questions
+
+Ask before guessing. A question marked blocking stops the node it names.
+None is open after round 2.
+
+1. Swift toolchain. Closed by decision 11.
+2. Branches. Closed by decision 18.
+3. Versions. Closed by decision 19.
+4. Coverage. Closed by decision 14.
+5. Linux build. Closed by decision 12.
+6. Gate tools for Swift. Closed by decisions 13 and 16.

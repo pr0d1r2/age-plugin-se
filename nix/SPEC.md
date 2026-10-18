@@ -1,0 +1,43 @@
+# SPEC
+
+## §G GOAL
+
+flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard, on aarch64-darwin (D12).
+
+## §N NAV
+
+rel|path|lens
+up|.|-
+self|nix|flake parts: package, checks, dev shell, host-toolchain guard
+sib|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)
+sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`
+sib|fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made
+sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
+sib|Documentation|upstream man page sources, unchanged; ⊥ node
+
+## §C CONSTRAINTS
+
+- nixpkgs follows nixpkgs-lock (`paradigm/V20`); hk, pkl, pklith & spec tools via pklith `lib.devShell`, as paradigm does.
+- Swift, macOS SDK & XCTest from host Xcode via `DEVELOPER_DIR` (D11, D21) ∴ package & checks ⊥ hermetic; stated deviation, revisit when nixpkgs ships Swift ≥ 6.2.
+- every other tool pinned by `flake.lock`: swiftlint & swift-format from nixpkgs pin (R4), mth, sherd, itok.
+- logic in `.sh` files beside the `.nix` that call them ⊥ embedded shell (xenolith rule).
+
+## §I INTERFACES
+
+- file: root `flake.nix` imports `nix/package.nix`, `nix/checks.nix`, `nix/shell.nix`.
+- file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`).
+- nix: `packages.aarch64-darwin.default` — `swift build -c release`, binary `age-plugin-se`.
+- nix: `checks.aarch64-darwin.tests` — `swift test`; `checks.aarch64-darwin.toolchain` — guard.
+- nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
+
+## §V INVARIANTS
+
+V1: guard runs before any build, test | shell; message names the missing piece & D21.
+V2: `checks.aarch64-darwin.tests` runs same command as pre-push ∴ ⊥ drift.
+
+## §T TASKS
+
+id|status|task|cites
+T1|.|`toolchain.sh` guard, planted old-Swift & no-XCTest runs refused (`.:T1`, `.:T2`)|V1
+T2|.|package builds `57ccea1` unchanged (`.:T1`)|V2
+T3|.|checks & dev shell via pklith `lib.devShell` (`.:T1`)|V2
