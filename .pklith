@@ -25,7 +25,7 @@ id|category|nix|glob|check|fix|env|msg
 
 ## types
 type|checks|min|exempt
-*|trailing-whitespace, final-newline, line-endings|-|-
+*|trailing-whitespace, final-newline, line-endings, no-bom|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 editorconfig|-|-|written by pklith (seed or gen)
 gitattributes|-|-|written by pklith (seed or gen)
