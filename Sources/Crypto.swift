@@ -80,6 +80,10 @@ protocol SecureEnclaveMLKEM768PrivateKey {
   class CryptoKitCrypto: Crypto {
     let context = LAContext()
 
+    /// `AGE_PLUGIN_SE_PROMPT`, when set and non-empty, is the Touch ID prompt text.
+    init(environment: [String: String] = ProcessInfo.processInfo.environment) {
+    }
+
     var isSecureEnclaveAvailable: Bool {
       return SecureEnclave.isAvailable
     }

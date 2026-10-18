@@ -43,3 +43,28 @@ final class ForkCLITests: XCTestCase {
     XCTAssertFalse(FileManager.default.fileExists(atPath: file))
   }
 }
+
+#if !os(Linux) && !os(Windows)
+  import LocalAuthentication
+
+  /// Fork prompt tests. Covers root V12: `AGE_PLUGIN_SE_PROMPT` set and
+  /// non-empty is the Touch ID prompt text; unset or empty keeps upstream's.
+  /// Reads the `LAContext` only, so no Secure Enclave key and no Touch ID.
+  final class ForkPromptTests: XCTestCase {
+    let upstream = LAContext().localizedReason
+
+    func testPrompt_Set() {
+      let crypto = CryptoKitCrypto(environment: ["AGE_PLUGIN_SE_PROMPT": "decrypt secrets.age"])
+      XCTAssertEqual("decrypt secrets.age", crypto.context.localizedReason)
+    }
+
+    func testPrompt_Unset() {
+      XCTAssertEqual(upstream, CryptoKitCrypto(environment: ["OTHER": "x"]).context.localizedReason)
+    }
+
+    func testPrompt_Empty() {
+      let crypto = CryptoKitCrypto(environment: ["AGE_PLUGIN_SE_PROMPT": ""])
+      XCTAssertEqual(upstream, crypto.context.localizedReason)
+    }
+  }
+#endif
