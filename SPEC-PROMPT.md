@@ -154,7 +154,7 @@ AGE_PLUGIN_SE_PROMPT=<text>   Touch ID prompt text (upstream PR 18)
    and 23). Local.
 6. Swift is not a fleet language. What this repository learns about
    gating it is noted for a paradigm `docs/SWIFT.md`, proposed only if the
-   repository joins the fleet. Local.
+   repository joins the fleet. Amended by decision 20. Local.
 7. Upstream's tests are kept and run as they are; this fork's tests are
    added beside them, not in their place. Local.
 8. `main` is protected on GitHub, set 2026-10-18: every change lands by
@@ -230,6 +230,25 @@ the owner amends it by a later decision.
     Each is drafted while the guardrails stage lays the row locally, and
     filed, with the owner's approval, once the row works here
     (paradigm/V6, paradigm/V35). Candidate.
+17. Federation: upstream's `Sources/` and `Tests/` stay flat and are one
+    node each, because moving upstream files would conflict with every
+    upstream PR (decision 3). The fork's own work lives in new
+    directories, each its own node, so waves can run workers side by side
+    there. Two workers never share the `Sources` node in one wave. Local.
+18. Branches (closes open question 2): fork `main` is upstream plus this
+    fork's flake, gate and spec files on top. It follows upstream by merge
+    commit through a PR, since decision 8 forbids force pushes to `main`.
+    Upstream PR branches are cut from `upstream/main` (decision 3). Local.
+19. Versions (closes open question 3): fork tags are
+    `v<upstream version>-fork.<n>`, the first `v0.2.1-fork.1`, on a base
+    that contains `57ccea1` (it carries PRs 16, 17 and 21, merged after
+    v0.2.1). T pins the tag; nothing relies on semver precedence. The
+    binary keeps reporting upstream's version string, so no carried diff
+    touches it. Local.
+20. Swift is a candidate fleet language for private macOS and iOS tools.
+    This repository is its first user shaped like a member; `docs/SWIFT.md`
+    is drafted from it and proposed to paradigm once this repository
+    ships (paradigm/V6). Amends decision 6. Candidate.
 
 # Non-goals
 
@@ -252,15 +271,11 @@ the owner amends it by a later decision.
 # Open questions
 
 Ask before guessing. A question marked blocking stops the node it names.
+None is open after round 2.
 
 1. Swift toolchain. Closed by decision 11.
-2. Branches: does fork `main` carry the flake, gate and spec files on top
-   of upstream, and does it follow upstream by rebase or by merge? Upstream
-   PR branches are cut from `upstream/main` either way (decision 3). Blocks
-   the first push of those files.
-3. Versions: tag scheme for fork releases (for example
-   `v0.2.1-fork.1`), and the base: upstream `57ccea1` or the v0.2.1 tag?
-   Blocks the first tag.
+2. Branches. Closed by decision 18.
+3. Versions. Closed by decision 19.
 4. Coverage. Closed by decision 14.
 5. Linux build. Closed by decision 12.
 6. Gate tools for Swift. Closed by decisions 13 and 16.
