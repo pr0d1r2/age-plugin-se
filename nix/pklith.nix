@@ -14,4 +14,5 @@ catalog: [
   catalog.swift-format
   catalog.taplo
   catalog.typos
+  catalog.yamllint
 ]

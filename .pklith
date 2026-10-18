@@ -49,3 +49,5 @@ sh|shellcheck, shfmt|-|-
 swift|swift-format|-|-
 toml|taplo|-|-
 txt|-|-|license text, no linter reads it
+yaml|yamllint|-|-
+yml|yamllint|-|-
