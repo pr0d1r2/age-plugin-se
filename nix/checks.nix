@@ -3,6 +3,9 @@
 # it does not rerun when only the host Xcode changes; the shell's guard runs
 # on every entry.
 { pkgs }:
+let
+  swiftpm = import ./swiftpm.nix { inherit pkgs; };
+in
 {
   # The guard on this host, and its planted refusals (nix T1).
   toolchain = pkgs.runCommand "age-plugin-se-toolchain" { __noChroot = true; } ''
@@ -13,4 +16,17 @@
     ${pkgs.bash}/bin/bash ${./toolchain-test.sh} ${./toolchain.sh}
     touch $out
   '';
+
+  # Upstream's XCTest suite and the fork's, on DummyCrypto (root V15).
+  tests = pkgs.stdenvNoCC.mkDerivation {
+    name = "age-plugin-se-tests";
+    inherit (swiftpm) src nativeBuildInputs;
+    __noChroot = true;
+    buildPhase = ''
+      runHook preBuild
+      ${swiftpm.swift} test --disable-sandbox --only-use-versions-from-resolved-file
+      runHook postBuild
+    '';
+    installPhase = "touch $out";
+  };
 }

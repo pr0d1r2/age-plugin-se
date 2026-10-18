@@ -37,6 +37,7 @@
       catalog = pklith.legacyPackages.${system}.catalog;
     in
     {
+      packages.${system} = import ./nix/package.nix { inherit pkgs; };
       checks.${system} = import ./nix/checks.nix { inherit pkgs; };
       devShells.${system}.default = import ./nix/shell.nix { inherit pkgs pklith catalog; };
     };
