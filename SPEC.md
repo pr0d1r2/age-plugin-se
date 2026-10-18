@@ -66,6 +66,7 @@ R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
 R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
 R10|gate 2026-10-18|36 steps on commit, +3 on push, 2 on commit-msg; coverage 87.67% (995/1,135 `Sources/` lines). recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
+R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/OptionsHelpTests.swift`
 
 ## §V INVARIANTS
 
@@ -97,7 +98,7 @@ T4|.|`fixtures` node: make corpus w/ upstream `v0.2.1` & `57ccea1` binaries on a
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, coverage exclusions T20, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
-T8|.|`Tests`: help ↔ parser drift test|V11
+T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
 T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5,V3
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
 T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`); upstream PR waits for owner approval|V14,V5
