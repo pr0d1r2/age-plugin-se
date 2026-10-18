@@ -1,0 +1,7 @@
+# Vendored byte-identical from microlith; edits would fork the format.
+FORMAT.md
+FORMAT-EXTENSIONS.md
+# Frozen as HISTORICAL INPUT after the spec run.
+SPEC-PROMPT.md
+# Baseline (D13): upstream pages, unchanged; not reformatted (D3).
+README.md
