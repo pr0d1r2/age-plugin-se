@@ -6,8 +6,13 @@
 # to archive. Measured the same day: root 2,803; Sources 3,334; Tests
 # 3,244; fixtures 3,197; nix 3,490 tok.
 # A raise is its own reviewed commit with the measurement.
+# Tests raised 2026-10-18 to measured + ~15%, rounded up to the next
+# 100, for root T28 (CLI.run): 3,799 of 3,800 before it; the T28 root
+# row makes the chain 3,850, x 1.15 = 4,428 -> 4,500. No done row is left
+# to archive and the open rows carry owner questions. Sources fits its
+# 3,900 at 3,899 with T28 and its own T6, so it is not raised.
 SPEC.md     3300
 Sources     3900
-Tests       3800
+Tests       4500
 fixtures    3700
 nix         4100

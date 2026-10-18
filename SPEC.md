@@ -128,6 +128,7 @@ T24|.|deferred until official releases: distribution key replaces T23's. private
 T25|.|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. W4 ∵ `Sources` busy W2, W3 (T17)|V18,V5
 T26|.|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. W4, w/ T25|V19,V5
 T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
+T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
 
 ## §B BUGS
 
