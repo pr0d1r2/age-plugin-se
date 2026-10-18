@@ -30,7 +30,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 - file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `CLIError.cannotWriteOutput` (B1, `.:T11`).
 - file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`.
-- file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`).
+- file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`).
 - file: `HPKE.swift` — HPKE seal/open, P-256 & ML-KEM-768 hybrid.
 - file: `Bech32.swift`, `Base64.swift` — encodings. `Stream.swift` — `StandardIOStream`.
 - env: `AGE_PLUGIN_SE_PROMPT` (`.:V12`). error: denial marker (`.:V13`).
@@ -44,7 +44,7 @@ V3: ∀ carried change reverts cleanly once upstream merges its equivalent ∴ d
 ## §T TASKS
 
 id|status|task|cites
-T1|.|prompt env, RED → GREEN, carrying upstream PR 18 (`.:T9`)|V2,V3
+T1|x|ARCHIVED to SPEC-ARCHIVE.md|V2,V3
 T2|.|denial marker, RED → GREEN (`.:T10`)|V1,V3
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T4|.|B2: `recipients -o` write failure → error, RED → GREEN (`.:T25`)|V3
