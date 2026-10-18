@@ -72,6 +72,7 @@ R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xc
 R10|gate 2026-10-18|39 steps on commit, +4 on push, 2 on commit-msg (after T14, T23); coverage 88.57% (1,015/1,146 `Sources/` lines) after W1. recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
 R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/OptionsHelpTests.swift`
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
+R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
 
 ## §V INVARIANTS
 
@@ -92,6 +93,8 @@ V14: `keygen -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT, ⊥ `Pub
 V15: `swift test` needs ⊥ Secure Enclave & ⊥ Touch ID (`DummyCrypto`); checks needing a real one are manual & listed in `fixtures/README.md`.
 V16: ∀ commit from `5fffb16` on passes hk hooks, ⊥ `--no-verify`: pre-commit checks, ⊥ stash (`paradigm/V15`); commit-msg: parsed `Paradigm-Stage:` & cited id (`paradigm/V43`, `paradigm/V27`); name guard on files & message (`paradigm/V37`); pre-push adds tests & coverage (`paradigm/V24`).
 V17: upstream findings → baseline naming each file | string (`hk.pkl`, `.typos.toml`, `.secretsignore`, `.markdownlintignore`, `.pklith` exempt); only shrinks (D13).
+V18: `recipients -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT ∵ B2.
+V19: `recipients` input empty | ⊥ UTF-8 → error, exit ≠ 0, ⊥ trap ∵ B3.
 
 ## §T TASKS
 
@@ -120,8 +123,13 @@ T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as 
 T22|.|owner: require `gate (macos-latest)` on `main` (D8); run `nix develop -c release/alpine-keygen.sh`, re-run `build (macos-26)`; Actions on, first run green|V6
 T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T24|.|deferred until official releases: distribution key replaces T23's. private key only in ALPINE_KEY, made in memory; `--rotate` ⊥ recovery; pubs append-only in `release/keys/` w/ `revoked/`; ALPINE_KEY_NAME var names `.SIGN.RSA.<name>.pub`; fork script calls `dir2apk.go --key=`; reconcile w/ D12|-
+T25|.|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. W4 ∵ `Sources` busy W2, W3 (T17)|V18,V5
+T26|.|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. W4, w/ T25|V19,V5
+T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
 
 ## §B BUGS
 
 id|date|cause|fix
 B1|2026-10-18|`keygen -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:23`) ∴ failed write loses identity yet prints `Public key:`; upstream bug, found in spec run|V14
+B2|2026-10-18|`recipients -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:32`), B1's cause in its sibling ∴ failed write exits 0, writes nothing, says nothing; upstream bug, found in W1 (PR #6), probed. sweep (`paradigm/V19`): `Sources/` has 2 `createFile` calls, both rowed|V18
+B3|2026-10-18|`recipients` force-unwraps stdin (`Sources/CLI.swift:27`) ∴ empty or non-UTF-8 stdin traps, exit 133; upstream bug, probed in W1 reconcile|V19

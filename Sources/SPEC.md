@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here are carried changes only: prompt env, denial marker, B1 fix; each offered upstream.
+upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here are carried changes only: prompt env, denial marker, B1 to B3 fixes; each offered upstream.
 
 ## §N NAV
 
@@ -47,3 +47,5 @@ id|status|task|cites
 T1|.|prompt env, RED → GREEN, carrying upstream PR 18 (`.:T9`)|V2,V3
 T2|.|denial marker, RED → GREEN (`.:T10`)|V1,V3
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
+T4|.|B2: `recipients -o` write failure → error, RED → GREEN (`.:T25`)|V3
+T5|.|B3: `recipients` empty or non-UTF-8 input → error ⊥ trap, RED → GREEN (`.:T26`)|V3

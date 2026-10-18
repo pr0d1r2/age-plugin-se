@@ -43,4 +43,4 @@ id|status|task|cites
 T1|.|`FormatFreezeTests`: parse & re-encode ∀ fixture (`.:T5`). open, owner reads `.:V1` before RED: `v0.2.1/tag-pq.recipient` is classic `age1tag1` (`v0.2.1` ignores `recipients --pq`); `DummyCrypto` reads identity data as raw P-256 (`DummyCrypto.swift:53`), fixture identities hold Secure Enclave blobs ∴ identity → recipient ⊥ derivable here, bech32 round trip is|V2
 T2|.|`FormatFreezeTests`: replay recipient-v1 & identity-v1 sessions (`.:T5`). open, owner reads `.:V2` before RED: sessions hold age's random `grease` stanza & real CryptoKit randomness, ⊥ `DummyCrypto`'s; identity-v1 unwrap needs the Secure Enclave that made the key (`.:V15`)|V1,V2
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
-T4|~|`ForkCLITests`: prompt env, denial marker, B1 (`.:T9`, `.:T10`, `.:T11`). B1 done|V3
+T4|~|`ForkCLITests`: prompt env, denial marker, B1, B2, B3 (`.:T9`, `.:T10`, `.:T11`, `.:T25`, `.:T26`). B1 done|V3
