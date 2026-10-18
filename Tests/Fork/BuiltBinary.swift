@@ -27,6 +27,11 @@ enum BuiltBinary {
   /// Runs the binary with `arguments`, feeding `standardInput`; returns its
   /// exit status and stdout.
   static func run(_ arguments: [String], standardInput: String = "") throws -> (Int32, String) {
+    try run(arguments, standardInput: Data(standardInput.utf8))
+  }
+
+  /// Runs the binary with `arguments`, feeding the raw bytes `standardInput`.
+  static func run(_ arguments: [String], standardInput: Data) throws -> (Int32, String) {
     let process = Process()
     process.executableURL = url()
     process.arguments = arguments
@@ -35,7 +40,7 @@ enum BuiltBinary {
     process.standardInput = input
     process.standardOutput = output
     try process.run()
-    try input.fileHandleForWriting.write(contentsOf: Data(standardInput.utf8))
+    try input.fileHandleForWriting.write(contentsOf: standardInput)
     try input.fileHandleForWriting.close()
     let data = try output.fileHandleForReading.readToEnd() ?? Data()
     process.waitUntilExit()

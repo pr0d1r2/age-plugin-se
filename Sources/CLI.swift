@@ -39,16 +39,15 @@ struct CLI {
       if let inputFile = options.input {
         input = try String(contentsOfFile: inputFile, encoding: .utf8)
       } else {
-        input = try String(data: readStandardInput()!, encoding: .utf8)!
+        guard let text = String(data: try readStandardInput() ?? Data(), encoding: .utf8) else {
+          throw CLIError.invalidStandardInput
+        }
+        input = text
       }
       let result = try plugin.generateRecipients(
         input: input, recipientType: options.recipientType.recipientType, pq: options.pq)
       if let outputFile = options.output {
-        FileManager.default.createFile(
-          atPath: outputFile,
-          contents: Data(result.utf8),
-          attributes: [.posixPermissions: 0o600]
-        )
+        try writeOutput(result, to: outputFile)
       } else if result != "" {
         print(result)
       }
@@ -69,24 +68,31 @@ func keygenOutput(_ result: (String, String), output: String?) throws -> String 
   guard let outputFile = output else {
     return result.0
   }
+  try writeOutput(result.0, to: outputFile)
+  return "Public key: \(result.1)"
+}
+
+/// Writes `contents` to `outputFile`, readable by its owner only.
+func writeOutput(_ contents: String, to outputFile: String) throws {
   guard
     FileManager.default.createFile(
       atPath: outputFile,
-      contents: Data(result.0.utf8),
+      contents: Data(contents.utf8),
       attributes: [.posixPermissions: 0o600]
     )
   else {
     throw CLIError.cannotWriteOutput(outputFile)
   }
-  return "Public key: \(result.1)"
 }
 
 enum CLIError: LocalizedError, Equatable {
   case cannotWriteOutput(String)
+  case invalidStandardInput
 
   public var errorDescription: String? {
     switch self {
     case .cannotWriteOutput(let file): return "cannot write output file `\(file)`"
+    case .invalidStandardInput: return "standard input is not valid UTF-8"
     }
   }
 }
