@@ -8,6 +8,11 @@ PARADIGM: paradigm `6c7e6cd` (no tag yet, D9), used as process; repo ⊥ fleet m
 
 LINEAGE: `SPEC-PROMPT.md` (HISTORICAL after this run). where it & this spec differ, this spec wins. prompt decisions cited as `D<n>`.
 
+## §F FEDERATION
+
+dir|owns|⊥owns|tokens
+Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)|tests (`Tests`), fixture bytes (`fixtures`), build (`nix`)|-
+
 ## §N NAV
 
 rel|path|lens
