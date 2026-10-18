@@ -11,6 +11,7 @@ up|.|-
 self|fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made
 sib|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)
 sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`
+sib|nix|flake parts: package, checks, dev shell, host-toolchain guard
 
 ## §C CONSTRAINTS
 
