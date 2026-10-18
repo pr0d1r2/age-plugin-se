@@ -13,3 +13,4 @@ T1|x|`nix` node: flake builds `57ccea1` (+ `f62703c`) w/o source change w/ host 
 T2|x|owner installed Xcode 27.1 machine-wide via the owner's machine config, outside this repo (D21, R3, R9); dev shell sets `DEVELOPER_DIR` & refuses w/o XCTest; CI runner's Xcode → T14|V6,V15
 T3|x|`Package.swift`: exclude `SPEC.md` from `Sources` & `Tests` targets (D22, R7)|V7
 T7|x|`.context-limits` measured w/ slack per node (`paradigm/V12`)|-
+T8|x|`Tests`: help ↔ parser drift test `OptionsHelpTests` (R11)|V11

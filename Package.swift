@@ -22,7 +22,8 @@ let package = Package(
       exclude: ["SPEC.md", "SPEC-ARCHIVE.md"]),
     .testTarget(
       name: "Tests", dependencies: ["age-plugin-se"], path: "Tests",
-      // Fork: the sherd node spec is not part of the target (fork decision 22).
-      exclude: ["SPEC.md"]),
+      // Fork: the sherd node spec and its archive are not part of the target
+      // (fork decision 22).
+      exclude: ["SPEC.md", "SPEC-ARCHIVE.md"]),
   ]
 )
