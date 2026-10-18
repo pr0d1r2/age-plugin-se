@@ -41,6 +41,6 @@ V2: `checks.aarch64-darwin.tests` runs same command as pre-push ∴ ⊥ drift.
 ## §T TASKS
 
 id|status|task|cites
-T1|x|`toolchain.sh` guard, planted old-Swift & no-XCTest runs refused (`.:T1`, `.:T2`)|V1
-T2|x|package builds `57ccea1` + `f62703c` w/o source change (`.:T1`)|V2
-T3|x|checks & dev shell via pklith `lib.devShell` (`.:T1`)|V2
+T1|x|ARCHIVED to SPEC-ARCHIVE.md|V1
+T2|x|ARCHIVED to SPEC-ARCHIVE.md|V2
+T3|x|ARCHIVED to SPEC-ARCHIVE.md|V2
