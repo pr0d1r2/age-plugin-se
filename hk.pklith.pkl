@@ -128,6 +128,9 @@ steps: Mapping<String, Config.Step> = new {
   ["toolchain"] {
     check = "command -v nix/toolchain-test.sh >/dev/null 2>&1 || { echo 'toolchain: nix/toolchain-test.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; nix/toolchain-test.sh nix/toolchain.sh || { echo 'toolchain: the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)' >&2; exit 1; }"
   }
+  ["gen-check"] {
+    check = "command -v pklith >/dev/null 2>&1 || { echo 'gen-check: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith gen --check || { echo 'gen-check: a step in hk.pklith.pkl no longer matches .pklith; run `pklith gen`' >&2; exit 1; }"
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
