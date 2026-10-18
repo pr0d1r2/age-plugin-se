@@ -7,6 +7,9 @@ setup() {
 	keygen="$BATS_TEST_DIRNAME/alpine-keygen.sh"
 	out="$BATS_TEST_TMPDIR/keys"
 	export ALPINE_KEYGEN_BITS=1024 ALPINE_KEYGEN_GH=0
+	# A git hook (pre-push) exports these for the repository under test;
+	# left set, `git init` below would act on that repository.
+	unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_PREFIX
 	cd "$BATS_TEST_TMPDIR"
 }
 
@@ -56,6 +59,15 @@ fingerprint() {
 @test "refuses an output dir inside a git work tree and writes nothing" {
 	git init -q repo
 	run "$keygen" test repo/keys
+	[ "$status" -eq 1 ]
+	[[ "$output" == *"git work tree"* ]]
+	[ ! -e repo/keys ]
+}
+
+@test "a GIT_DIR and GIT_WORK_TREE naming another repository hide no work tree" {
+	git init -q other
+	git init -q repo
+	GIT_DIR="$PWD/other/.git" GIT_WORK_TREE="$PWD/other" run "$keygen" test repo/keys
 	[ "$status" -eq 1 ]
 	[[ "$output" == *"git work tree"* ]]
 	[ ! -e repo/keys ]
