@@ -193,7 +193,12 @@ final class CLIProcessCoverageTests: XCTestCase {
 
 /// Fork CLI tests. Covers root V14 (bug B1): when `keygen -o OUTPUT` cannot
 /// write OUTPUT, keygen fails with an error naming OUTPUT and prints no
-/// `Public key:` line, so the identity is never silently lost.
+/// `Public key:` line, so the identity is never silently lost. Covers root
+/// V18 (bug B2): `recipients -o OUTPUT` fails the same way. Covers root V19
+/// (bug B3): `recipients` stdin that is not UTF-8 is an error, not a trap,
+/// and empty stdin reads as an empty `-i` file: no recipient, exit 0. The
+/// built binary checks the exit status and stdout (root R13); its input has
+/// no identity, so it needs no Secure Enclave (root V15).
 final class ForkCLITests: XCTestCase {
   let result = ("AGE-PLUGIN-SE-1TESTIDENTITY", "age1se1testrecipient")
   var directory = URL(fileURLWithPath: NSTemporaryDirectory())
@@ -230,6 +235,47 @@ final class ForkCLITests: XCTestCase {
       XCTAssertTrue(error.localizedDescription.contains(file))
     }
     XCTAssertFalse(FileManager.default.fileExists(atPath: file))
+  }
+
+  func testRecipientsOutput_WriteFails() throws {
+    var printed: [String] = []
+    let plugin = Plugin(crypto: DummyCrypto(), stream: MemoryStream())
+    try CLI.run(["_", "keygen"], plugin: plugin, print: { printed.append($0) })
+    let identity = try XCTUnwrap(printed.first)
+    printed = []
+    let file = directory.appendingPathComponent("missing/recipients.txt").path
+    XCTAssertThrowsError(
+      try CLI.run(
+        ["_", "recipients", "-o", file], plugin: plugin,
+        readStandardInput: { Data(identity.utf8) }, print: { printed.append($0) })
+    ) { error in
+      XCTAssertEqual(CLIError.cannotWriteOutput(file), error as? CLIError)
+      XCTAssertTrue(error.localizedDescription.contains(file))
+    }
+    XCTAssertEqual([], printed)
+    XCTAssertFalse(FileManager.default.fileExists(atPath: file))
+  }
+
+  func testRecipientsOutput_WriteFails_Process() throws {
+    let file = directory.appendingPathComponent("missing/recipients.txt").path
+    let (status, output) = try BuiltBinary.run(
+      ["recipients", "-o", file], standardInput: "# no identity\n")
+    XCTAssertEqual(255, status)
+    XCTAssertEqual(
+      "\(BuiltBinary.url().path): error: cannot write output file `\(file)`\n", output)
+  }
+
+  func testRecipients_EmptyStandardInput_Process() throws {
+    let (status, output) = try BuiltBinary.run(["recipients"], standardInput: Data())
+    XCTAssertEqual(0, status)
+    XCTAssertEqual("", output)
+  }
+
+  func testRecipients_InvalidStandardInput_Process() throws {
+    let (status, output) = try BuiltBinary.run(["recipients"], standardInput: Data([0xff, 0xfe]))
+    XCTAssertEqual(255, status)
+    XCTAssertEqual(
+      "\(BuiltBinary.url().path): error: standard input is not valid UTF-8\n", output)
   }
 }
 
