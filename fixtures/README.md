@@ -59,7 +59,8 @@ every set has a `-decrypt.session` (identity-v1).
 
 The recorder runs the real binary (`REAL_PLUGIN`) with age's arguments,
 passes stdin and stdout through byte for byte, and appends each line to
-`SESSION_LOG`, prefixed `> ` (age to plugin) or `< ` (plugin to age):
+`SESSION_LOG`, prefixed `>` (age to plugin) or `<` (plugin to age) and a
+space:
 
 ```python
 #!/usr/bin/env python3
@@ -120,8 +121,8 @@ the tests decide what this build must match.
 - `recipients -o` writes the recipient without a final newline, in both
   revisions.
 - A protocol message with an empty body ends in an empty line; the
-  recorder writes it as `> ` or `< `, the prefix alone, trailing blank
-  included.
+  recorder writes it as the prefix alone, `>` or `<` and its space, so
+  the line ends in a blank.
 - age adds a random `grease-…` stanza to each identity-v1 request, so the
   sessions are not reproducible byte for byte; the tests pin randomness
   with `DummyCrypto` (root V2).

@@ -4,4 +4,5 @@ FORMAT-EXTENSIONS.md
 # Frozen as HISTORICAL INPUT after the spec run.
 SPEC-PROMPT.md
 # Baseline (D13): upstream pages, unchanged; not reformatted (D3).
-README.md
+# Anchored, so fork pages named README.md elsewhere are still linted.
+/README.md
