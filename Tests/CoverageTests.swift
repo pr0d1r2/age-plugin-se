@@ -10,7 +10,8 @@ import XCTest
 
 // Coverage tests (root V10): reach `Sources/` lines the upstream suite leaves
 // unrun, through the seams `Sources/` has (`CLI.run` is the one the fork
-// carries, root T28), with no Secure Enclave key or Touch ID (root V15).
+// carries, root T28) and the built binary's process entry point, with no
+// Secure Enclave key or Touch ID (root V15).
 // Each class names its area.
 
 /// Bech32 decode errors and their descriptions.
@@ -287,5 +288,80 @@ final class CLIRunCoverageTests: XCTestCase {
       XCTAssertEqual(Options.Error.unknownOption("--bogus"), error as? Options.Error)
     }
     XCTAssertEqual([], printed)
+  }
+}
+
+/// `CLI.main`, `CLI.run`'s default stdin and print, and `StandardIOStream`:
+/// the built binary run as a child process, so only the process entry point
+/// reaches them. Under `swift test --enable-code-coverage` the child inherits
+/// `LLVM_PROFILE_FILE` and its counts merge with the suite's. No case touches
+/// the Secure Enclave or Touch ID (root V15).
+final class CLIProcessCoverageTests: XCTestCase {
+  /// The binary SwiftPM built beside this test bundle; missing fails.
+  func binary() throws -> URL {
+    let url = Bundle(for: Self.self).bundleURL.deletingLastPathComponent()
+      .appendingPathComponent("age-plugin-se")
+    XCTAssertTrue(
+      FileManager.default.isExecutableFile(atPath: url.path), "no built binary at \(url.path)")
+    return url
+  }
+
+  func run(_ arguments: [String], standardInput: String = "") throws -> (Int32, String) {
+    let process = Process()
+    process.executableURL = try binary()
+    process.arguments = arguments
+    let input = Pipe()
+    let output = Pipe()
+    process.standardInput = input
+    process.standardOutput = output
+    try process.run()
+    try input.fileHandleForWriting.write(contentsOf: Data(standardInput.utf8))
+    try input.fileHandleForWriting.close()
+    let data = try output.fileHandleForReading.readToEnd() ?? Data()
+    process.waitUntilExit()
+    return (process.terminationStatus, String(decoding: data, as: UTF8.self))
+  }
+
+  func testVersion() throws {
+    let (status, output) = try run(["--version"])
+    XCTAssertEqual(0, status)
+    XCTAssertEqual("\(age_plugin_se.version)\n", output)
+  }
+
+  func testHelp() throws {
+    let (status, output) = try run(["--help"])
+    XCTAssertEqual(0, status)
+    XCTAssertEqual("\(Options.help)\n", output)
+  }
+
+  /// R13: the error goes to stdout and the exit status is 255.
+  func testUnknownOption() throws {
+    let path = try binary().path
+    let (status, output) = try run(["--bogus"])
+    XCTAssertEqual(255, status)
+    XCTAssertEqual("\(path): error: unknown option: `--bogus`\n", output)
+  }
+
+  /// Comment lines only: real stdin is read, no identity is parsed.
+  func testRecipientsFromStandardInput() throws {
+    let (status, output) = try run(["recipients"], standardInput: "# no identity\n")
+    XCTAssertEqual(0, status)
+    XCTAssertEqual("", output)
+  }
+
+  /// age's side of `fixtures/v0.2.1/se-classic-encrypt.session`, over real
+  /// stdin and stdout; wrapping needs no Secure Enclave.
+  func testRecipientV1() throws {
+    let session = try String(
+      contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+        .appendingPathComponent("../fixtures/v0.2.1/se-classic-encrypt.session"),
+      encoding: .utf8)
+    let toPlugin = session.split(separator: "\n", omittingEmptySubsequences: false)
+      .filter { $0.hasPrefix(">") }.map { $0.dropFirst(2) }.joined(separator: "\n")
+    let (status, output) = try run(["--age-plugin=recipient-v1"], standardInput: toPlugin + "\n")
+    XCTAssertEqual(0, status)
+    let lines = output.components(separatedBy: "\n")
+    XCTAssertTrue(lines[0].hasPrefix("-> recipient-stanza 0 piv-p256 "), output)
+    XCTAssertEqual(["-> done", "", ""], Array(lines.suffix(3)), output)
   }
 }
