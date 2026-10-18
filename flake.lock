@@ -233,16 +233,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1791090047,
-        "narHash": "sha256-wBaJu8Irb/ZHFKjeCA3kS/3vmYBECVlyTc9EEVHGizA=",
-        "ref": "refs/tags/v0.5.4",
-        "rev": "479b14c0d042c9b7700bf684c21e0113d0cf706a",
+        "lastModified": 1792326228,
+        "narHash": "sha256-jr8ousnD1Ii4q5Q0KEyT+intXoaJg9zYWu2p3eELrO4=",
+        "ref": "main",
+        "rev": "3372ebfdd5bde68e166aec68e5f9a0da015dec2c",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/pr0d1r2/sherd"
       },
       "original": {
-        "ref": "refs/tags/v0.5.4",
+        "ref": "main",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/pr0d1r2/sherd"
