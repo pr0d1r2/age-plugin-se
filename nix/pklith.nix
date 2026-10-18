@@ -12,6 +12,7 @@ catalog: [
   catalog.markdownlint-cli
   catalog.microlith
   catalog.nixfmt
+  catalog.openssl
   catalog.ripsecrets
   catalog.shellcheck
   catalog.sherd

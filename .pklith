@@ -38,6 +38,7 @@ no-stash|gate|gnugrep|-|! grep -nE 'stash *= *(true\|"git"\|"patch-file")' hk.pk
 no-core-worktree|gate|git|-|test -z "$(git config --local --get core.worktree)"|-|-|core.worktree is set in the shared .git/config, so every worktree acts on one checkout (paradigm/V15)
 names|gate|gnugrep|**/*|gate/names.sh {{files}}|-|-|a private name is staged (paradigm/V37); the hit names the denylist entry, never the name
 gate-tests|test|bats|gate/*.sh, gate/*.bats|bats gate|-|-|a gate script's bats test failed (root T6)
+release-tests|test|openssl|release/*.sh, release/*.bats|bats release|-|-|a release script's bats test failed (root T23)
 confirm|gate|-|-|pklith confirm|-|-|the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)
 actlith-check|gate|-|-|actlith gen --check && actlith check|-|-|a workflow no longer matches .actlith, or a file in .github/workflows/ is neither generated nor listed hand-written; run `actlith gen` (root T14)
 
@@ -71,7 +72,8 @@ path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
 path:gate/*.sh|shellcheck, shfmt, gate-tests|-|-
 path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
-path:release/*.bats|bats-parse|-|-
+path:release/*.bats|bats-parse, release-tests|-|-
+path:release/*.sh|shellcheck, shfmt, release-tests|-|-
 pkl|no-stash|-|-
 pklith|gen-check, pklith-check, confirm|-|-
 pre-commit|-|-|written by pklith (seed or gen)

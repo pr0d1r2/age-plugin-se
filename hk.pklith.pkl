@@ -173,6 +173,10 @@ push: Mapping<String, Config.Step> = new {
     glob = List("gate/*.sh", "gate/*.bats")
     check = #"command -v bats >/dev/null 2>&1 || { echo 'gate-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats gate || { echo 'gate-tests: a gate script'\''s bats test failed (root T6)' >&2; exit 1; }"#
   }
+  ["release-tests"] {
+    glob = List("release/*.sh", "release/*.bats")
+    check = #"command -v bats >/dev/null 2>&1 || { echo 'release-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats release || { echo 'release-tests: a release script'\''s bats test failed (root T23)' >&2; exit 1; }"#
+  }
   ["coverage"] {
     glob = List("**/*.swift", "Package.swift", ".coverage")
     check = "command -v sherd >/dev/null 2>&1 || { echo 'coverage: sherd is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; sherd coverage --check || { echo 'coverage: line coverage fell below the floor in .coverage (root V10)' >&2; exit 1; }"
