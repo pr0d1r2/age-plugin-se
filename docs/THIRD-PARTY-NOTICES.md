@@ -1,0 +1,73 @@
+# Third-party notices
+
+This repository is a fork. Most of its code was written upstream, some
+was written by others before that, and the build pulls in two Apple
+packages. This file says what each part is, who holds its copyright and
+which licence it carries.
+
+## Upstream: `age-plugin-se`
+
+The fork is built on
+[`remko/age-plugin-se`](https://github.com/remko/age-plugin-se): the
+plugin's code in `Sources/`, its tests in `Tests/`, the build and
+coverage scripts in `Scripts/`, the man page and design notes in
+`Documentation/`, `Makefile`, `README.md` and the upstream CI.
+
+- Licence: MIT
+- Copyright (c) 2023 Remko Tronçon
+
+The licence text is [`LICENSE.txt`](../LICENSE.txt), kept as upstream
+wrote it with one fork copyright line added under upstream's.
+
+## Bech32
+
+The Bech32 checksum code in `Sources/Bech32.swift`, and its copy in
+`Scripts/ConvertBech32HRP.swift`, is a modified version of
+[`0xDEADP00L/Bech32`](https://github.com/0xDEADP00L/Bech32). Both files
+carry its notice in their header.
+
+- Licence: MIT
+- Copyright 2018 Evolution Group Limited
+
+## SwiftPM dependencies
+
+The repository holds only their pins, in `Package.resolved`; their source
+is fetched at build time.
+
+| Package | Version | Licence |
+| --- | --- | --- |
+| [`apple/swift-crypto`](https://github.com/apple/swift-crypto) | 4.2.0 | Apache-2.0 |
+| [`apple/swift-asn1`](https://github.com/apple/swift-asn1) | 1.5.1 | Apache-2.0 (pulled in by `swift-crypto`) |
+
+`Package.swift` links `swift-crypto` on Linux and Windows only; the macOS
+build uses Apple's CryptoKit and links neither. Any binary that does link
+them must ship each package's `LICENSE.txt` and `NOTICE.txt` with it, as
+Apache-2.0 requires.
+
+## Fixtures
+
+`fixtures/` holds identities, recipients and plugin sessions made by
+running upstream's binaries (`v0.2.1` and `57ccea1`). They are that
+program's output, kept byte for byte, and come under upstream's licence
+above as far as any licence reaches them.
+
+## Not distributed: build-time tools
+
+These run in the dev shell, the gate and CI. None is linked into the
+plugin or shipped with it.
+
+- [`nix`](https://github.com/NixOS/nix): pins the dev shell and builds
+  the package.
+- [`hk`](https://github.com/jdx/hk): runs the gate in `hk.pkl`.
+- [`pklith`](https://github.com/pr0d1r2/pklith): writes `hk.pkl` from
+  `.pklith`.
+- [`sherd`](https://github.com/pr0d1r2/sherd): checks the federated spec
+  and holds the coverage floor.
+- [`actlith`](https://github.com/pr0d1r2/actlith): writes the fork CI
+  workflow from `.actlith`.
+
+## The fork's own additions
+
+Everything the fork adds (the specs, the nix flake, the gate, the fork
+tests, the fixtures' notes and these pages) is licensed under the MIT
+License in [`LICENSE.txt`](../LICENSE.txt).

@@ -16,7 +16,8 @@ Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `Dum
 fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made|tests reading it (`Tests`), the formats (upstream)|-
 nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (root `.pklith`), CI workflow (root)|-
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
-Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
+Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (`docs`; root `README.md` stays upstream's)|-
+docs|fork notices & LLM disclaimer; ⊥ node|`LICENSE.txt` (root)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
 release|fork CI-only Alpine keygen & its bats test; ⊥ node|upstream packaging|-
 pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node|gate rows (root `.pklith`)|-
@@ -31,7 +32,8 @@ self|.|-
 
 - formats frozen (D2): identity, recipient & stanza encoding, plugin protocol messages ⊥ change. change needing one → upstream first, waits there.
 - crypto ⊥ rewritten (D4): `Sources/Crypto.swift`, `Sources/HPKE.swift` change only to follow upstream | fix bug proven by failing test; human review each.
-- upstream-bound change (D3): branch cut from `upstream/main`, ⊥ fork file in it (`SPEC*.md`, `FORMAT*.md`, `flake.*`, `nix/`, `fixtures/`, `.pklith`, `hk.pkl`, `.coverage`, `.context-limits`, fork CI). carried change dropped once upstream merges it.
+- upstream-bound change (D3): branch cut from `upstream/main`, ⊥ fork file in it (`SPEC*.md`, `FORMAT*.md`, `flake.*`, `nix/`, `fixtures/`, `docs/`, `.pklith`, `hk.pkl`, `.coverage`, `.context-limits`, fork CI). carried change dropped once upstream merges it.
+- `LICENSE.txt` = upstream's + 1 fork copyright line under its own: owner decision 2026-10-18, exception to D3.
 - upstream tests kept & run as-is (D7); fork tests in own files beside them.
 - Swift ≥ 6.2 & macOS SDK from host; nix pins every other tool (D11). tests need Xcode's XCTest (D21). `.macOS(.v26)` stays.
 - darwin only v1 (D12). fork CI = GitHub macOS runner running same `hk.pkl`; upstream `build.yml` untouched.
@@ -107,9 +109,9 @@ T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, coverage exclusions T20, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
-T9|~|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval. fork half done (`CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`); upstream PR waits for owner approval|V12,V5,V3
+T9|~|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval. fork half done (`CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`)|V12,V5,V3
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
-T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`); upstream PR waits for owner approval|V14,V5
+T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`)|V14,V5
 T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
