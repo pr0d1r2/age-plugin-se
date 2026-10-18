@@ -7,47 +7,58 @@ struct CLI {
   static func main() {
     do {
       let plugin = Plugin(crypto: CryptoKitCrypto(), stream: StandardIOStream())
-      let options = try Options.parse(CommandLine.arguments)
-      switch options.command {
-      case .help:
-        print(Options.help)
-      case .version:
-        print(version)
-      case .keygen:
-        let result = try plugin.generateKey(
-          accessControl: options.accessControl.keyAccessControl,
-          recipientType: options.recipientType.recipientType, now: Date(),
-          pq: options.pq)
-        print(try keygenOutput(result, output: options.output))
-      case .recipients:
-        var input = ""
-        if let inputFile = options.input {
-          input = try String(contentsOfFile: inputFile, encoding: .utf8)
-        } else {
-          input = try String(data: FileHandle.standardInput.readToEnd()!, encoding: .utf8)!
-        }
-        let result = try plugin.generateRecipients(
-          input: input, recipientType: options.recipientType.recipientType, pq: options.pq)
-        if let outputFile = options.output {
-          FileManager.default.createFile(
-            atPath: outputFile,
-            contents: Data(result.utf8),
-            attributes: [.posixPermissions: 0o600]
-          )
-        } else if result != "" {
-          print(result)
-        }
-      case .plugin(let sm):
-        switch sm {
-        case .recipientV1:
-          plugin.runRecipientV1()
-        case .identityV1:
-          plugin.runIdentityV1()
-        }
-      }
+      try run(CommandLine.arguments, plugin: plugin)
     } catch {
       print("\(CommandLine.arguments[0]): error: \(error.localizedDescription)")
       exit(-1)
+    }
+  }
+
+  /// Runs the command that `arguments` names on `plugin`. `readStandardInput`
+  /// reads the `recipients` input when no INPUT is given, and `print` writes
+  /// one line of output.
+  static func run(
+    _ arguments: [String], plugin: Plugin,
+    readStandardInput: () throws -> Data? = { try FileHandle.standardInput.readToEnd() },
+    print: (String) -> Void = { Swift.print($0) }
+  ) throws {
+    let options = try Options.parse(arguments)
+    switch options.command {
+    case .help:
+      print(Options.help)
+    case .version:
+      print(version)
+    case .keygen:
+      let result = try plugin.generateKey(
+        accessControl: options.accessControl.keyAccessControl,
+        recipientType: options.recipientType.recipientType, now: Date(),
+        pq: options.pq)
+      print(try keygenOutput(result, output: options.output))
+    case .recipients:
+      var input = ""
+      if let inputFile = options.input {
+        input = try String(contentsOfFile: inputFile, encoding: .utf8)
+      } else {
+        input = try String(data: readStandardInput()!, encoding: .utf8)!
+      }
+      let result = try plugin.generateRecipients(
+        input: input, recipientType: options.recipientType.recipientType, pq: options.pq)
+      if let outputFile = options.output {
+        FileManager.default.createFile(
+          atPath: outputFile,
+          contents: Data(result.utf8),
+          attributes: [.posixPermissions: 0o600]
+        )
+      } else if result != "" {
+        print(result)
+      }
+    case .plugin(let sm):
+      switch sm {
+      case .recipientV1:
+        plugin.runRecipientV1()
+      case .identityV1:
+        plugin.runIdentityV1()
+      }
     }
   }
 }

@@ -9,8 +9,9 @@ import XCTest
 #endif
 
 // Coverage tests (root V10): reach `Sources/` lines the upstream suite leaves
-// unrun, through seams that already exist, with no change to `Sources/` and
-// no Secure Enclave key or Touch ID (root V15). Each class names its area.
+// unrun, through the seams `Sources/` has (`CLI.run` is the one the fork
+// carries, root T28), with no Secure Enclave key or Touch ID (root V15).
+// Each class names its area.
 
 /// Bech32 decode errors and their descriptions.
 final class Bech32CoverageTests: XCTestCase {
@@ -174,3 +175,117 @@ final class OptionsCoverageTests: XCTestCase {
     #endif
   }
 #endif
+
+/// `CLI.run`, the dispatch `CLI.main` hands its arguments to: every command
+/// on `DummyCrypto` and `MemoryStream`, with printed lines captured.
+final class CLIRunCoverageTests: XCTestCase {
+  var stream = MemoryStream()
+  var printed: [String] = []
+  var directory = URL(fileURLWithPath: NSTemporaryDirectory())
+
+  override func setUpWithError() throws {
+    stream = MemoryStream()
+    printed = []
+    directory = FileManager.default.temporaryDirectory
+      .appendingPathComponent("CLIRunCoverageTests-\(UUID().uuidString)")
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+  }
+
+  override func tearDownWithError() throws {
+    try FileManager.default.removeItem(at: directory)
+  }
+
+  func run(_ arguments: [String], standardInput: String = "") throws {
+    try CLI.run(
+      ["age-plugin-se"] + arguments, plugin: Plugin(crypto: DummyCrypto(), stream: stream),
+      readStandardInput: { Data(standardInput.utf8) }, print: { self.printed.append($0) })
+  }
+
+  /// Runs `keygen` and returns the identity file text and its recipient.
+  func keygen() throws -> (String, String) {
+    try run(["keygen"])
+    let identity = try XCTUnwrap(printed.first)
+    let recipient = try XCTUnwrap(
+      identity.components(separatedBy: "\n").first { $0.hasPrefix("# public key: ") })
+    printed = []
+    return (identity, String(recipient.dropFirst("# public key: ".count)))
+  }
+
+  func testHelp() throws {
+    try run([])
+    try run(["--help"])
+    XCTAssertEqual([Options.help, Options.help], printed)
+  }
+
+  func testVersion() throws {
+    try run(["--version"])
+    XCTAssertEqual([age_plugin_se.version], printed)
+  }
+
+  func testKeygen() throws {
+    let (identity, recipient) = try keygen()
+    XCTAssertTrue(identity.contains("\nAGE-PLUGIN-SE-1"))
+    XCTAssertTrue(recipient.hasPrefix("age1se1"))
+  }
+
+  func testKeygen_Output() throws {
+    let file = directory.appendingPathComponent("identity.txt").path
+    try run(["keygen", "-o", file, "--access-control", "none"])
+    XCTAssertEqual(1, printed.count)
+    XCTAssertTrue(try XCTUnwrap(printed.first).hasPrefix("Public key: age1se1"))
+    let identity = try String(contentsOfFile: file, encoding: .utf8)
+    XCTAssertTrue(identity.contains("# access control: none\n"))
+  }
+
+  func testRecipients_Input() throws {
+    let (identity, recipient) = try keygen()
+    let file = directory.appendingPathComponent("identity.txt").path
+    try identity.write(toFile: file, atomically: true, encoding: .utf8)
+    try run(["recipients", "-i", file])
+    XCTAssertEqual([recipient], printed)
+  }
+
+  func testRecipients_StandardInput() throws {
+    let (identity, recipient) = try keygen()
+    try run(["recipients", "--recipient-type", "tag"], standardInput: identity)
+    XCTAssertEqual(1, printed.count)
+    XCTAssertTrue(try XCTUnwrap(printed.first).hasPrefix("age1tag1"))
+    XCTAssertNotEqual(recipient, printed.first)
+  }
+
+  func testRecipients_Output() throws {
+    let (identity, recipient) = try keygen()
+    let file = directory.appendingPathComponent("recipients.txt").path
+    try run(["recipients", "-o", file], standardInput: identity)
+    XCTAssertEqual([], printed)
+    XCTAssertEqual(recipient, try String(contentsOfFile: file, encoding: .utf8))
+    let attributes = try FileManager.default.attributesOfItem(atPath: file)
+    XCTAssertEqual(0o600, (attributes[.posixPermissions] as? NSNumber)?.intValue)
+  }
+
+  func testRecipients_NoIdentity() throws {
+    try run(["recipients"], standardInput: "# no identity here\n")
+    XCTAssertEqual([], printed)
+  }
+
+  func testPlugin_RecipientV1() throws {
+    stream.add(input: "-> done\n")
+    try run(["--age-plugin=recipient-v1"])
+    XCTAssertEqual("-> done\n", stream.output)
+    XCTAssertEqual([], printed)
+  }
+
+  func testPlugin_IdentityV1() throws {
+    stream.add(input: "-> done\n")
+    try run(["--age-plugin", "identity-v1"])
+    XCTAssertEqual("-> done\n", stream.output)
+    XCTAssertEqual([], printed)
+  }
+
+  func testError_Thrown() throws {
+    XCTAssertThrowsError(try run(["--bogus"])) { error in
+      XCTAssertEqual(Options.Error.unknownOption("--bogus"), error as? Options.Error)
+    }
+    XCTAssertEqual([], printed)
+  }
+}
