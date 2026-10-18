@@ -18,7 +18,7 @@ nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (roo
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
 Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
-release|fork Alpine keygen & its bats test, fork public keys; ⊥ node|upstream packaging, private keys|-
+release|fork CI-only Alpine keygen & its bats test; ⊥ node|upstream packaging|-
 
 ## §N NAV
 
@@ -51,7 +51,7 @@ self|.|-
 - nix: `packages.aarch64-darwin.default` (`age-plugin-se`), `checks.aarch64-darwin.*`, `devShells.aarch64-darwin.default` (`nix` node).
 - file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`; `.bats` beside each.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
-- file: `release/alpine-keygen.sh [--new] [PREFIX [DIR]]` — `<prefix>-<hex epoch>.rsa` & `.pub`, PKCS#8 RSA 4096, ⊥ in git; existing pair checked, new only w/ `--new`; `.pub` → `release/keys/`.
+- file: `release/alpine-keygen.sh [--rotate]` — PKCS#8 RSA 4096 made in memory → `gh secret set ALPINE_KEY` stdin; ⊥ file; ALPINE_KEY set → nothing done.
 - file: `.pklith` → `hk.pkl` (gate), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
 - tag: `v<upstream>-fork.<n>`, first `v0.2.1-fork.1` (D19). binary keeps upstream version string.
 - trailer: `Paradigm-Stage: <stage>` per paradigm §I.trailer.
@@ -116,8 +116,9 @@ T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks 
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|.|coverage exclusions w/ reasons (D14); owner picks their home (sherd#138), then floor re-recorded|V10
 T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as file ceilings; owner picks|-
-T22|.|owner: require `gate (macos-latest)` on `main` (D8); Actions on, first run green|V6
-T23|.|fork-signed Alpine apk (path B): `ALPINE_KEY` from `release/alpine-keygen.sh`; fork script runs `dir2apk.go --key=<fork key>` ∵ `Makefile` hard-codes upstream key; `build.yml`, `Makefile` ⊥ changed. ⊥ D12 (darwin only): owner reconciles|-
+T22|.|owner: require `gate (macos-latest)` on `main` (D8); run `nix develop -c release/alpine-keygen.sh`, re-run `build (macos-26)`; Actions on, first run green|V6
+T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
+T24|.|deferred until official releases: distribution key replaces T23's. private key only in ALPINE_KEY, made in memory; `--rotate` ⊥ recovery; pubs append-only in `release/keys/` w/ `revoked/`; ALPINE_KEY_NAME var names `.SIGN.RSA.<name>.pub`; fork script calls `dir2apk.go --key=`; reconcile w/ D12|-
 
 ## §B BUGS
 
