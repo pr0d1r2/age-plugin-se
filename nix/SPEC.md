@@ -9,13 +9,14 @@ flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard, 
 rel|path|lens
 up|.|-
 self|nix|flake parts: package, checks, dev shell, host-toolchain guard
-sib|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)
+sib|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker, CLI bug fixes)
 sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`
 sib|fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made
 sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
 sib|Documentation|upstream man page sources, unchanged; ⊥ node
 sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node
 sib|release|fork CI-only Alpine keygen & its bats test; ⊥ node
+sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §C CONSTRAINTS
 

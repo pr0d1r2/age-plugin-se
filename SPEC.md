@@ -11,7 +11,7 @@ LINEAGE: `SPEC-PROMPT.md` (HISTORICAL after this run). where it & this spec diff
 ## §F FEDERATION
 
 dir|owns|⊥owns|tokens
-Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker)|tests (`Tests`), fixture bytes (`fixtures`), build (`nix`)|-
+Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas, bech32, base64, crypto boundary; carried changes (prompt env, denial marker, CLI bug fixes)|tests (`Tests`), fixture bytes (`fixtures`), build (`nix`)|-
 Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`|product code (`Sources`), fixture bytes (`fixtures`)|-
 fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made|tests reading it (`Tests`), the formats (upstream)|-
 nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (root `.pklith`), CI workflow (root)|-
@@ -19,6 +19,7 @@ Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; 
 Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
 release|fork CI-only Alpine keygen & its bats test; ⊥ node|upstream packaging|-
+pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node|gate rows (root `.pklith`)|-
 
 ## §N NAV
 
@@ -52,7 +53,7 @@ self|.|-
 - file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`; `.bats` beside each.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
 - file: `release/alpine-keygen.sh [--rotate]` — PKCS#8 RSA 4096 made in memory → `gh secret set ALPINE_KEY` stdin; ⊥ file; ALPINE_KEY set → nothing done.
-- file: `.pklith` → `hk.pkl` (gate), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
+- file: `.pklith` → `hk.pkl` (gate, amends `pkl/Config.pkl`), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
 - tag: `v<upstream>-fork.<n>`, first `v0.2.1-fork.1` (D19). binary keeps upstream version string.
 - trailer: `Paradigm-Stage: <stage>` per paradigm §I.trailer.
 
@@ -68,13 +69,14 @@ R6|pklith & sherd Swift support 2026-10-18|pklith catalog: 0 Swift rows (`swift`
 R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); fixed on fork `main` by PR #3 (`f62703c`, issue #2) → clean build 0 warnings. non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled` (∴ D22)|local probe, PR #3
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
 R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
-R10|gate 2026-10-18|36 steps on commit, +3 on push, 2 on commit-msg; coverage 87.67% (995/1,135 `Sources/` lines). recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
+R10|gate 2026-10-18|39 steps on commit, +4 on push, 2 on commit-msg (after T14, T23); coverage 88.57% (1,015/1,146 `Sources/` lines) after W1. recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
 R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/OptionsHelpTests.swift`
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
+R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
 
 ## §V INVARIANTS
 
-V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; `se` & `tag`; classic & `--pq`) parses & re-encodes byte-identical in this build (D2).
+V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; sets `se-classic`, `tag-classic`, `tag-pq`; ⊥ `se-pq` ∵ `--pq` always `tag`) parses & re-encodes byte-identical in this build (D2).
 V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness pinned by `DummyCrypto` (D2).
 V3: `Sources/Crypto.swift` & `Sources/HPKE.swift` ≠ upstream only in commits citing a failing test, an upstream commit | the upstream PR they carry (D4).
 V4: upstream test files ⊥ edited, except by upstream sync | by a carried change whose upstream PR edits them (D7).
@@ -91,6 +93,8 @@ V14: `keygen -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT, ⊥ `Pub
 V15: `swift test` needs ⊥ Secure Enclave & ⊥ Touch ID (`DummyCrypto`); checks needing a real one are manual & listed in `fixtures/README.md`.
 V16: ∀ commit from `5fffb16` on passes hk hooks, ⊥ `--no-verify`: pre-commit checks, ⊥ stash (`paradigm/V15`); commit-msg: parsed `Paradigm-Stage:` & cited id (`paradigm/V43`, `paradigm/V27`); name guard on files & message (`paradigm/V37`); pre-push adds tests & coverage (`paradigm/V24`).
 V17: upstream findings → baseline naming each file | string (`hk.pkl`, `.typos.toml`, `.secretsignore`, `.markdownlintignore`, `.pklith` exempt); only shrinks (D13).
+V18: `recipients -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT ∵ B2.
+V19: `recipients` input empty | ⊥ UTF-8 → error, exit ≠ 0, ⊥ trap ∵ B3.
 
 ## §T TASKS
 
@@ -111,7 +115,7 @@ T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swif
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
-T17|.|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in `Tests/ForkCLITests.swift` ∴ `Tests` worker in same wave ⊥ touches that file|V5,V15
+T17|~|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in `Tests/ForkCLITests.swift` ∴ `Tests` worker in same wave ⊥ touches that file. W1 merged (PRs #6 #7 #8) & reconciled (`reconcile-1`). W2 ready: T9 ⊥ deps; T5 has T4, its open items (owner reads V1, V2) in `Tests` T1, T2|V5,V15
 T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|.|coverage exclusions w/ reasons (D14); owner picks their home (sherd#138), then floor re-recorded|V10
@@ -119,8 +123,13 @@ T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as 
 T22|.|owner: require `gate (macos-latest)` on `main` (D8); run `nix develop -c release/alpine-keygen.sh`, re-run `build (macos-26)`; Actions on, first run green|V6
 T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T24|.|deferred until official releases: distribution key replaces T23's. private key only in ALPINE_KEY, made in memory; `--rotate` ⊥ recovery; pubs append-only in `release/keys/` w/ `revoked/`; ALPINE_KEY_NAME var names `.SIGN.RSA.<name>.pub`; fork script calls `dir2apk.go --key=`; reconcile w/ D12|-
+T25|.|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. W4 ∵ `Sources` busy W2, W3 (T17)|V18,V5
+T26|.|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. W4, w/ T25|V19,V5
+T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
 
 ## §B BUGS
 
 id|date|cause|fix
 B1|2026-10-18|`keygen -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:23`) ∴ failed write loses identity yet prints `Public key:`; upstream bug, found in spec run|V14
+B2|2026-10-18|`recipients -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:32`), B1's cause in its sibling ∴ failed write exits 0, writes nothing, says nothing; upstream bug, found in W1 (PR #6), probed. sweep (`paradigm/V19`): `Sources/` has 2 `createFile` calls, both rowed|V18
+B3|2026-10-18|`recipients` force-unwraps stdin (`Sources/CLI.swift:27`) ∴ empty or non-UTF-8 stdin traps, exit 133; upstream bug, probed in W1 reconcile|V19

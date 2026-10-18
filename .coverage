@@ -7,4 +7,8 @@
 # No exclusions yet: the Secure Enclave and terminal code root V10 exempts
 # (CryptoKitCrypto, StandardIOStream, CLI.main) waits for the owner's
 # exclusion convention (sherd#138), so it counts as uncovered here.
-lines 87.67
+#
+# Raised 2026-10-18 by `sherd coverage --record` in the wave 1 reconcile
+# (root T17, paradigm/V18): 88.57%, 1,015 of 1,146 lines under Sources/.
+# B1's fix (root T11, PR #6) and its tests added the gain.
+lines 88.57
