@@ -16,7 +16,8 @@ Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `Dum
 fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made|tests reading it (`Tests`), the formats (upstream)|-
 nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (root `.pklith`), CI workflow (root)|-
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
-Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
+Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (`docs`; root `README.md` stays upstream's)|-
+docs|fork notices & LLM disclaimer; ⊥ node|`LICENSE.txt` (root)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
 release|fork CI-only Alpine keygen & its bats test; ⊥ node|upstream packaging|-
 pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node|gate rows (root `.pklith`)|-
@@ -31,7 +32,7 @@ self|.|-
 
 - formats frozen (D2): identity, recipient & stanza encoding, plugin protocol messages ⊥ change. change needing one → upstream first, waits there.
 - crypto ⊥ rewritten (D4): `Sources/Crypto.swift`, `Sources/HPKE.swift` change only to follow upstream | fix bug proven by failing test; human review each.
-- upstream-bound change (D3): branch cut from `upstream/main`, ⊥ fork file in it (`SPEC*.md`, `FORMAT*.md`, `flake.*`, `nix/`, `fixtures/`, `.pklith`, `hk.pkl`, `.coverage`, `.context-limits`, fork CI). carried change dropped once upstream merges it.
+- upstream-bound change (D3): branch cut from `upstream/main`, ⊥ fork file in it (`SPEC*.md`, `FORMAT*.md`, `flake.*`, `nix/`, `fixtures/`, `docs/`, `.pklith`, `hk.pkl`, `.coverage`, `.context-limits`, fork CI). carried change dropped once upstream merges it.
 - `LICENSE.txt` = upstream's + 1 fork copyright line under its own: owner decision 2026-10-18, exception to D3.
 - upstream tests kept & run as-is (D7); fork tests in own files beside them.
 - Swift ≥ 6.2 & macOS SDK from host; nix pins every other tool (D11). tests need Xcode's XCTest (D21). `.macOS(.v26)` stays.
