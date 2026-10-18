@@ -1,5 +1,53 @@
 {
   "nodes": {
+    "actlith": {
+      "inputs": {
+        "characterminator": [],
+        "itok": [
+          "pklith",
+          "itok"
+        ],
+        "microlith": [
+          "pklith",
+          "microlith"
+        ],
+        "nix-hk": [
+          "pklith",
+          "nix-hk"
+        ],
+        "nixpkgs": [
+          "actlith",
+          "nixpkgs-lock",
+          "nixpkgs"
+        ],
+        "nixpkgs-lock": [
+          "nixpkgs-lock"
+        ],
+        "pklith": [
+          "pklith"
+        ],
+        "rekall": [],
+        "sherd": [
+          "sherd"
+        ],
+        "xenolith": []
+      },
+      "locked": {
+        "lastModified": 1792325294,
+        "narHash": "sha256-4cTocHYnoA9YmNbSZyrJsWzKuLTfBSvk/MqB89xg7WI=",
+        "ref": "main",
+        "rev": "6d7eed255dbc47c6e3ab8312f77a4030e1637983",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/actlith"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/pr0d1r2/actlith"
+      }
+    },
     "itok": {
       "inputs": {
         "hk": [
@@ -208,6 +256,7 @@
     },
     "root": {
       "inputs": {
+        "actlith": "actlith",
         "nixpkgs": [
           "nixpkgs-lock",
           "nixpkgs"
