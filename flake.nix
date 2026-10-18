@@ -32,10 +32,35 @@
       inputs.nixpkgs-lock.follows = "nixpkgs-lock";
       inputs.nix-hk.follows = "pklith/nix-hk";
     };
+    # Renders the fork CI workflow from .actlith (root T14). actlith main,
+    # for the gate kind's `xcode=<version>` pin (actlith PR 19), which no
+    # tag carries yet; back to a tag once one does. Its fleet tools follow
+    # the ones above, so the lock keeps one of each it shares.
+    actlith = {
+      url = "git+https://github.com/pr0d1r2/actlith?ref=main&shallow=1";
+      inputs = {
+        nixpkgs-lock.follows = "nixpkgs-lock";
+        nix-hk.follows = "pklith/nix-hk";
+        pklith.follows = "pklith";
+        sherd.follows = "sherd";
+        microlith.follows = "pklith/microlith";
+        itok.follows = "pklith/itok";
+        # Its dev-shell-only tools: `""` follows this flake instead, so the
+        # lock carries none of them; its package reads only the crate.
+        characterminator.follows = "";
+        rekall.follows = "";
+        xenolith.follows = "";
+      };
+    };
   };
 
   outputs =
-    { nixpkgs, pklith, ... }:
+    {
+      nixpkgs,
+      pklith,
+      actlith,
+      ...
+    }:
     let
       system = "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -44,6 +69,9 @@
     {
       packages.${system} = import ./nix/package.nix { inherit pkgs; };
       checks.${system} = import ./nix/checks.nix { inherit pkgs; };
-      devShells.${system}.default = import ./nix/shell.nix { inherit pkgs pklith catalog; };
+      devShells.${system}.default = import ./nix/shell.nix {
+        inherit pkgs pklith catalog;
+        actlith = actlith.packages.${system}.default;
+      };
     };
 }

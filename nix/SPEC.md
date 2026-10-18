@@ -15,6 +15,7 @@ sib|fixtures|format-freeze corpus: identities, recipients & stanzas made by upst
 sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
 sib|Documentation|upstream man page sources, unchanged; ⊥ node
 sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node
+sib|release|fork CI-only Alpine keygen & its bats test; ⊥ node
 
 ## §C CONSTRAINTS
 
@@ -22,7 +23,7 @@ sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their
 - Swift, macOS SDK & XCTest from host Xcode via `DEVELOPER_DIR` (D11, D21) ∴ package & checks ⊥ hermetic; stated deviation, revisit when nixpkgs ships Swift ≥ 6.2.
 - every other tool pinned by `flake.lock`: swiftlint & swift-format from nixpkgs pin (R4), mth, sherd, itok. sherd pinned newer than pklith's catalog; pklith follows it ∴ one sherd.
 - package & checks run host Xcode ∴ `__noChroot` (refused on `sandbox = true`). SwiftPM resolves Linux-only pins too (`swift-crypto`, `swift-asn1`) ∴ each pin = fixed-output git checkout, SwiftPM mirror → it; build ⊥ network.
-- darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to its apple-sdk ∴ shell & builds reset them to host Xcode.
+- darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to its apple-sdk ∴ shell & builds reset them to host Xcode: `HOST_DEVELOPER_DIR` (CI pin) | `xcode-select -p`.
 - logic in `.sh` files beside the `.nix` that call them ⊥ embedded shell (xenolith rule).
 
 ## §I INTERFACES

@@ -1,0 +1,11 @@
+---
+# yamllint over the fork's YAML: the fork CI, .github/workflows/ci.yml,
+# rendered by actlith (root T14); upstream workflows are not read.
+extends: default
+rules:
+  # `on:` is a GitHub Actions key, not a boolean.
+  truthy:
+    check-keys: false
+  # SHA-pinned action references with their version comment exceed 80.
+  line-length:
+    max: 120

@@ -2,6 +2,7 @@
 # The packages the generated hk steps run: `import ./nix/pklith.nix catalog`,
 # with pklith's catalog namespace (nixpkgs plus the tools nixpkgs lacks).
 catalog: [
+  catalog.actionlint
   catalog.bats
   catalog.deadnix
   catalog.editorconfig-checker
@@ -11,6 +12,7 @@ catalog: [
   catalog.markdownlint-cli
   catalog.microlith
   catalog.nixfmt
+  catalog.openssl
   catalog.ripsecrets
   catalog.shellcheck
   catalog.sherd
@@ -20,4 +22,5 @@ catalog: [
   catalog.taplo
   catalog.typos
   catalog.yamllint
+  catalog.zizmor
 ]

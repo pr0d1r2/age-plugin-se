@@ -72,6 +72,14 @@ steps: Mapping<String, Config.Step> = new {
     glob = List(".githooks/*", ".envrc", "**/*.sh")
     check = "command -v shellcheck >/dev/null 2>&1 || { echo 'shellcheck: shellcheck is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; shellcheck --shell=bash {{files}} || { echo 'shellcheck: shell script finding' >&2; exit 1; }"
   }
+  ["actionlint"] {
+    glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+    check = "command -v actionlint >/dev/null 2>&1 || { echo 'actionlint: actionlint is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; actionlint {{files}} || { echo 'actionlint: workflow does not parse or type-check' >&2; exit 1; }"
+  }
+  ["zizmor"] {
+    glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+    check = "command -v zizmor >/dev/null 2>&1 || { echo 'zizmor: zizmor is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; zizmor --offline --no-progress {{files}} || { echo 'zizmor: workflow security finding' >&2; exit 1; }"
+  }
   ["statix"] {
     glob = List("**/*.nix")
     check = #"command -v statix >/dev/null 2>&1 || { echo 'statix: statix is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; (for f in {{files}}; do statix check "$f" || exit 1; done) || { echo 'statix: nix anti-pattern; statix names the lint and its fix' >&2; exit 1; }"#
@@ -151,6 +159,9 @@ steps: Mapping<String, Config.Step> = new {
   ["confirm"] {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'confirm: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith confirm || { echo 'confirm: the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)' >&2; exit 1; }"
   }
+  ["actlith-check"] {
+    check = "command -v actlith >/dev/null 2>&1 || { echo 'actlith-check: actlith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; actlith gen --check && actlith check || { echo 'actlith-check: a workflow no longer matches .actlith, or a file in .github/workflows/ is neither generated nor listed hand-written; run `actlith gen` (root T14)' >&2; exit 1; }"
+  }
 }
 
 push: Mapping<String, Config.Step> = new {
@@ -161,6 +172,10 @@ push: Mapping<String, Config.Step> = new {
   ["gate-tests"] {
     glob = List("gate/*.sh", "gate/*.bats")
     check = #"command -v bats >/dev/null 2>&1 || { echo 'gate-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats gate || { echo 'gate-tests: a gate script'\''s bats test failed (root T6)' >&2; exit 1; }"#
+  }
+  ["release-tests"] {
+    glob = List("release/*.sh", "release/*.bats")
+    check = #"command -v bats >/dev/null 2>&1 || { echo 'release-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats release || { echo 'release-tests: a release script'\''s bats test failed (root T23)' >&2; exit 1; }"#
   }
   ["coverage"] {
     glob = List("**/*.swift", "Package.swift", ".coverage")

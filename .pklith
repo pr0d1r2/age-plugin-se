@@ -17,8 +17,8 @@ format 1
 # - itok: `.context-limits` holds sherd's chain ceilings (paradigm/V12);
 #   itok reads the same file as per-file ceilings and refuses SPEC.md at
 #   3,563 tokens against its 2,900 chain ceiling.
-# - actionlint, zizmor, yamllint on `.github/`: upstream CI is untouched
-#   (root §C); fork CI brings its own workflow and these rows (T14).
+# - actionlint, zizmor, yamllint on upstream `.github/` files: upstream CI
+#   is untouched (root §C); they read the fork CI, `ci.yml`, only (T14).
 # - the name guard's allowlist half (paradigm/V37): CI, which has no
 #   denylist, would check every repository named or linked against a
 #   committed list of public ones; the text already names third-party
@@ -38,12 +38,15 @@ no-stash|gate|gnugrep|-|! grep -nE 'stash *= *(true\|"git"\|"patch-file")' hk.pk
 no-core-worktree|gate|git|-|test -z "$(git config --local --get core.worktree)"|-|-|core.worktree is set in the shared .git/config, so every worktree acts on one checkout (paradigm/V15)
 names|gate|gnugrep|**/*|gate/names.sh {{files}}|-|-|a private name is staged (paradigm/V37); the hit names the denylist entry, never the name
 gate-tests|test|bats|gate/*.sh, gate/*.bats|bats gate|-|-|a gate script's bats test failed (root T6)
+release-tests|test|openssl|release/*.sh, release/*.bats|bats release|-|-|a release script's bats test failed (root T23)
 confirm|gate|-|-|pklith confirm|-|-|the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)
+actlith-check|gate|-|-|actlith gen --check && actlith check|-|-|a workflow no longer matches .actlith, or a file in .github/workflows/ is neither generated nor listed hand-written; run `actlith gen` (root T14)
 
 ## types
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, names, no-core-worktree|-|-
 bats|bats-parse, gate-tests|-|-
+actlith|actlith-check|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 commit-msg|shellcheck|-|-
 context-limits|sherd-budget|-|-
@@ -57,7 +60,11 @@ markdownlintignore|-|-|ignore patterns, no linter reads them
 md|markdownlint|-|-
 nix|nixfmt, statix, deadnix|-|-
 path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-budget|-|-
-path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
+path:.github/actions/**|-|-|upstream composite action, untouched (root §C); the upstream workflows use it
+path:.github/workflows/build-main.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
+path:.github/workflows/build.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
+path:.github/workflows/ci.yml|actionlint, zizmor, yamllint|-|-
+path:.github/workflows/release.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
 path:fixtures/*/*|-|-|fixture bytes written by upstream, frozen (fixtures V2): no linter reads keys, recipients or protocol transcripts; the * steps still read them, blank, newline and editorconfig steps skip them (hk.pkl)
 path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
@@ -65,6 +72,8 @@ path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
 path:gate/*.sh|shellcheck, shfmt, gate-tests|-|-
 path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
+path:release/*.bats|bats-parse, release-tests|-|-
+path:release/*.sh|shellcheck, shfmt, release-tests|-|-
 pkl|no-stash|-|-
 pklith|gen-check, pklith-check, confirm|-|-
 pre-commit|-|-|written by pklith (seed or gen)

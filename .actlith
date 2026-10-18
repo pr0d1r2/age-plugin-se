@@ -1,0 +1,20 @@
+format 1
+
+# age-plugin-se's CI registry (root T14): the fork CI is rendered from it
+# by `actlith gen`. One gate row on the macOS runner only (D12), with an
+# Xcode pinned (Swift 6.2 or newer and XCTest come from the host Xcode,
+# D11, D21), running the same hk gate as the hooks (root §C).
+#
+# The command hands the pinned Xcode to the dev shell as
+# HOST_DEVELOPER_DIR: `nix develop` overwrites DEVELOPER_DIR with the
+# stdenv's apple-sdk before the shell hook runs (nix §C).
+
+## workflows
+id|kind|systems|cache|args
+ci|gate|aarch64-darwin|pr0d1r2|xcode=26.6, timeout=60, command=HOST_DEVELOPER_DIR="$DEVELOPER_DIR" nix develop --command hk check --all --check
+
+## hand-written
+path|reason
+.github/workflows/build.yml|upstream CI, untouched (root §C, D12): builds and tests on macOS and Linux, packages
+.github/workflows/build-main.yml|upstream CI, untouched (root §C, D12): build.yml on main, then the pages deploy
+.github/workflows/release.yml|upstream CI, untouched (root §C, D12): build.yml on a release, then its assets
