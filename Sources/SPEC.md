@@ -44,4 +44,4 @@ V3: ∀ carried change reverts cleanly once upstream merges its equivalent ∴ d
 id|status|task|cites
 T1|.|prompt env, RED → GREEN, carrying upstream PR 18 (`.:T9`)|V2,V3
 T2|.|denial marker, RED → GREEN (`.:T10`)|V1,V3
-T3|.|B1: `keygen -o` write failure → error, RED → GREEN (`.:T11`)|V3
+T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3

@@ -18,16 +18,7 @@ struct CLI {
           accessControl: options.accessControl.keyAccessControl,
           recipientType: options.recipientType.recipientType, now: Date(),
           pq: options.pq)
-        if let outputFile = options.output {
-          FileManager.default.createFile(
-            atPath: outputFile,
-            contents: Data(result.0.utf8),
-            attributes: [.posixPermissions: 0o600]
-          )
-          print("Public key: \(result.1)")
-        } else {
-          print(result.0)
-        }
+        print(try keygenOutput(result, output: options.output))
       case .recipients:
         var input = ""
         if let inputFile = options.input {
@@ -57,6 +48,34 @@ struct CLI {
     } catch {
       print("\(CommandLine.arguments[0]): error: \(error.localizedDescription)")
       exit(-1)
+    }
+  }
+}
+
+/// Handles the result of `keygen`: writes the identity to `output` if given,
+/// and returns the text to print.
+func keygenOutput(_ result: (String, String), output: String?) throws -> String {
+  guard let outputFile = output else {
+    return result.0
+  }
+  guard
+    FileManager.default.createFile(
+      atPath: outputFile,
+      contents: Data(result.0.utf8),
+      attributes: [.posixPermissions: 0o600]
+    )
+  else {
+    throw CLIError.cannotWriteOutput(outputFile)
+  }
+  return "Public key: \(result.1)"
+}
+
+enum CLIError: LocalizedError, Equatable {
+  case cannotWriteOutput(String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .cannotWriteOutput(let file): return "cannot write output file `\(file)`"
     }
   }
 }

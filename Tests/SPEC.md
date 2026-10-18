@@ -41,4 +41,4 @@ id|status|task|cites
 T1|.|`FormatFreezeTests`: parse & re-encode ∀ fixture (`.:T5`)|V2
 T2|.|`FormatFreezeTests`: replay recipient-v1 & identity-v1 sessions (`.:T5`)|V1,V2
 T3|.|`OptionsHelpTests`: help ↔ parser (`.:T8`)|V3
-T4|.|`ForkCLITests`: prompt env, denial marker, B1 (`.:T9`, `.:T10`, `.:T11`)|V3
+T4|~|`ForkCLITests`: prompt env, denial marker, B1 (`.:T9`, `.:T10`, `.:T11`). B1 done|V3
