@@ -17,14 +17,15 @@ in
     touch $out
   '';
 
-  # Upstream's XCTest suite and the fork's, on DummyCrypto (root V15).
+  # Upstream's XCTest suite and the fork's, on DummyCrypto (root V15), by
+  # nix/test.sh: the command the pre-push `test` step runs (nix V2).
   tests = pkgs.stdenvNoCC.mkDerivation {
     name = "age-plugin-se-tests";
     inherit (swiftpm) src nativeBuildInputs;
     __noChroot = true;
     buildPhase = ''
       runHook preBuild
-      ${swiftpm.swift} test --disable-sandbox --only-use-versions-from-resolved-file
+      ${pkgs.bash}/bin/bash ${./test.sh} ${swiftpm.swift}
       runHook postBuild
     '';
     installPhase = "touch $out";

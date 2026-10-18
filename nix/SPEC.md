@@ -14,6 +14,7 @@ sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; 
 sib|fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made
 sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
 sib|Documentation|upstream man page sources, unchanged; ⊥ node
+sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node
 
 ## §C CONSTRAINTS
 
@@ -30,7 +31,8 @@ sib|Documentation|upstream man page sources, unchanged; ⊥ node
 - file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`); `nix/toolchain-test.sh` — its planted refusals.
 - file: `nix/shell-hook.sh` (shell entry), `nix/swift.sh` & `nix/swiftpm.nix` (SwiftPM in a nix build): host Xcode, vendored pins.
 - nix: `packages.aarch64-darwin.default` — `swift build -c release`, binary `age-plugin-se`.
-- nix: `checks.aarch64-darwin.tests` — `swift test`; `checks.aarch64-darwin.toolchain` — guard.
+- file: `nix/test.sh <swift…>` — the one test command: `<swift…> test --disable-sandbox --only-use-versions-from-resolved-file` (V2).
+- nix: `checks.aarch64-darwin.tests` — `nix/test.sh` w/ `nix/swift.sh` wrapper; `checks.aarch64-darwin.toolchain` — guard.
 - nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
 
 ## §V INVARIANTS
@@ -44,4 +46,4 @@ id|status|task|cites
 T1|x|ARCHIVED to SPEC-ARCHIVE.md|V1
 T2|x|ARCHIVED to SPEC-ARCHIVE.md|V2
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V2
-T4|.|pre-push step (`.:T6`) runs `swift test` as `checks.aarch64-darwin.tests` does|V2
+T4|x|ARCHIVED to SPEC-ARCHIVE.md|V2

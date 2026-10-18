@@ -1,0 +1,67 @@
+amends "pkl/Config.pkl"
+
+// Seeded by `pklith seed`; yours to edit. The steps come from hk.pklith.pkl,
+// which `pklith gen` and `pklith lay` write from .pklith: shape them here
+// (excludes, depends) by amending a step by its id. `steps` run on every
+// commit; `push` holds the test and coverage checks, which run at pre-push
+// and `hk check`, so a commit can hold a failing test before its fix.
+import "hk.pklith.pkl" as generated
+
+// Upstream paths `.pklith` exempts (root §F: not nodes, unchanged; root
+// §C: upstream code is not reformatted, D3). An exempt type claims no
+// check, so no step reads it.
+local upstream = List(".github/**", "Documentation/**", "Scripts/**", "Makefile")
+exclude = upstream
+
+// Baseline (D13): upstream files, unchanged, that a step finds fault with.
+// It only shrinks: an entry goes once upstream fixes the file or a carried
+// change touches it. A step's own exclude replaces the global one, so it
+// repeats `upstream`. Tools with their own ignore file keep their baseline
+// there (.typos.toml, .secretsignore, .markdownlintignore).
+local blanks = upstream + List("README.md", "Sources/CLI.swift")
+
+local commit = (generated.steps) {
+  when (generated.steps.containsKey("trailing-whitespace")) {
+    ["trailing-whitespace"] { exclude = blanks }
+  }
+  when (generated.steps.containsKey("editorconfig-checker")) {
+    ["editorconfig-checker"] { exclude = blanks }
+  }
+}
+local all = (commit) { ...generated.push }
+
+hooks {
+  ["pre-commit"] {
+    // Check only, never stash (paradigm/V15, as paradigm's gate does): hk's
+    // git stash is shared by every worktree of this repository, and this
+    // repository is worked in parallel worktrees. Without a stash a fixer
+    // would rewrite unstaged edits, so fixing stays `hk fix`, by hand.
+    fix = false
+    stash = "none"
+    steps = commit
+  }
+  // The message gate (root T6): a Paradigm-Stage trailer git can parse and
+  // a cited spec id (paradigm/V43, V27), then the name guard over the
+  // message itself (paradigm/V37), one after the other.
+  ["commit-msg"] {
+    steps {
+      ["commit-msg"] {
+        check = "gate/commit-msg.sh {{commit_msg_file}}"
+      }
+      ["message-names"] {
+        check = "gate/names.sh {{commit_msg_file}}"
+        depends = List("commit-msg")
+      }
+    }
+  }
+  ["pre-push"] {
+    steps = all
+  }
+  ["check"] {
+    steps = all
+  }
+  ["fix"] {
+    fix = true
+    steps = all
+  }
+}

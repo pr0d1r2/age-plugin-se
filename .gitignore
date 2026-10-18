@@ -3,7 +3,9 @@
 /manual-tests
 /.vscode/launch.json
 /default.profraw
-# Fork: agent state (paradigm/V16), nix build links and direnv's cache.
+# Fork: agent state (paradigm/V16), nix build links, direnv's cache and
+# the name guard's local denylist (paradigm/V37), never committed.
 .claude/
 /result*
 /.direnv
+/.private/

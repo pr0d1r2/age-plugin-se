@@ -1,0 +1,10 @@
+# Line coverage floor (root V10, paradigm/V25): a ratchet read by `sherd
+# coverage --check`. It may only rise, and only `sherd coverage --record`
+# moves it. Lowering it is a reviewed commit that says why here.
+#
+# Set 2026-10-18 by `sherd coverage --record` (root T6): 87.67%, 995 of
+# 1,135 lines under Sources/ (sherd counts Sources/ only, sherd PR 140).
+# No exclusions yet: the Secure Enclave and terminal code root V10 exempts
+# (CryptoKitCrypto, StandardIOStream, CLI.main) waits for the owner's
+# exclusion convention (sherd#138), so it counts as uncovered here.
+lines 87.67

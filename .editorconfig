@@ -1,0 +1,15 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[{Makefile,*.mk,go.mod,*.go}]
+indent_style = tab
+
+# shfmt's default; the fork's shell scripts and bats tests are tab-indented.
+[*.{sh,bats}]
+indent_style = tab

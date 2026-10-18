@@ -17,6 +17,7 @@ fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream
 nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (root `.pklith`), CI workflow (root)|-
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
 Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (root `README.md` stays upstream's)|-
+gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
 
 ## §N NAV
 
@@ -47,6 +48,7 @@ self|.|-
 - env: `AGE_PLUGIN_SE_PROMPT=<text>` — Touch ID prompt text; unset → upstream text. carried, offered upstream (PR 18).
 - error: denial marker — fixed documented string in the plugin error when user denies Touch ID; ⊥ in any other error. carried, offered upstream.
 - nix: `packages.aarch64-darwin.default` (`age-plugin-se`), `checks.aarch64-darwin.*`, `devShells.aarch64-darwin.default` (`nix` node).
+- file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`; `.bats` beside each.
 - file: `.pklith` → `hk.pkl` (gate), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
 - tag: `v<upstream>-fork.<n>`, first `v0.2.1-fork.1` (D19). binary keeps upstream version string.
 - trailer: `Paradigm-Stage: <stage>` per paradigm §I.trailer.
@@ -63,6 +65,7 @@ R6|pklith & sherd Swift support 2026-10-18|pklith catalog: 0 Swift rows (`swift`
 R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); fixed on fork `main` by PR #3 (`f62703c`, issue #2) → clean build 0 warnings. non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled` (∴ D22)|local probe, PR #3
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
 R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
+R10|gate 2026-10-18|36 steps on commit, +3 on push, 2 on commit-msg; coverage 87.67% (995/1,135 `Sources/` lines). recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
 
 ## §V INVARIANTS
 
@@ -81,6 +84,8 @@ V12: `AGE_PLUGIN_SE_PROMPT` set & non-empty → Touch ID prompt = its text; unse
 V13: Touch ID denied by user → plugin error carries denial marker; ∀ other error ∌ it.
 V14: `keygen -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT, ⊥ `Public key:` line ∵ B1.
 V15: `swift test` needs ⊥ Secure Enclave & ⊥ Touch ID (`DummyCrypto`); checks needing a real one are manual & listed in `fixtures/README.md`.
+V16: ∀ commit from `5fffb16` on passes hk hooks, ⊥ `--no-verify`: pre-commit checks, ⊥ stash (`paradigm/V15`); commit-msg: parsed `Paradigm-Stage:` & cited id (`paradigm/V43`, `paradigm/V27`); name guard on files & message (`paradigm/V37`); pre-push adds tests & coverage (`paradigm/V24`).
+V17: upstream findings → baseline naming each file | string (`hk.pkl`, `.typos.toml`, `.secretsignore`, `.markdownlintignore`, `.pklith` exempt); only shrinks (D13).
 
 ## §T TASKS
 
@@ -90,7 +95,7 @@ T2|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|.|`fixtures` node: make corpus w/ upstream `v0.2.1` & `57ccea1` binaries on a Mac w/ Secure Enclave; record commands|V1,V2,V15
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
-T6|.|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet|V6,V7,V8,V9,V10
+T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, coverage exclusions T20, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|.|`Tests`: help ↔ parser drift test|V11
 T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5,V3
@@ -102,6 +107,10 @@ T14|.|fork CI rendered by actlith on macOS runner w/ Xcode (Swift ≥ 6.2, XCTes
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
 T17|.|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in `Tests/ForkCLITests.swift` ∴ `Tests` worker in same wave ⊥ touches that file|V5,V15
+T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
+T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
+T20|.|coverage exclusions w/ reasons (D14); owner picks their home (sherd#138), then floor re-recorded|V10
+T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as file ceilings; owner picks|-
 
 ## §B BUGS
 

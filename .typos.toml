@@ -1,0 +1,16 @@
+# Baseline (D13): upstream files, unchanged, whose bech32 and base64 test
+# vectors and man page read as misspellings. Upstream code is not edited
+# (D3, D7); an entry goes once upstream fixes the file. pkl/Config.pkl is
+# hk's schema, vendored by pklith seed.
+[files]
+extend-exclude = [
+  "pkl/Config.pkl",
+  "README.md",
+  "Tests/Bech32Tests.swift",
+  "Tests/DummyCrypto.swift",
+  "Tests/PluginTests.swift",
+]
+
+# An upstream comment in Sources/Plugin.swift, kept as upstream wrote it.
+[default.extend-words]
+Compresed = "Compresed"

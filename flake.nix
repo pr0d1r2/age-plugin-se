@@ -18,15 +18,20 @@
   inputs = {
     nixpkgs-lock.url = "git+https://github.com/pr0d1r2/nixpkgs-lock?ref=main&shallow=1";
     nixpkgs.follows = "nixpkgs-lock/nixpkgs";
-    pklith.url = "git+https://github.com/pr0d1r2/pklith?ref=main&shallow=1";
-    pklith.inputs.nixpkgs-lock.follows = "nixpkgs-lock";
-    # Newer than the sherd pklith's catalog pins (v0.5.1, two false
-    # advisories since fixed upstream). pklith follows it, so the lock keeps
-    # one sherd and `catalog.sherd` is this one.
-    sherd.url = "git+https://github.com/pr0d1r2/sherd?ref=refs/tags/v0.5.4&shallow=1";
-    sherd.inputs.nixpkgs-lock.follows = "nixpkgs-lock";
-    sherd.inputs.nix-hk.follows = "pklith/nix-hk";
-    pklith.inputs.sherd.follows = "sherd";
+    pklith = {
+      url = "git+https://github.com/pr0d1r2/pklith?ref=main&shallow=1";
+      inputs.nixpkgs-lock.follows = "nixpkgs-lock";
+      inputs.sherd.follows = "sherd";
+    };
+    # Newer than the sherd pklith's catalog pins: sherd main, for SwiftPM
+    # line coverage (`sherd coverage`, sherd PRs 139 and 140), which no tag
+    # carries yet; back to a tag once one does. pklith follows it, so the
+    # lock keeps one sherd and `catalog.sherd` is this one.
+    sherd = {
+      url = "git+https://github.com/pr0d1r2/sherd?ref=main&shallow=1";
+      inputs.nixpkgs-lock.follows = "nixpkgs-lock";
+      inputs.nix-hk.follows = "pklith/nix-hk";
+    };
   };
 
   outputs =

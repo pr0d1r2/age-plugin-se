@@ -1,0 +1,78 @@
+format 1
+
+# age-plugin-se's registry: every tracked file type and the hk steps that
+# check it (root T6). Seeded by `pklith seed --init`; edited by hand since,
+# one check per commit (paradigm/V21), in the order `pklith lay` lays them.
+#
+# The `## checks` rows are this repository's own. Swift and XCTest come from
+# the host Xcode (D21), which the catalog's `nix` column cannot name
+# (pklith#89), so the toolchain, build and test rows name no nix package and
+# run what is on PATH; the shell's guard put the host Xcode there (nix V1),
+# and the toolchain step runs that guard again on every commit.
+#
+# Not laid, each with its reason (root T6):
+# - swiftlint: the seeded `.swiftlint.yml` finds 120 violations in upstream
+#   code, which is not reformatted (D3, D13); it waits for the owner's
+#   baseline convention (root V9, T18).
+# - itok: `.context-limits` holds sherd's chain ceilings (paradigm/V12);
+#   itok reads the same file as per-file ceilings and refuses SPEC.md at
+#   3,563 tokens against its 2,900 chain ceiling.
+# - actionlint, zizmor, yamllint on `.github/`: upstream CI is untouched
+#   (root §C); fork CI brings its own workflow and these rows (T14).
+# - the name guard's allowlist half (paradigm/V37): CI, which has no
+#   denylist, would check every repository named or linked against a
+#   committed list of public ones; the text already names third-party
+#   repositories, so which go on that list is the owner's call (T19).
+
+## checks
+id|category|nix|glob|check|fix|env|msg
+shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash {{files}}|-|-|shell script finding
+build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tests -Xswiftc -warnings-as-errors|-|-|the build or a compiler warning failed (root V7)
+test|test|-|**/*.swift, Package.swift, Package.resolved, nix/test.sh|nix/test.sh swift|-|-|a test failed (root V15, nix V2)
+coverage|coverage|sherd|**/*.swift, Package.swift, .coverage|sherd coverage --check|-|-|line coverage fell below the floor in .coverage (root V10)
+flake-lock-graph|supply|jq|flake.lock|jq -e '[.nodes[] \| select(.locked.repo? == "nixpkgs")] \| length == 1' flake.lock|-|-|flake.lock holds more or fewer than one nixpkgs (paradigm/V20)
+toolchain|supply|-|-|nix/toolchain-test.sh nix/toolchain.sh|-|-|the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)
+gen-check|gate|-|-|pklith gen --check|-|-|a step in hk.pklith.pkl no longer matches .pklith; run `pklith gen`
+pklith-check|gate|-|-|pklith check|-|-|a tracked file type has no row in .pklith, or a row matches nothing
+no-stash|gate|gnugrep|-|! grep -nE 'stash *= *(true\|"git"\|"patch-file")' hk.pkl|-|-|hk.pkl stashes in a hook; parallel worktrees share git stash (paradigm/V15)
+no-core-worktree|gate|git|-|test -z "$(git config --local --get core.worktree)"|-|-|core.worktree is set in the shared .git/config, so every worktree acts on one checkout (paradigm/V15)
+names|gate|gnugrep|**/*|gate/names.sh {{files}}|-|-|a private name is staged (paradigm/V37); the hit names the denylist entry, never the name
+gate-tests|test|bats|gate/*.sh, gate/*.bats|bats gate|-|-|a gate script's bats test failed (root T6)
+confirm|gate|-|-|pklith confirm|-|-|the gate is incomplete, stale, unrunnable or evaluates to no steps (paradigm/V22)
+
+## types
+type|checks|min|exempt
+*|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, names, no-core-worktree|-|-
+bats|bats-parse, gate-tests|-|-
+Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
+commit-msg|shellcheck|-|-
+context-limits|sherd-budget|-|-
+coverage|coverage|-|-
+editorconfig|-|-|written by pklith (seed or gen)
+envrc|shellcheck|-|-
+gitattributes|-|-|written by pklith (seed or gen)
+gitignore|-|-|ignore patterns, no linter reads them
+lock|flake-lock-graph|-|-
+markdownlintignore|-|-|ignore patterns, no linter reads them
+md|markdownlint|-|-
+nix|nixfmt, statix, deadnix|-|-
+path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-budget|-|-
+path:.github/**|-|-|upstream CI, untouched (root §C); fork CI and its actionlint, zizmor and yamllint rows arrive with T14
+path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
+path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
+path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
+path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
+path:gate/*.sh|shellcheck, shfmt, gate-tests|-|-
+path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
+pkl|no-stash|-|-
+pklith|gen-check, pklith-check, confirm|-|-
+pre-commit|-|-|written by pklith (seed or gen)
+pre-push|-|-|written by pklith (seed or gen)
+resolved|build, test|-|-
+secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
+sh|shellcheck, shfmt|-|-
+swift|swift-format, build, test, coverage|-|-
+toml|taplo|-|-
+txt|-|-|license text, no linter reads it
+yaml|yamllint|-|-
+yml|yamllint|-|-
