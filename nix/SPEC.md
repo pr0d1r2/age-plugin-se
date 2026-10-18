@@ -30,7 +30,8 @@ sib|Documentation|upstream man page sources, unchanged; ⊥ node
 - file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`); `nix/toolchain-test.sh` — its planted refusals.
 - file: `nix/shell-hook.sh` (shell entry), `nix/swift.sh` & `nix/swiftpm.nix` (SwiftPM in a nix build): host Xcode, vendored pins.
 - nix: `packages.aarch64-darwin.default` — `swift build -c release`, binary `age-plugin-se`.
-- nix: `checks.aarch64-darwin.tests` — `swift test`; `checks.aarch64-darwin.toolchain` — guard.
+- file: `nix/test.sh <swift…>` — the one test command: `<swift…> test --disable-sandbox --only-use-versions-from-resolved-file` (V2).
+- nix: `checks.aarch64-darwin.tests` — `nix/test.sh` w/ `nix/swift.sh` wrapper; `checks.aarch64-darwin.toolchain` — guard.
 - nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
 
 ## §V INVARIANTS
