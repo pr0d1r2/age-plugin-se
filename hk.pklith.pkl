@@ -95,6 +95,10 @@ steps: Mapping<String, Config.Step> = new {
     glob = List("**/*")
     check = "command -v editorconfig-checker >/dev/null 2>&1 || { echo 'editorconfig-checker: editorconfig-checker is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; editorconfig-checker {{files}} || { echo 'editorconfig-checker: file breaks its .editorconfig (indent, line ends, final newline)' >&2; exit 1; }"
   }
+  ["build"] {
+    glob = List("**/*.swift", "Package.swift", "Package.resolved")
+    check = "command -v swift >/dev/null 2>&1 || { echo 'build: swift is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; swift build --build-tests -Xswiftc -warnings-as-errors || { echo 'build: the build or a compiler warning failed (root V7)' >&2; exit 1; }"
+  }
 }
 
 push: Mapping<String, Config.Step> = new {

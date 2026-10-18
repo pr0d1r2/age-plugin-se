@@ -23,6 +23,7 @@ format 1
 ## checks
 id|category|nix|glob|check|fix|env|msg
 shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash {{files}}|-|-|shell script finding
+build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tests -Xswiftc -warnings-as-errors|-|-|the build or a compiler warning failed (root V7)
 
 ## types
 type|checks|min|exempt
@@ -44,9 +45,10 @@ path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in b
 path:nix/toolchain*.sh|shellcheck, shfmt|-|-
 pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)
+resolved|build|-|-
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
 sh|shellcheck, shfmt|-|-
-swift|swift-format|-|-
+swift|swift-format, build|-|-
 toml|taplo|-|-
 txt|-|-|license text, no linter reads it
 yaml|yamllint|-|-
