@@ -100,7 +100,7 @@ T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|.|`Tests`: help ↔ parser drift test|V11
 T9|.|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval|V12,V5,V3
 T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
-T11|.|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval|V14,V5
+T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`); upstream PR waits for owner approval|V14,V5
 T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
 T14|.|fork CI rendered by actlith on macOS runner w/ Xcode (Swift ≥ 6.2, XCTest); required status checks on `main` (D8, D12)|V6
