@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-XCTest target `Tests`: upstream's suite as-is & fork tests beside it, all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave.
+XCTest target `Tests`: upstream's suite as-is & fork tests beside it, all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` runs the built binary as a child, ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`.
 
 ## §N NAV
 

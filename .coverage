@@ -28,4 +28,14 @@
 # the SecAccessControl failure, one line each) and 44 need a Secure
 # Enclave, macOS older than 26, a terminal or the process entry point
 # (CLI.main's 9 lines and CLI.run's 2 default arguments among them).
-lines 96.02
+#
+# Raised 2026-10-18 by `sherd coverage --record` (root V10): 97.66%,
+# 1,129 of 1,156 lines under Sources/. CLIProcessCoverageTests runs the
+# built binary as a child, whose profile merges through the inherited
+# LLVM_PROFILE_FILE: CLI.main (9), CLI.run's default stdin and print (2)
+# and StandardIOStream (8) now run. No Sources/ change. The 27 still
+# unrun: Crypto.swift 22 (Secure Enclave key create and load), HPKE.swift
+# 2 (the macOS-older-than-26 guard), CLI.swift 2 (`default:` and its
+# `assert(false)` in Options.parse; llvm-cov counts both lines) and
+# Plugin.swift 1 (the SecAccessControl failure).
+lines 97.66
