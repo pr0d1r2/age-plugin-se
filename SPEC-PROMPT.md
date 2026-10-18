@@ -182,6 +182,23 @@ the owner amends it by a later decision.
     and tests; (3) the gate; (4) the prompt env var and the denial marker,
     each RED then GREEN, each offered upstream; (5) the first tag, and T
     switches its input (T `nix:T3`). Local.
+11. Swift toolchain (closes open question 1): the build needs Swift 6.2 or
+    newer. Post-quantum Secure Enclave keys (`SecureEnclave.MLKEM768`)
+    compile only under `#if compiler(>=6.2)` (`Sources/Crypto.swift:108`),
+    so a 5.10.1 build would quietly lose `--pq`. The fleet nixpkgs pin
+    ships 5.10.1, so the flake takes Swift and the macOS SDK from the
+    host's Command Line Tools and nix pins every other tool. A gate step
+    refuses a Swift older than 6.2. `.macOS(.v26)` stays. On 2026-10-18
+    the build Mac had Swift 6.3.3 and Command Line Tools 26.6. Recount:
+    `swift --version`, `pkgutil --pkg-info=com.apple.pkg.CLTools_Executables`.
+    Deviation from paradigm/V20, revisited when nixpkgs ships Swift 6.2.
+    Local.
+12. Platforms (closes open question 5): darwin only in v1. The fork's CI
+    runs the gate on a GitHub macOS runner, the only platform where the
+    tests mean anything; upstream's `build.yml` stays as it is for Linux
+    and Windows builds. A Linux encrypt-only build for T's CI is a later
+    node, not v1. Deviation from paradigm/V28 (three platforms): a Secure
+    Enclave plugin has one. Local.
 
 # Non-goals
 
@@ -205,11 +222,7 @@ the owner amends it by a later decision.
 
 Ask before guessing. A question marked blocking stops the node it names.
 
-1. Swift toolchain: build with the fleet's Swift 5.10.1 after `make
-   patch-package-swift-legacy` (tools 5.9, macOS 14), or bring a newer
-   Swift from elsewhere? Does lowering `.macOS(.v26)` cost anything we use
-   (post-quantum keys in the Secure Enclave)? T open question 8.
-   Blocks the flake node.
+1. Swift toolchain. Closed by decision 11.
 2. Branches: does fork `main` carry the flake, gate and spec files on top
    of upstream, and does it follow upstream by rebase or by merge? Upstream
    PR branches are cut from `upstream/main` either way (decision 3). Blocks
@@ -219,9 +232,6 @@ Ask before guessing. A question marked blocking stops the node it names.
    Blocks the first tag.
 4. Coverage: adopt upstream's `ProcessCoverage.swift` measure as the
    ratchet floor in `.coverage`, or measure another way? Not blocking.
-5. Linux build: the package targets Macs, and whether nix can build it
-   on Linux is unknown (upstream CI builds it on ubuntu-24.04 with
-   SwiftPM, using `swift-crypto` there). darwin only in v1, and Linux
-   tried later for T's CI, or required now? Not blocking.
+5. Linux build. Closed by decision 12.
 6. Gate tools for Swift: swift-format from nixpkgs (5.10.1) as the lint,
    and what pklith row covers `.swift` files? Not blocking.
