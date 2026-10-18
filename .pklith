@@ -22,12 +22,14 @@ format 1
 
 ## checks
 id|category|nix|glob|check|fix|env|msg
+shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash {{files}}|-|-|shell script finding
 
 ## types
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 editorconfig|-|-|written by pklith (seed or gen)
+envrc|shellcheck|-|-
 gitattributes|-|-|written by pklith (seed or gen)
 gitignore|-|-|ignore patterns, no linter reads them
 nix|nixfmt|-|-
@@ -36,11 +38,11 @@ path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a n
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
 path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
-path:nix/toolchain*.sh|shfmt|-|-
+path:nix/toolchain*.sh|shellcheck, shfmt|-|-
 pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
-sh|shfmt|-|-
+sh|shellcheck, shfmt|-|-
 swift|swift-format|-|-
 toml|taplo|-|-
 txt|-|-|license text, no linter reads it
