@@ -62,6 +62,7 @@ R5|hk 2.7.0 Swift support 2026-10-18|1 builtin: `swiftlint` (`lint {{files}}`, f
 R6|pklith & sherd Swift support 2026-10-18|pklith catalog: 0 Swift rows (`swift` only in vendored Config.pkl type list). sherd code verbs read Rust only; Ruby filed the same gap|pklith `src/catalog`; paradigm `docs/RUBY.md`
 R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); fixed on fork `main` by PR #3 (`f62703c`, issue #2) → clean build 0 warnings. non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled` (∴ D22)|local probe, PR #3
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
+R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
 
 ## §V INVARIANTS
 
@@ -84,8 +85,8 @@ V15: `swift test` needs ⊥ Secure Enclave & ⊥ Touch ID (`DummyCrypto`); check
 ## §T TASKS
 
 id|status|task|cites
-T1|.|`nix` node: flake builds `57ccea1` unchanged w/ host Swift, runs `swift test` as check; refuses Swift < 6.2|V6,V15
-T2|.|owner installs Xcode 26 machine-wide via the owner's machine config, outside this repo (D21, R3); dev shell sets `DEVELOPER_DIR` & refuses w/o XCTest; CI macOS runner has Xcode|V6,V15
+T1|x|`nix` node: flake builds `57ccea1` (+ `f62703c`) w/o source change w/ host Swift, runs `swift test` as check (107 pass); refuses Swift < 6.2|V6,V15
+T2|x|owner installed Xcode 27.1 machine-wide via the owner's machine config, outside this repo (D21, R3, R9); dev shell sets `DEVELOPER_DIR` & refuses w/o XCTest; CI runner's Xcode → T14|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|.|`fixtures` node: make corpus w/ upstream `v0.2.1` & `57ccea1` binaries on a Mac w/ Secure Enclave; record commands|V1,V2,V15
 T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
@@ -97,7 +98,7 @@ T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
 T11|.|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval|V14,V5
 T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
-T14|.|fork CI rendered by actlith on macOS runner; required status checks on `main` (D8, D12)|V6
+T14|.|fork CI rendered by actlith on macOS runner w/ Xcode (Swift ≥ 6.2, XCTest); required status checks on `main` (D8, D12)|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
 T17|.|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in `Tests/ForkCLITests.swift` ∴ `Tests` worker in same wave ⊥ touches that file|V5,V15

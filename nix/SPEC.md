@@ -19,13 +19,16 @@ sib|Documentation|upstream man page sources, unchanged; ⊥ node
 
 - nixpkgs follows nixpkgs-lock (`paradigm/V20`); hk, pkl, pklith & spec tools via pklith `lib.devShell`, as paradigm does.
 - Swift, macOS SDK & XCTest from host Xcode via `DEVELOPER_DIR` (D11, D21) ∴ package & checks ⊥ hermetic; stated deviation, revisit when nixpkgs ships Swift ≥ 6.2.
-- every other tool pinned by `flake.lock`: swiftlint & swift-format from nixpkgs pin (R4), mth, sherd, itok.
+- every other tool pinned by `flake.lock`: swiftlint & swift-format from nixpkgs pin (R4), mth, sherd, itok. sherd pinned newer than pklith's catalog; pklith follows it ∴ one sherd.
+- package & checks run host Xcode ∴ `__noChroot` (refused on `sandbox = true`). SwiftPM resolves Linux-only pins too (`swift-crypto`, `swift-asn1`) ∴ each pin = fixed-output git checkout, SwiftPM mirror → it; build ⊥ network.
+- darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to its apple-sdk ∴ shell & builds reset them to host Xcode.
 - logic in `.sh` files beside the `.nix` that call them ⊥ embedded shell (xenolith rule).
 
 ## §I INTERFACES
 
 - file: root `flake.nix` imports `nix/package.nix`, `nix/checks.nix`, `nix/shell.nix`.
-- file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`).
+- file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`); `nix/toolchain-test.sh` — its planted refusals.
+- file: `nix/shell-hook.sh` (shell entry), `nix/swift.sh` & `nix/swiftpm.nix` (SwiftPM in a nix build): host Xcode, vendored pins.
 - nix: `packages.aarch64-darwin.default` — `swift build -c release`, binary `age-plugin-se`.
 - nix: `checks.aarch64-darwin.tests` — `swift test`; `checks.aarch64-darwin.toolchain` — guard.
 - nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
@@ -38,6 +41,6 @@ V2: `checks.aarch64-darwin.tests` runs same command as pre-push ∴ ⊥ drift.
 ## §T TASKS
 
 id|status|task|cites
-T1|.|`toolchain.sh` guard, planted old-Swift & no-XCTest runs refused (`.:T1`, `.:T2`)|V1
-T2|.|package builds `57ccea1` unchanged (`.:T1`)|V2
-T3|.|checks & dev shell via pklith `lib.devShell` (`.:T1`)|V2
+T1|x|`toolchain.sh` guard, planted old-Swift & no-XCTest runs refused (`.:T1`, `.:T2`)|V1
+T2|x|package builds `57ccea1` + `f62703c` w/o source change (`.:T1`)|V2
+T3|x|checks & dev shell via pklith `lib.devShell` (`.:T1`)|V2
