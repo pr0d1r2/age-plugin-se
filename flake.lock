@@ -191,10 +191,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1792252518,
-        "narHash": "sha256-BhziI2EBp16KnxzXvnzuGFCmZK0IcNAZEM9X0y8/EKE=",
+        "lastModified": 1792326577,
+        "narHash": "sha256-g14hDck7v3yH59UifEFUgpDQ6Aonafe9rpNOceGC0Fk=",
         "ref": "main",
-        "rev": "9345f469dc4166938199d61347b40692cde561c1",
+        "rev": "8ff15bde4e56e35ea62e0e5219a4acd03815750b",
         "shallow": true,
         "type": "git",
         "url": "https://github.com/pr0d1r2/pklith"
