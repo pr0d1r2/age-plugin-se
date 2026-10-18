@@ -40,3 +40,15 @@ self|.|-
 - file: `.pklith` → `hk.pkl` (gate), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
 - tag: `v<upstream>-fork.<n>`, first `v0.2.1-fork.1` (D19). binary keeps upstream version string.
 - trailer: `Paradigm-Stage: <stage>` per paradigm §I.trailer.
+
+## §R RESEARCH
+
+id|topic|finding|src
+R1|upstream survey 2026-10-18|1,531 Swift lines in `Sources/`, 1,851 in `Tests/`, 108 test funcs, all on `DummyCrypto`; 1 dep `swift-crypto` (Linux & Windows only); one maintainer wrote 161 of 164 commits; PRs 15 & 18 open for months|`SPEC-PROMPT.md` Survey
+R2|post-quantum needs Swift 6.2 2026-10-18|`SecureEnclave.MLKEM768` only under `#if compiler(>=6.2)` ∴ older compiler builds stub that throws `pqUnavailable`; upstream tests guard PQ cases the same way|`Sources/Crypto.swift:108`, `Tests/PluginTests.swift:51`
+R3|build Mac toolchain 2026-10-18|Swift 6.3.3 (`arm64-apple-macosx26.0`), Command Line Tools 26.6, no Xcode. CLT ships `Testing.framework`, ⊥ `XCTest.framework` ∴ `swift test` fails `no such module 'XCTest'`. recount: `swift --version`, `pkgutil --pkg-info=com.apple.pkg.CLTools_Executables`|local probe
+R4|fleet nixpkgs pin 2026-10-18|nixpkgs `26f4107e` (via nixpkgs-lock): `swift` 5.10.1, `swift-format` 5.10.1, `swiftlint` 0.63.2, `swiftformat` 0.61.1, all aarch64-darwin; `periphery` absent. recount: `nix eval --raw github:NixOS/nixpkgs/<rev>#<pkg>.version`|local probe
+R5|hk 2.7.0 Swift support 2026-10-18|1 builtin: `swiftlint` (`lint {{files}}`, fix `--fix`, indicator `.swiftlint.yml`); ⊥ swift-format, ⊥ build, ⊥ test builtin|hk `pkl/builtins/swiftlint.pkl`
+R6|pklith & sherd Swift support 2026-10-18|pklith catalog: 0 Swift rows (`swift` only in vendored Config.pkl type list). sherd code verbs read Rust only; Ruby filed the same gap|pklith `src/catalog`; paradigm `docs/RUBY.md`
+R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a valid version number for macOS` (`#unavailable(macOS 21.0)`, `Crypto.swift:109,122`, `HPKE.swift:87,120`); non-Swift file in target dir → SwiftPM `found 1 file(s) which are unhandled`|local probe
+R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
