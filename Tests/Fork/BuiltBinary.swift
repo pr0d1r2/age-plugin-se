@@ -4,7 +4,9 @@ import XCTest
 /// built beside this test bundle, run as a child process with real pipes on
 /// stdin and stdout. Under `swift test --enable-code-coverage` the child
 /// inherits `LLVM_PROFILE_FILE` and its counts merge with the suite's. No
-/// caller touches the Secure Enclave or Touch ID (root V15).
+/// caller triggers Touch ID (root V15); only the gated hardware suite's
+/// round trip (`CryptoKitHardwareTests`) makes a Secure Enclave key, with
+/// `--access-control none`.
 enum BuiltBinary {
   private final class Marker {}
 
