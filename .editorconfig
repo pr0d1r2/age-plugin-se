@@ -9,3 +9,7 @@ indent_style = space
 
 [{Makefile,*.mk,go.mod,*.go}]
 indent_style = tab
+
+# shfmt's default; the fork's shell scripts are tab-indented.
+[*.sh]
+indent_style = tab
