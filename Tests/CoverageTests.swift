@@ -154,3 +154,23 @@ final class OptionsCoverageTests: XCTestCase {
     }
   }
 #endif
+
+#if !os(Linux) && !os(Windows)
+  /// The two `CryptoKitCrypto` members that touch no Secure Enclave key and
+  /// so no Touch ID: the availability probe and ML-KEM-768 encapsulation to
+  /// a software public key (the recipient side of a wrap).
+  final class CryptoKitCryptoCoverageTests: XCTestCase {
+    func testIsSecureEnclaveAvailable() {
+      XCTAssertEqual(
+        SecureEnclave.isAvailable, CryptoKitCrypto(environment: [:]).isSecureEnclaveAvailable)
+    }
+
+    #if compiler(>=6.2)
+      func testEncapsulate_SoftwareMLKEM768Key() throws {
+        let key = try MLKEM768.PrivateKey()
+        let result = try CryptoKitCrypto(environment: [:]).encapsulate(mlkem768Key: key.publicKey)
+        XCTAssertEqual(result.sharedSecret, try key.decapsulate(result.encapsulated))
+      }
+    #endif
+  }
+#endif
