@@ -19,6 +19,21 @@ coverage scripts in `Scripts/`, the man page and design notes in
 The licence text is [`LICENSE.txt`](../LICENSE.txt), kept as upstream
 wrote it with one fork copyright line added under upstream's.
 
+## Carried and adapted changes
+
+- The macOS 14 build, with post-quantum keys only where macOS 26 has
+  ML-KEM-768, carries upstream
+  [PR 15](https://github.com/remko/age-plugin-se/pull/15), "add some
+  guards to allow compiling with older SDK", by Andreas Metsälä
+  ([`verokarhu`](https://github.com/verokarhu)), adapted to this fork's
+  code. It was offered to upstream under upstream's MIT licence above.
+- `gate/universal.sh`, the check that the release binary holds arm64 and
+  x86_64 slices with `minos` 14.0 each, adapts the idea of the
+  `verify-macos-deployment` Makefile target in the
+  [`dcosson/age-plugin-se`](https://github.com/dcosson/age-plugin-se)
+  fork, a fork of the same upstream under the same MIT licence. Its
+  version string and release steps are not taken.
+
 ## Bech32
 
 The Bech32 checksum code in `Sources/Bech32.swift`, and its copy in
