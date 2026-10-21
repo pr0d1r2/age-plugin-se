@@ -213,6 +213,8 @@ final class GenerateKeyTests: XCTestCase {
 
   #if compiler(>=6.2)
     func testGenerate_TagPQRecipient() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
       let result = try plugin.generateKey(
         accessControl: .anyBiometryOrPasscode, recipientType: .tag,
@@ -276,6 +278,8 @@ final class GenerateRecipientsTests: XCTestCase {
 
   #if compiler(>=6.2)
     func testGenerate_P256TagPQ() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
       let result = try plugin.generateRecipients(
         input: """
@@ -513,6 +517,8 @@ final class RecipientV1Tests: XCTestCase {
 
   #if compiler(>=6.2)
     func testRecipient_MLKEM768P256Tag() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
 
       stream.add(
@@ -594,6 +600,8 @@ final class RecipientV1Tests: XCTestCase {
 
   #if compiler(>=6.2)
     func testIdentity_PQ() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
 
       stream.add(
@@ -616,6 +624,8 @@ final class RecipientV1Tests: XCTestCase {
     }
 
     func testIdentity_MixedPQAndNonPQ() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
 
       stream.add(
@@ -930,6 +940,8 @@ final class IdentityV1Tests: XCTestCase {
 
   #if compiler(>=6.2)
     func testRecipientStanza_MLKEM768P256Tag() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
       stream.add(
         input:
@@ -955,6 +967,8 @@ final class IdentityV1Tests: XCTestCase {
     }
 
     func testRecipientStanza_MLKEM768P256Tag_MissingPQ() throws {
+      // Fork: ML-KEM-768 needs macOS 26 at run time (root V6).
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let plugin = Plugin(crypto: crypto, stream: stream)
       stream.add(
         input:
