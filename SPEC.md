@@ -51,7 +51,7 @@ self|.|-
 - format: identity `AGE-PLUGIN-SE-1…`; recipients `age1se1…`, `age1tag1…`, `age1tagpq1…` (bech32, `Sources/Plugin.swift`). frozen (D2).
 - env: `AGE_PLUGIN_SE_PROMPT=<text>` — Touch ID prompt text; unset → upstream text. carried, offered upstream (PR 18).
 - error: denial marker — fixed documented string in the plugin error when user denies Touch ID; ⊥ in any other error. carried, offered upstream.
-- nix: `packages.<sys>.default` (`age-plugin-se`) & `checks.<sys>.*`, sys `{aarch64,x86_64}-darwin`; `devShells.aarch64-darwin.default` (`nix` node).
+- nix: `packages.<sys>.default` (`age-plugin-se`), `checks.<sys>.*` & `devShells.<sys>.default`, sys `{aarch64,x86_64}-darwin` (`nix` node).
 - file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`, `gate/universal.sh [BIN]` (push: arm64 & x86_64, `minos` 14.0); `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
 - file: `release/alpine-keygen.sh [--rotate]` — PKCS#8 RSA 4096 made in memory → `gh secret set ALPINE_KEY` stdin; ⊥ file; ALPINE_KEY set → nothing done.
@@ -75,7 +75,7 @@ R10|gate 2026-10-18|39 steps on commit, +4 on push, 2 on commit-msg (after T14, 
 R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/Fork/CLIForkTests.swift`
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
 R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
-R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner|local probe, PR body
+R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner; pklith shell since `028c65c` (pklith PR 103)|local probe, PR body
 
 ## §V INVARIANTS
 
@@ -132,8 +132,8 @@ T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ ow
 T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
 T29|.|owner: HPKE `#unavailable(macOS 26)` guard in `mlkemp256Encap`: extract to own fn & exclude (carried), or 2 lines stay uncovered|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 carried + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
-T31|.|owner: Intel Mac (A1990, macOS 15): clone, `nix develop` (T32), hooks, `hardware` row|V6,V15
-T32|.|`x86_64-darwin` shell ⊥ in pklith `lib.devShell`; macOS 15 CI row ⊥ in actlith (`macos-latest` only); issues w/ approval|V6
+T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), hooks, `swift test`, `hardware` row. `coverage` floor measured on macOS 26, ⊥ on 15 (PQ tests skip) ∴ may fall short there → owner|V6,V15,V10
+T32|~|`x86_64-darwin` shell done (pklith `028c65c`); macOS 15 CI row ⊥ in actlith (`macos-latest` only); issue w/ approval|V6
 
 ## §B BUGS
 

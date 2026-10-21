@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard. package & checks on aarch64- & x86_64-darwin, shell aarch64 only (`.:T32`).
+flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard. package, checks & shell on aarch64- & x86_64-darwin (`.:T32`).
 
 ## §N NAV
 
@@ -36,7 +36,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 - nix: `packages.<sys>.default` — `swift build -c release`, binary `age-plugin-se`.
 - file: `nix/test.sh <swift…>` — the one test command: `<swift…> test --disable-sandbox --only-use-versions-from-resolved-file` (V2).
 - nix: `checks.<sys>.tests` — `nix/test.sh` w/ `nix/swift.sh` wrapper; `checks.<sys>.toolchain` — guard; ⊥ reads macOS | Xcode version ∴ Swift 6.2 on macOS 15 passes.
-- nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
+- nix: `devShells.<sys>.default` — guard on entry, then gate tools. x86_64: ⊥ cache for hk, sherd, mth, itok, pklith, actlith ∴ 1st entry builds them (`.:T31`).
 
 ## §V INVARIANTS
 
