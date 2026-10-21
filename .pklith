@@ -94,3 +94,5 @@ id|kind|select|target|except
 swift-test|exists|Sources/*.swift|Tests/Fork/{stem}ForkTests.swift|-
 swift-orphan|orphan|Tests/*Tests.swift|Sources/{stem\|chop:ForkTests\|chop:Tests}.swift|Tests/StanzaTests.swift
 swift-tdd|tdd-order|Sources/*.swift|Tests/Fork/{stem}ForkTests.swift|-
+gate-bats|exists|gate/*.sh|gate/{stem}.bats|-
+release-bats|exists|release/*.sh|release/{stem}.bats|-
