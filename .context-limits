@@ -11,8 +11,15 @@
 # row makes the chain 3,850, x 1.15 = 4,428 -> 4,500. No done row is left
 # to archive and the open rows carry owner questions. Sources fits its
 # 3,900 at 3,899 with T28 and its own T6, so it is not raised.
-SPEC.md     3300
-Sources     3900
-Tests       4500
-fixtures    3700
-nix         4100
+# All raised 2026-10-21 to measured + ~15%, rounded up to the next 100,
+# for root T30 to T32 (macOS 14 and Intel: the owner's decisions amending
+# D12, V5 and V6, three task rows) and their node rows, after T17 was
+# compacted. Measured with those rows: root 3,456; Sources 4,097; Tests
+# 4,685; fixtures 3,886; nix 4,179 tok. x 1.15: 3,974 -> 4,000; 4,712 ->
+# 4,800; 5,388 -> 5,400; 4,469 -> 4,500; 4,806 -> 4,900. Every chain
+# carries the root, whose 277 new tokens no done row could absorb.
+SPEC.md     4000
+Sources     4800
+Tests       5400
+fixtures    4500
+nix         4900
