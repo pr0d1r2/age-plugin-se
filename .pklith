@@ -10,6 +10,12 @@ format 1
 # run what is on PATH; the shell's guard put the host Xcode there (nix V1),
 # and the toolchain step runs that guard again on every commit.
 #
+# `bats-unit` replaces the catalog row: the specs sit beside their scripts
+# in gate/ and release/, and on macOS's case-insensitive disk the catalog's
+# `bats --recursive tests` opens the XCTest dir Tests/ and passes on 0
+# tests. `bats-changed` runs a changed script's spec, found through the
+# `gate-bats` and `release-bats` rules; `bats-unit` runs them all.
+#
 # Not laid, each with its reason (root T6):
 # - swiftlint: the seeded `.swiftlint.yml` finds 120 violations in upstream
 #   code, which is not reformatted (D3, D13); it waits for the owner's
