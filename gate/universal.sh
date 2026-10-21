@@ -4,6 +4,8 @@
 # slices, each with `minos` 14.0, so one binary runs on an Apple silicon
 # Mac and on an Intel Mac from macOS 14 on. Adapted from a fork's
 # `verify-macos-deployment` Makefile target (docs/THIRD-PARTY-NOTICES.md).
+# Either Mac can run it: each slice is built by `--arch`, never the host's
+# default, and Xcode cross-builds the slice the host is not.
 # Usage: universal.sh [BINARY]  checks BINARY instead of building one.
 # UNIVERSAL_MINOS overrides the expected minos (a planted failure).
 set -euo pipefail

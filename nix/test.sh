@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The one test command (nix V2): checks.aarch64-darwin.tests and the gate's
+# The one test command (nix V2): checks.<system>.tests and the gate's
 # pre-push `test` step (root T6) both run this, so they cannot drift. The
 # arguments are the swift to run: plain `swift` in the dev shell, whose
 # entry put the host Xcode on PATH (nix V1), or nix/swift.sh's wrapper
