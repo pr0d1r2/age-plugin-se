@@ -29,7 +29,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §I INTERFACES
 
-- cmd: `swift test` — whole suite; pre-push & `checks.aarch64-darwin` (`nix`).
+- cmd: `swift test` — whole suite; pre-push & `checks.<sys>` (`nix`).
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
 - helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift`.
 - hardware: `CryptoKitHardwareTests` (`Fork/CryptoForkTests.swift`): 4 `.coverage`-excluded `newSecureEnclave*` fns & age round trip (classic, `--pq`). runs iff `AGE_PLUGIN_SE_HARDWARE=1` ∧ `SecureEnclave.isAvailable`, else `XCTSkip` w/ why.

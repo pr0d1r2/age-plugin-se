@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard, on aarch64-darwin (D12).
+flake parts: `age-plugin-se` package, checks, dev shell & host-toolchain guard. package & checks on aarch64- & x86_64-darwin, shell aarch64 only (`.:T32`).
 
 ## §N NAV
 
@@ -33,15 +33,15 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 - file: root `flake.nix` imports `nix/package.nix`, `nix/checks.nix`, `nix/shell.nix`.
 - file: `nix/toolchain.sh` — guard: Swift ≥ 6.2 & XCTest present | exit 1 naming the fix (`.:V6`); `nix/toolchain-test.sh` — its planted refusals.
 - file: `nix/shell-hook.sh` (shell entry), `nix/swift.sh` & `nix/swiftpm.nix` (SwiftPM in a nix build): host Xcode, vendored pins.
-- nix: `packages.aarch64-darwin.default` — `swift build -c release`, binary `age-plugin-se`.
+- nix: `packages.<sys>.default` — `swift build -c release`, binary `age-plugin-se`.
 - file: `nix/test.sh <swift…>` — the one test command: `<swift…> test --disable-sandbox --only-use-versions-from-resolved-file` (V2).
-- nix: `checks.aarch64-darwin.tests` — `nix/test.sh` w/ `nix/swift.sh` wrapper; `checks.aarch64-darwin.toolchain` — guard.
+- nix: `checks.<sys>.tests` — `nix/test.sh` w/ `nix/swift.sh` wrapper; `checks.<sys>.toolchain` — guard; ⊥ reads macOS | Xcode version ∴ Swift 6.2 on macOS 15 passes.
 - nix: `devShells.aarch64-darwin.default` — guard on entry, then gate tools.
 
 ## §V INVARIANTS
 
 V1: guard runs before any build, test | shell; message names the missing piece & D21.
-V2: `checks.aarch64-darwin.tests` runs same command as pre-push ∴ ⊥ drift.
+V2: `checks.<sys>.tests` runs same command as pre-push ∴ ⊥ drift.
 
 ## §T TASKS
 

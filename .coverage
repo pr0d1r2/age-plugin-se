@@ -52,9 +52,15 @@
 # HPKE.mlkemp256Encap; root T29 decides), CLI.swift 2 (`default:` and
 # its `assert(false)` in Options.parse) and Plugin.swift 1 (the
 # SecAccessControl failure in generateKey), both a refactor's to remove.
+#
+# Raised 2026-10-21 by `sherd coverage --record` (root T30): 99.58%,
+# 1,174 of 1,179 lines under Sources/, after the macOS 14 port. Every
+# new `#available(macOS 26)` fallback runs on this host through the
+# `Crypto.isMLKEMAvailable` seam, so no row and no cap changed; the same
+# 5 lines stay unrun.
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(accessControl:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(accessControl:) needs a real Secure Enclave
 excluded 22
-lines 99.56
+lines 99.58

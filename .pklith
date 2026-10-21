@@ -36,6 +36,7 @@ shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash 
 build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tests -Xswiftc -warnings-as-errors|-|-|the build or a compiler warning failed (root V7)
 test|test|-|**/*.swift, Package.swift, Package.resolved, nix/test.sh|nix/test.sh swift|-|-|a test failed (root V15, nix V2)
 hardware|test|-|**/*.swift, Package.swift, Package.resolved|test -n "${CI:-}" && echo 'hardware: CI is set, so the Secure Enclave suite is not run here (Tests §I)' \|\| AGE_PLUGIN_SE_HARDWARE=1 swift test --filter CryptoKitHardwareTests|-|-|a Secure Enclave hardware test failed on this Mac (Tests §I, root V15)
+universal|test|-|**/*.swift, Package.swift, Package.resolved, gate/universal.sh|gate/universal.sh|-|-|the release binary is not arm64 + x86_64 with minos 14.0 in each slice (root T30, V6)
 coverage|coverage|sherd|**/*.swift, Package.swift, .coverage|sherd coverage --check|-|-|line coverage fell below the floor in .coverage (root V10)
 flake-lock-graph|supply|jq|flake.lock|jq -e '[.nodes[] \| select(.locked.repo? == "nixpkgs")] \| length == 1' flake.lock|-|-|flake.lock holds more or fewer than one nixpkgs (paradigm/V20)
 toolchain|supply|-|-|nix/toolchain-test.sh nix/toolchain.sh|-|-|the host toolchain is not Swift 6.2 or newer with XCTest, or the guard stopped refusing one (root V6, nix V1)
@@ -85,10 +86,10 @@ pkl|no-stash|-|-
 pklith|gen-check, pklith-check, tdd-order, confirm|-|-
 pre-commit|-|-|written by pklith (seed or gen)
 pre-push|-|-|written by pklith (seed or gen)
-resolved|build, test, hardware|-|-
+resolved|build, test, hardware, universal|-|-
 secretsignore|-|-|ignore patterns and allowed strings, no linter reads them
 sh|shellcheck, shfmt|-|-
-swift|swift-format, build, test, hardware, coverage|-|-
+swift|swift-format, build, test, hardware, universal, coverage|-|-
 toml|taplo|-|-
 txt|-|-|license text, no linter reads it
 yaml|yamllint|-|-

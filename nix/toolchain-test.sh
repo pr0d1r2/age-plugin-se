@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Planted runs for the toolchain guard (nix T1): the host toolchain passes,
-# and an old Swift, a missing XCTest and a missing swift are each refused
+# Planted runs for the toolchain guard (nix T1): the host toolchain and
+# Swift 6.2 pass, and an old Swift, a missing XCTest and a missing swift are each refused
 # with a message naming the piece and decision 21. Fakes are put first on
 # PATH; the real `swift` and `xcrun` are used for everything else.
 set -euo pipefail
@@ -36,6 +36,16 @@ expect_refusal() { # expect_refusal <label> <needle> <PATH>
 
 "$guard" >/dev/null
 printf 'toolchain-test: host toolchain: passed\n'
+
+# Xcode 26.0's Swift 6.2, the oldest the guard takes, runs on macOS 15 (an
+# Intel Mac's last): the guard reads no macOS or Xcode version (root T30).
+fake "$work/xcode26" swift 'echo "swift-driver version: 1.127.14.1 Apple Swift version 6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)"'
+PATH="$work/xcode26:$PATH" "$BASH" "$guard" >/dev/null ||
+	{
+		printf 'toolchain-test: Swift 6.2: refused, expected a pass\n' >&2
+		exit 1
+	}
+printf 'toolchain-test: Swift 6.2: passed\n'
 
 fake "$work/old" swift 'echo "Apple Swift version 6.1.2 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)"'
 expect_refusal "Swift 6.1" "older than 6.2" "$work/old:$PATH"

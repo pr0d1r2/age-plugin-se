@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-`age-plugin-se` fork: upstream `remko/age-plugin-se` (age plugin; identity in Mac Secure Enclave; Touch ID per decrypt) + nix flake, hk gate & federated spec, built paradigm's way. ⊥ new product. formats byte-identical w/ upstream. ∀ functional change offered upstream. daily consumer: T (private secrets tool, named by letter only).
+`age-plugin-se` fork: upstream `remko/age-plugin-se` (age plugin; identity in Mac Secure Enclave; Touch ID per decrypt) + nix flake, hk gate & federated spec, built paradigm's way. ⊥ new product. formats byte-identical w/ upstream. functional changes ⊥ offered upstream for now (V5). daily consumer: T (private secrets tool, named by letter only).
 
 PARADIGM: paradigm `6c7e6cd` (no tag yet, D9), used as process; repo ⊥ fleet member yet (D1). cited `paradigm/V<n>`.
 
@@ -35,8 +35,8 @@ self|.|-
 - upstream-bound change (D3): branch cut from `upstream/main`, ⊥ fork file in it (`SPEC*.md`, `FORMAT*.md`, `flake.*`, `nix/`, `fixtures/`, `docs/`, `.pklith`, `hk.pkl`, `.coverage`, `.context-limits`, fork CI). carried change dropped once upstream merges it.
 - `LICENSE.txt` = upstream's + 1 fork copyright line under its own: owner decision 2026-10-18, exception to D3.
 - upstream tests kept & run as-is (D7); fork tests in own files beside them.
-- Swift ≥ 6.2 & macOS SDK from host; nix pins every other tool (D11). tests need Xcode's XCTest (D21). `.macOS(.v26)` stays.
-- darwin only v1 (D12). fork CI = GitHub macOS runner running same `hk.pkl`; upstream `build.yml` untouched.
+- Swift ≥ 6.2 & macOS SDK from host; nix pins every other tool (D11). tests need Xcode's XCTest (D21). `.macOS(.v14)`; ML-KEM `@available(macOS 26)` (V6).
+- darwin aarch64 & x86_64 (owner 2026-10-21, amends D12). fork CI = GitHub macOS runner running same `hk.pkl`; upstream `build.yml` untouched.
 - `Sources/` & `Tests/` flat, ⊥ moved (D17). ⊥ 2 workers in `Sources` in one wave. node `SPEC.md` inside a SwiftPM target dir excluded in `Package.swift` (D22).
 - gate = one `hk.pkl` from `.pklith` (`paradigm/V23`). Swift rows local first, then filed upstream (D13, D16). upstream code ⊥ reformatted; its debt baselined (V17).
 - `main` protected, PR-only (D8); follows upstream by merge commit via PR (D18). ∀ PR human review (D5).
@@ -51,8 +51,8 @@ self|.|-
 - format: identity `AGE-PLUGIN-SE-1…`; recipients `age1se1…`, `age1tag1…`, `age1tagpq1…` (bech32, `Sources/Plugin.swift`). frozen (D2).
 - env: `AGE_PLUGIN_SE_PROMPT=<text>` — Touch ID prompt text; unset → upstream text. carried, offered upstream (PR 18).
 - error: denial marker — fixed documented string in the plugin error when user denies Touch ID; ⊥ in any other error. carried, offered upstream.
-- nix: `packages.aarch64-darwin.default` (`age-plugin-se`), `checks.aarch64-darwin.*`, `devShells.aarch64-darwin.default` (`nix` node).
-- file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`; `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
+- nix: `packages.<sys>.default` (`age-plugin-se`) & `checks.<sys>.*`, sys `{aarch64,x86_64}-darwin`; `devShells.aarch64-darwin.default` (`nix` node).
+- file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`, `gate/universal.sh [BIN]` (push: arm64 & x86_64, `minos` 14.0); `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
 - file: `release/alpine-keygen.sh [--rotate]` — PKCS#8 RSA 4096 made in memory → `gh secret set ALPINE_KEY` stdin; ⊥ file; ALPINE_KEY set → nothing done.
 - file: `.pklith` → `hk.pkl` (gate, amends `pkl/Config.pkl`), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
@@ -75,6 +75,7 @@ R10|gate 2026-10-18|39 steps on commit, +4 on push, 2 on commit-msg (after T14, 
 R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/Fork/CLIForkTests.swift`
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
 R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
+R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner|local probe, PR body
 
 ## §V INVARIANTS
 
@@ -82,8 +83,8 @@ V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea
 V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness pinned by `DummyCrypto` (D2).
 V3: `Sources/Crypto.swift` & `Sources/HPKE.swift` ≠ upstream only in commits citing a failing test, an upstream commit | the upstream PR they carry (D4).
 V4: upstream test files ⊥ edited, except by upstream sync | by a carried change whose upstream PR edits them (D7).
-V5: ∀ upstream PR branch ∌ fork file (§C list) (D3).
-V6: build & dev shell refuse Swift < 6.2 ∵ `--pq` would silently become `pqUnavailable` (D11, R2).
+V5: ∀ upstream PR branch ∌ fork file (§C list) (D3). deferred (owner 2026-10-21).
+V6: build & dev shell refuse Swift < 6.2 ∵ `--pq` would silently become `pqUnavailable` (D11, R2). macOS ≥ 14; ML-KEM-768 only on macOS 26, else `pqUnavailable` ⊥ trap (owner 2026-10-21).
 V7: ⊥ compiler warning: clean build has 0 since `f62703c` (R7) ∴ build runs `-warnings-as-errors`. warning arriving by upstream sync → baseline entry in that sync PR, baseline only shrinks (D13).
 V8: `swift format lint --strict` clean on fork-written & fork-changed lines; upstream violations in baseline that only shrinks (D13).
 V9: ⊥ force unwrap `!`, `try!`, `as!`, `fatalError` in fork-written Swift (swiftlint) (D13).
@@ -117,7 +118,7 @@ T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swif
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
-T17|~|wave plan, by hand ∵ `sherd wave` reads only Rust edges (sherd#132). after dev shell (T1, T2) & guardrails (T6, T14) per `paradigm/V13`: W1 = T4 `fixtures` ∥ T8 `Tests` ∥ T11 `Sources`; W2 = T5 `Tests` (needs T4) ∥ T9 `Sources`; W3 = T10 `Sources`. ∀ wave ends w/ reconcile commit (`paradigm/V18`). `Sources` task writes its RED test in its `Tests/Fork` mirror ∴ `Tests` worker in same wave ⊥ touches that file. W1 merged (PRs #6 #7 #8) & reconciled (`reconcile-1`). W2 ready: T9 ⊥ deps; T5 has T4, its open items (owner reads V1, V2) in `Tests` T1, T2|V5,V15
+T17|~|wave plan by hand ∵ `sherd wave` reads only Rust edges (sherd#132): W1 = T4 ∥ T8 ∥ T11, merged & reconciled (`reconcile-1`); W2 = T5 `Tests` ∥ T9 `Sources`; W3 = T10 `Sources`; each ends w/ reconcile commit (`paradigm/V18`). `Sources` task's RED test in its `Tests/Fork` mirror ∴ ⊥ `Tests` worker there. T5 waits on owner (`Tests` T1, T2)|V5,V15
 T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|x|ARCHIVED to SPEC-ARCHIVE.md|V10
@@ -130,6 +131,9 @@ T26|~|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. fork half done|V
 T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
 T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
 T29|.|owner: HPKE `#unavailable(macOS 26)` guard in `mlkemp256Encap`: extract to own fn & exclude (carried), or 2 lines stay uncovered|V10
+T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 carried + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
+T31|.|owner: Intel Mac (A1990, macOS 15): clone, `nix develop` (T32), hooks, `hardware` row|V6,V15
+T32|.|`x86_64-darwin` shell ⊥ in pklith `lib.devShell`; macOS 15 CI row ⊥ in actlith (`macos-latest` only); issues w/ approval|V6
 
 ## §B BUGS
 

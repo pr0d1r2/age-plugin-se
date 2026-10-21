@@ -180,6 +180,10 @@ push: Mapping<String, Config.Step> = new {
     glob = List("**/*.swift", "Package.swift", "Package.resolved")
     check = #"command -v swift >/dev/null 2>&1 || { echo 'hardware: swift is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; test -n "${CI:-}" && echo 'hardware: CI is set, so the Secure Enclave suite is not run here (Tests §I)' || AGE_PLUGIN_SE_HARDWARE=1 swift test --filter CryptoKitHardwareTests || { echo 'hardware: a Secure Enclave hardware test failed on this Mac (Tests §I, root V15)' >&2; exit 1; }"#
   }
+  ["universal"] {
+    glob = List("**/*.swift", "Package.swift", "Package.resolved", "gate/universal.sh")
+    check = "command -v gate/universal.sh >/dev/null 2>&1 || { echo 'universal: gate/universal.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; gate/universal.sh || { echo 'universal: the release binary is not arm64 + x86_64 with minos 14.0 in each slice (root T30, V6)' >&2; exit 1; }"
+  }
   ["tdd-order"] {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'tdd-order: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith check --pushed || { echo 'tdd-order: a commit changed a file before its test; commit the test first or with it' >&2; exit 1; }"
   }
