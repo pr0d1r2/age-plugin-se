@@ -165,6 +165,13 @@ steps: Mapping<String, Config.Step> = new {
 }
 
 push: Mapping<String, Config.Step> = new {
+  ["bats-changed"] {
+    glob = List("**/*.sh", "**/*.bats")
+    check = #"command -v pklith >/dev/null 2>&1 || { echo 'bats-changed: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; command -v bats >/dev/null 2>&1 || { echo 'bats-changed: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; command -v sort >/dev/null 2>&1 || { echo 'bats-changed: sort is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; command -v grep >/dev/null 2>&1 || { echo 'bats-changed: grep is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; (specs=$(pklith map {{files}}) || exit 1; for f in {{files}}; do case $f in *.bats) [ -f "$f" ] && specs="$specs $f";; esac; done; [ -n "$specs" ] || exit 0; out=$(bats --formatter tap $(printf '%s\n' $specs | sort -u)) && exit 0; printf '%s\n' "$out" | grep -v '^ok '; exit 1) || { echo 'bats-changed: a changed file'\''s bats spec failed, or a changed script has no spec its rule names' >&2; exit 1; }"#
+  }
+  ["bats-unit"] {
+    check = "command -v bats >/dev/null 2>&1 || { echo 'bats-unit: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats --recursive gate release || { echo 'bats-unit: a bats spec under gate/ or release/ failed (root T6, T23)' >&2; exit 1; }"
+  }
   ["test"] {
     glob = List("**/*.swift", "Package.swift", "Package.resolved", "nix/test.sh")
     check = "command -v nix/test.sh >/dev/null 2>&1 || { echo 'test: nix/test.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; nix/test.sh swift || { echo 'test: a test failed (root V15, nix V2)' >&2; exit 1; }"
@@ -175,14 +182,6 @@ push: Mapping<String, Config.Step> = new {
   }
   ["tdd-order"] {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'tdd-order: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith check --pushed || { echo 'tdd-order: a commit changed a file before its test; commit the test first or with it' >&2; exit 1; }"
-  }
-  ["gate-tests"] {
-    glob = List("gate/*.sh", "gate/*.bats")
-    check = #"command -v bats >/dev/null 2>&1 || { echo 'gate-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats gate || { echo 'gate-tests: a gate script'\''s bats test failed (root T6)' >&2; exit 1; }"#
-  }
-  ["release-tests"] {
-    glob = List("release/*.sh", "release/*.bats")
-    check = #"command -v bats >/dev/null 2>&1 || { echo 'release-tests: bats is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; bats release || { echo 'release-tests: a release script'\''s bats test failed (root T23)' >&2; exit 1; }"#
   }
   ["coverage"] {
     glob = List("**/*.swift", "Package.swift", ".coverage")
