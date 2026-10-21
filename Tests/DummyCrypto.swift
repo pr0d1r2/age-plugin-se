@@ -48,6 +48,7 @@ class DummyCrypto: Crypto {
   ]
 
   var isSecureEnclaveAvailable = true
+  var isMLKEMAvailable = true
   var failingOperations = false
 
   func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws

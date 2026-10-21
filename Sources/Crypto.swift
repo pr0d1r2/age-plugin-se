@@ -47,6 +47,9 @@ import Foundation
 /// Abstraction for random/unpredictable/system-specific crypto operations
 protocol Crypto {
   var isSecureEnclaveAvailable: Bool { get }
+  /// Fork: ML-KEM-768 usable here; tests set it false to stand in for macOS
+  /// older than 26, where every post-quantum path throws `pqUnavailable`.
+  var isMLKEMAvailable: Bool { get }
 
   func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws
     -> SecureEnclaveP256PrivateKey
@@ -89,6 +92,10 @@ protocol SecureEnclaveMLKEM768PrivateKey {
 
     var isSecureEnclaveAvailable: Bool {
       return SecureEnclave.isAvailable
+    }
+
+    var isMLKEMAvailable: Bool {
+      return false
     }
 
     func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws
@@ -153,6 +160,10 @@ protocol SecureEnclaveMLKEM768PrivateKey {
 
   class CryptoKitCrypto: Crypto {
     var isSecureEnclaveAvailable: Bool {
+      return false
+    }
+
+    var isMLKEMAvailable: Bool {
       return false
     }
 

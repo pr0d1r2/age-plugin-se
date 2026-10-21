@@ -20,8 +20,15 @@ import XCTest
         SecureEnclave.isAvailable, CryptoKitCrypto(environment: [:]).isSecureEnclaveAvailable)
     }
 
+    /// The real crypto never stands in for an older macOS: there, `#available`
+    /// alone turns the post-quantum paths into `pqUnavailable` (root V6).
+    func testIsMLKEMAvailable() {
+      XCTAssertTrue(CryptoKitCrypto(environment: [:]).isMLKEMAvailable)
+    }
+
     #if compiler(>=6.2)
       func testEncapsulate_SoftwareMLKEM768Key() throws {
+        guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
         let key = try MLKEM768.PrivateKey()
         let result = try CryptoKitCrypto(environment: [:]).encapsulate(mlkem768Key: key.publicKey)
         XCTAssertEqual(result.sharedSecret, try key.decapsulate(result.encapsulated))
@@ -170,7 +177,11 @@ import XCTest
     func testRoundTrip_PostQuantum() throws {
       #if compiler(>=6.2)
         guard #available(macOS 26.0, *) else {
-          throw XCTSkip("hardware: post-quantum keys need macOS 26 or newer")
+          // Older macOS: `keygen --pq` fails cleanly, before any output.
+          let (status, output) = try BuiltBinary.run(["keygen", "--pq", "--access-control", "none"])
+          XCTAssertNotEqual(0, status)
+          XCTAssert(output.contains(Plugin.Error.pqUnavailable.localizedDescription), output)
+          return
         }
         try roundTrip(pq: true)
       #else

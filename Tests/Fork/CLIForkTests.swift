@@ -86,6 +86,23 @@ final class CLIRunCoverageTests: XCTestCase {
     XCTAssertEqual([Options.help, Options.help], printed)
   }
 
+  /// `--pq` names its macOS 26 (Tahoe) requirement in the help (root V6).
+  func testHelp_PQNamesMacOSTahoe() {
+    let pq = Options.help.components(separatedBy: "Generate post-quantum keys").dropFirst()
+    XCTAssert(pq.first?.prefix(80).contains("Note: requires macOS Tahoe or newer.") == true)
+  }
+
+  /// `keygen --pq` without ML-KEM-768 fails with `pqUnavailable` (root V6).
+  func testKeygen_PQUnavailable() throws {
+    XCTAssertThrowsError(
+      try CLI.run(
+        ["age-plugin-se", "keygen", "--pq"],
+        plugin: Plugin(crypto: MLKEMUnavailableCrypto(), stream: stream),
+        print: { self.printed.append($0) })
+    ) { XCTAssertEqual(Plugin.Error.pqUnavailable.localizedDescription, $0.localizedDescription) }
+    XCTAssertEqual([], printed)
+  }
+
   func testVersion() throws {
     try run(["--version"])
     XCTAssertEqual([age_plugin_se.version], printed)

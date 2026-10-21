@@ -46,6 +46,7 @@ final class HPKEForkTests: XCTestCase {
   #if compiler(>=6.2)
     /// `DummyCrypto` whose ML-KEM-768 encapsulation is real, so the
     /// decapsulation it is checked against can match it.
+    @available(macOS 26.0, *)
     final class EncapsulatingCrypto: DummyCrypto {
       override func encapsulate(mlkem768Key: MLKEM768.PublicKey) throws
         -> KEM.EncapsulationResult
@@ -55,6 +56,7 @@ final class HPKEForkTests: XCTestCase {
     }
 
     func testMLKEMP256_RoundTrip() throws {
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
       let crypto = EncapsulatingCrypto()
       let p256 = try crypto.newSecureEnclaveP256PrivateKey(dataRepresentation: crypto.dummyKeys[0])
       let mlkem = try crypto.newSecureEnclaveMLKEM768PrivateKey(
