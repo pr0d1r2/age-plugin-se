@@ -47,7 +47,7 @@ actlith-check|gate|-|-|actlith gen --check && actlith check|-|-|a workflow no lo
 ## types
 type|checks|min|exempt
 *|trailing-whitespace, final-newline, line-endings, no-bom, no-merge-conflict, no-case-conflict, no-broken-symlinks, no-private-key, ripsecrets, typos, editorconfig-checker, no-local-paths, names, no-core-worktree|-|-
-bats|bats-parse, gate-tests|-|-
+bats|bats-parse, bats-changed, gate-tests|-|-
 actlith|actlith-check|-|-
 Makefile|-|-|upstream build entry points, unchanged (root §F); no linter in the catalog reads them
 commit-msg|shellcheck|-|-
@@ -72,10 +72,10 @@ path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a n
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
 path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them
-path:gate/*.sh|shellcheck, shfmt, gate-tests|-|-
+path:gate/*.sh|shellcheck, shfmt, bats-changed, gate-tests|-|-
 path:nix/toolchain*.sh|shellcheck, shfmt, toolchain|-|-
-path:release/*.bats|bats-parse, release-tests|-|-
-path:release/*.sh|shellcheck, shfmt, release-tests|-|-
+path:release/*.bats|bats-parse, bats-changed, release-tests|-|-
+path:release/*.sh|shellcheck, shfmt, bats-changed, release-tests|-|-
 pkl|no-stash|-|-
 pklith|gen-check, pklith-check, tdd-order, confirm|-|-
 pre-commit|-|-|written by pklith (seed or gen)
