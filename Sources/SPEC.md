@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here are carried changes only: prompt env, denial marker, B1 to B3 fixes, `CLI.run` seam; each offered upstream.
+upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here are carried changes only: prompt env, denial marker, B1 to B3 fixes, `CLI.run` seam, upstream PR 15 (`.:T30`).
 
 ## §N NAV
 
@@ -31,7 +31,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 - file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `writeOutput(_:to:)`, `CLIError` (B1 to B3, `.:T11`, `.:T25`, `.:T26`); `CLI.run` (`.:T28`).
 - file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`.
-- file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`).
+- file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`), `isMLKEMAvailable` (test seam, `.:T30`).
 - file: `HPKE.swift` — HPKE seal/open, P-256 & ML-KEM-768 hybrid.
 - file: `Bech32.swift`, `Base64.swift` — encodings. `Stream.swift` — `StandardIOStream`.
 - env: `AGE_PLUGIN_SE_PROMPT` (`.:V12`). error: denial marker (`.:V13`).
