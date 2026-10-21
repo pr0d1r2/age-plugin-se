@@ -77,6 +77,7 @@ enum HPKE {
     return sharedSecret
   }
 
+  @available(macOS 26.0, *)
   static func mlkemp256Encap(
     recipientP256Key: P256.KeyAgreement.PublicKey, recipientMLKEM768Key: MLKEM768.PublicKey,
     crypto: Crypto
@@ -110,6 +111,7 @@ enum HPKE {
     #endif
   }
 
+  @available(macOS 26.0, *)
   static func mlkemp256Decap(
     enc: Data, recipientP256Key: SecureEnclaveP256PrivateKey,
     recipientMLKEM768Key: SecureEnclaveMLKEM768PrivateKey

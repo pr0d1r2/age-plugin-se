@@ -12,10 +12,13 @@ import XCTest
 
 /// `DummyCrypto` without ML-KEM-768 (`isMLKEMAvailable` false), standing in
 /// for macOS older than 26 on a host that has it.
+/// `answers` are its first replies, for a check that must run twice.
 final class MLKEMUnavailableCrypto: DummyCrypto {
-  override init() {
-    super.init()
-    isMLKEMAvailable = false
+  var answers: [Bool] = []
+
+  override var isMLKEMAvailable: Bool {
+    get { answers.isEmpty ? false : answers.removeFirst() }
+    set {}
   }
 }
 
@@ -128,6 +131,42 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
         """, stream.output)
     }
 
+    func testRecipientV1_PQRecipient() throws {
+      let (_, recipient) = try pqKey()
+      let stream = MemoryStream()
+      stream.add(
+        input:
+          """
+          -> add-recipient \(recipient)
+
+          -> wrap-file-key
+          AAAAAAAAAAAAAAAAAAAAAQ
+          -> done
+
+          -> ok
+
+          """)
+      plugin(stream).runRecipientV1()
+      XCTAssertEqual(
+        """
+        -> error internal
+        \(Data(pqUnavailable.utf8).base64RawEncodedString())
+        -> done
+
+        """, stream.output)
+    }
+
+    /// `keygen --pq` checks ML-KEM-768 again before it derives the
+    /// post-quantum recipient: gone by then, it throws `pqUnavailable`.
+    func testKeygen_PQ_GoneAfterKey() throws {
+      let crypto = MLKEMUnavailableCrypto()
+      crypto.answers = [true]
+      XCTAssertThrowsError(
+        try Plugin(crypto: crypto, stream: MemoryStream())
+          .generateKey(accessControl: .none, recipientType: .tag, now: Date(), pq: true)
+      ) { XCTAssertEqual(pqUnavailable, $0.localizedDescription) }
+    }
+
     /// Wraps a file key to `recipient` on `DummyCrypto`; returns the stanza.
     func wrap(to recipient: String) throws -> String {
       let stream = MemoryStream()
@@ -193,6 +232,53 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
         file.split(separator: "\n").first { $0.hasPrefix("AGE-PLUGIN-SE-1") })
       XCTAssertEqual(
         "-> done\n", unwrap(stanza, identity: String(identity), crypto: DummyCrypto()))
+    }
+  }
+
+  /// A classic recipient holds no ML-KEM-768 key: asking it for one, or for
+  /// its `age1tagpq1` form, throws `missingPQ`.
+  final class LazyPQRecipientTests: XCTestCase {
+    let classic = "age1tag1qvlvs7x2g83gtaqg0dlstnm3ee8tr49dhtdnxudpfd0sy2gedw20k7ux6zq"
+    let missingPQ = Plugin.Error.missingPQ.localizedDescription
+
+    func testAgeTagPQRecipient_Classic() throws {
+      XCTAssertThrowsError(try Recipient(ageRecipient: classic).ageTagPQRecipient) {
+        XCTAssertEqual(missingPQ, $0.localizedDescription)
+      }
+    }
+
+    func testMLKEM768PublicKey_Classic() throws {
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
+      XCTAssertThrowsError(try Recipient(ageRecipient: classic).mlkem768PublicKey()) {
+        XCTAssertEqual(missingPQ, $0.localizedDescription)
+      }
+    }
+  }
+
+  /// `DummyCrypto` that refuses every ML-KEM-768 key blob, as the Secure
+  /// Enclave refuses one it did not make.
+  @available(macOS 26.0, *)
+  final class BadMLKEMBlobCrypto: DummyCrypto {
+    override func newSecureEnclaveMLKEM768PrivateKey(dataRepresentation: Data) throws
+      -> SecureEnclaveMLKEM768PrivateKey
+    {
+      throw DummyCryptoError.dummyError
+    }
+  }
+
+  /// Where ML-KEM-768 exists, an identity whose ML-KEM-768 half does not
+  /// load still fails at parse, as before that half loaded lazily (root V2):
+  /// it falls back to the classic format, which its bytes are not.
+  final class BadMLKEMHalfTests: XCTestCase {
+    func testIdentity_BadMLKEMHalf() throws {
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
+      let (file, _) = try Plugin(crypto: DummyCrypto(), stream: MemoryStream())
+        .generateKey(accessControl: .none, recipientType: .tag, now: Date(), pq: true)
+      let identity = try XCTUnwrap(
+        file.split(separator: "\n").first { $0.hasPrefix("AGE-PLUGIN-SE-1") })
+      XCTAssertNoThrow(try Identity(ageIdentity: String(identity), crypto: DummyCrypto()))
+      XCTAssertThrowsError(
+        try Identity(ageIdentity: String(identity), crypto: BadMLKEMBlobCrypto()))
     }
   }
 #endif

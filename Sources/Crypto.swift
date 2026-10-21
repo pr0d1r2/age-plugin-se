@@ -57,10 +57,13 @@ protocol Crypto {
     -> SecureEnclaveP256PrivateKey
   func newEphemeralP256PrivateKey() -> P256.KeyAgreement.PrivateKey
 
+  @available(macOS 26.0, *)
   func newSecureEnclaveMLKEM768PrivateKey(dataRepresentation: Data) throws
     -> SecureEnclaveMLKEM768PrivateKey
+  @available(macOS 26.0, *)
   func newSecureEnclaveMLKEM768PrivateKey(accessControl: SecAccessControl) throws
     -> SecureEnclaveMLKEM768PrivateKey
+  @available(macOS 26.0, *)
   func encapsulate(mlkem768Key: MLKEM768.PublicKey) throws -> KEM.EncapsulationResult
 }
 
@@ -72,6 +75,7 @@ protocol SecureEnclaveP256PrivateKey {
     -> SharedSecret
 }
 
+@available(macOS 26.0, *)
 protocol SecureEnclaveMLKEM768PrivateKey {
   var publicKey: MLKEM768.PublicKey { get }
   var dataRepresentation: Data { get }
@@ -95,7 +99,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
     }
 
     var isMLKEMAvailable: Bool {
-      return false
+      return true
     }
 
     func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws
@@ -116,6 +120,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
       return P256.KeyAgreement.PrivateKey()
     }
 
+    @available(macOS 26.0, *)
     func newSecureEnclaveMLKEM768PrivateKey(dataRepresentation: Data) throws
       -> SecureEnclaveMLKEM768PrivateKey
     {
@@ -129,6 +134,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
         throw Plugin.Error.pqUnsupported
       #endif
     }
+    @available(macOS 26.0, *)
     func newSecureEnclaveMLKEM768PrivateKey(accessControl: SecAccessControl) throws
       -> SecureEnclaveMLKEM768PrivateKey
     {
@@ -143,6 +149,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
       #endif
     }
 
+    @available(macOS 26.0, *)
     func encapsulate(mlkem768Key: MLKEM768.PublicKey) throws -> KEM.EncapsulationResult {
       return try mlkem768Key.encapsulate()
     }
@@ -152,6 +159,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
   }
 
   #if compiler(>=6.2)
+    @available(macOS 26.0, *)
     extension SecureEnclave.MLKEM768.PrivateKey: SecureEnclaveMLKEM768PrivateKey {
     }
   #endif
@@ -164,7 +172,7 @@ protocol SecureEnclaveMLKEM768PrivateKey {
     }
 
     var isMLKEMAvailable: Bool {
-      return false
+      return true
     }
 
     func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws
@@ -183,18 +191,21 @@ protocol SecureEnclaveMLKEM768PrivateKey {
       return P256.KeyAgreement.PrivateKey()
     }
 
+    @available(macOS 26.0, *)
     func newSecureEnclaveMLKEM768PrivateKey(accessControl: SecAccessControl) throws
       -> SecureEnclaveMLKEM768PrivateKey
     {
       throw Plugin.Error.seUnsupported
     }
 
+    @available(macOS 26.0, *)
     func newSecureEnclaveMLKEM768PrivateKey(dataRepresentation: Data) throws
       -> SecureEnclaveMLKEM768PrivateKey
     {
       throw Plugin.Error.seUnsupported
     }
 
+    @available(macOS 26.0, *)
     func encapsulate(mlkem768Key: MLKEM768.PublicKey) throws -> KEM.EncapsulationResult {
       return try mlkem768Key.encapsulate()
     }
