@@ -1,6 +1,6 @@
 {
-  # age-plugin-se fork: the package and its checks on aarch64-darwin and
-  # x86_64-darwin, the dev shell on aarch64-darwin (decision 12, amended
+  # age-plugin-se fork: the package, its checks and the dev shell on
+  # aarch64-darwin and x86_64-darwin (decision 12, amended
   # 2026-10-21). Swift, the macOS SDK and XCTest come
   # from the host Xcode (decisions 11 and 21); nix pins every other tool.
   # One nixpkgs, followed from nixpkgs-lock rather than spelled here
@@ -74,13 +74,15 @@
         system: import ./nix/package.nix { pkgs = nixpkgs.legacyPackages.${system}; }
       );
       checks = forSystems (system: import ./nix/checks.nix { pkgs = nixpkgs.legacyPackages.${system}; });
-      # aarch64-darwin only: pklith's lib.devShell and catalog list no
-      # x86_64-darwin yet (root T32).
-      devShells.aarch64-darwin.default = import ./nix/shell.nix {
-        inherit pklith;
-        pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-        inherit (pklith.legacyPackages.aarch64-darwin) catalog;
-        actlith = actlith.packages.aarch64-darwin.default;
-      };
+      # x86_64-darwin too since pklith 028c65c, whose catalog builds
+      # microlith, itok and sherd from source there (root T32).
+      devShells = forSystems (system: {
+        default = import ./nix/shell.nix {
+          inherit pklith;
+          pkgs = nixpkgs.legacyPackages.${system};
+          inherit (pklith.legacyPackages.${system}) catalog;
+          actlith = actlith.packages.${system}.default;
+        };
+      });
     };
 }
