@@ -4,6 +4,7 @@ import XCTest
 
 #if !os(Linux) && !os(Windows)
   import CryptoKit
+  import LocalAuthentication
 #else
   import Crypto
 #endif
@@ -295,6 +296,128 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
       XCTAssertNoThrow(try Identity(ageIdentity: String(identity), crypto: DummyCrypto()))
       XCTAssertThrowsError(
         try Identity(ageIdentity: String(identity), crypto: BadMLKEMBlobCrypto()))
+    }
+  }
+#endif
+
+#if !os(Linux) && !os(Windows)
+  /// Denial marker (root V13, Sources V1): a Touch ID the user cancelled or
+  /// failed, read from the error's code (its own or one beneath it), opens
+  /// the plugin's message with `AGE_PLUGIN_SE_DENIED_V1: `. Every other
+  /// error keeps its text alone, so its bytes stay upstream's (root V2).
+  final class DenialMarkerTests: XCTestCase {
+    func status(_ code: OSStatus) -> NSError {
+      return NSError(domain: NSOSStatusErrorDomain, code: Int(code))
+    }
+
+    func denied(_ error: Swift.Error) -> String {
+      return "AGE_PLUGIN_SE_DENIED_V1: \(error.localizedDescription)"
+    }
+
+    func testDenialMarker() {
+      XCTAssertEqual("AGE_PLUGIN_SE_DENIED_V1", Plugin.denialMarker)
+    }
+
+    func testMessage_Denied() {
+      let errors: [Swift.Error] = [
+        LAError(.userCancel), LAError(.authenticationFailed),
+        status(errSecUserCanceled), status(errSecAuthFailed),
+      ]
+      for error in errors {
+        XCTAssertEqual(denied(error), Plugin.message(for: error), "\(error)")
+      }
+    }
+
+    /// Security may wrap the LocalAuthentication error, and CryptoKit hands
+    /// on what Security returns.
+    func testMessage_DeniedBeneath() {
+      let wrapped = NSError(
+        domain: "CryptoTokenKit", code: -9, userInfo: [NSUnderlyingErrorKey: LAError(.userCancel)])
+      let errors: [Swift.Error] = [
+        wrapped,
+        NSError(domain: "com.example", code: 2, userInfo: [NSUnderlyingErrorKey: wrapped]),
+        NSError(
+          domain: "com.example", code: 1,
+          userInfo: [
+            NSMultipleUnderlyingErrorsKey: [status(errSecDecode), status(errSecAuthFailed)]
+          ]),
+      ]
+      for error in errors {
+        XCTAssertEqual(denied(error), Plugin.message(for: error), "\(error)")
+      }
+    }
+
+    func testMessage_NotDenied() {
+      let errors: [Swift.Error] = [
+        LAError(.appCancel), LAError(.systemCancel), LAError(.userFallback),
+        LAError(.biometryLockout), LAError(.biometryNotEnrolled), LAError(.biometryNotAvailable),
+        LAError(.passcodeNotSet), LAError(.notInteractive), LAError(.invalidContext),
+        status(errSecInteractionNotAllowed), status(errSecNotAvailable), status(errSecDecode),
+        DummyCryptoError.dummyError, Plugin.Error.pqUnavailable,
+        // LocalAuthentication's userCancel code in another domain.
+        NSError(domain: "com.example", code: LAError.Code.userCancel.rawValue),
+        // Text that reads like a cancel, with no denial code (Sources V1).
+        NSError(
+          domain: "com.example", code: 1,
+          userInfo: [NSLocalizedDescriptionKey: "Canceled by user."]),
+        // A code no OSStatus holds.
+        NSError(domain: NSOSStatusErrorDomain, code: Int.max),
+        NSError(
+          domain: "com.example", code: 3,
+          userInfo: [NSUnderlyingErrorKey: LAError(.biometryLockout)]),
+      ]
+      for error in errors {
+        XCTAssertEqual(error.localizedDescription, Plugin.message(for: error), "\(error)")
+      }
+    }
+
+    /// identity-v1 session whose key agreement throws `error`.
+    func unwrap(failing error: Swift.Error) -> String {
+      let crypto = DummyCrypto()
+      crypto.operationError = error
+      let stream = MemoryStream()
+      stream.add(
+        input:
+          """
+          -> add-identity AGE-PLUGIN-SE-18YNMANPJKHE2ZAZJHRCKZKFXCT78YYWUTY0F730TMTZFV0CM9YHSRP8GPG
+
+          -> recipient-stanza 0 piv-p256 14yi6A Az7IeMpB4oX0CHt/Bc9xzk6x1K262zNxoUtfAikZa5T7
+          SLgnrcnHLaJHCx+fwSEWWoflDgL91oDGCGNwb2YaT+4
+          -> done
+
+          -> ok
+
+          """)
+      Plugin(crypto: crypto, stream: stream).runIdentityV1()
+      return stream.output
+    }
+
+    func session(msg text: String) -> String {
+      return "-> msg\n\(Data(text.utf8).base64RawEncodedString(wrap: true))\n-> done\n"
+    }
+
+    /// The text of the `msg` stanza that opens `output`.
+    func msg(in output: String) throws -> String {
+      let stream = MemoryStream()
+      stream.add(input: output)
+      let stanza = try Stanza.readFrom(stream: stream)
+      XCTAssertEqual("msg", stanza.type)
+      return String(decoding: stanza.body, as: UTF8.self)
+    }
+
+    func testIdentityV1_Denied() throws {
+      for error in [LAError(.userCancel) as NSError, status(errSecAuthFailed)] {
+        let output = unwrap(failing: error)
+        XCTAssert(try msg(in: output).hasPrefix("AGE_PLUGIN_SE_DENIED_V1: "), output)
+        XCTAssertEqual(session(msg: denied(error)), output)
+      }
+    }
+
+    func testIdentityV1_NotDenied() throws {
+      let error = LAError(.biometryLockout)
+      let output = unwrap(failing: error)
+      XCTAssertEqual(error.localizedDescription, try msg(in: output))
+      XCTAssertEqual(session(msg: error.localizedDescription), output)
     }
   }
 #endif

@@ -33,6 +33,14 @@ wrote it with one fork copyright line added under upstream's.
   [`dcosson/age-plugin-se`](https://github.com/dcosson/age-plugin-se)
   fork, a fork of the same upstream under the same MIT licence. Its
   version string and release steps are not taken.
+- The Touch ID denial marker (`AGE_PLUGIN_SE_DENIED_V1`) takes ideas
+  from the presence-denial marker in the same
+  [`dcosson/age-plugin-se`](https://github.com/dcosson/age-plugin-se)
+  fork: classify the error by its code, never its text; let
+  `DummyCrypto` throw a chosen error from a key operation; check the
+  `msg` stanza of an identity-v1 unwrap. Its marker string and its list
+  of codes are not taken: here only a user's cancel or failed Touch ID
+  counts, and the marker comes before the error's own text.
 
 ## Bech32
 

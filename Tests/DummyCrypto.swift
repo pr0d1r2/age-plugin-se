@@ -50,6 +50,8 @@ class DummyCrypto: Crypto {
   var isSecureEnclaveAvailable = true
   var isMLKEMAvailable = true
   var failingOperations = false
+  /// Fork: when set, Secure Enclave key operations throw it (root T10).
+  var operationError: Swift.Error?
 
   func newSecureEnclaveP256PrivateKey(dataRepresentation: Data) throws
     -> SecureEnclaveP256PrivateKey
@@ -116,6 +118,9 @@ struct DummySecureEnclaveP256PrivateKey: SecureEnclaveP256PrivateKey {
   func sharedSecretFromKeyAgreement(with publicKeyShare: P256.KeyAgreement.PublicKey) throws
     -> SharedSecret
   {
+    if let operationError = crypto.operationError {
+      throw operationError
+    }
     if crypto.failingOperations {
       throw DummyCryptoError.dummyError
     }

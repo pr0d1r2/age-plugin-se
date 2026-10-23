@@ -10,3 +10,4 @@ correctly and uselessly. The verb that reads it is `mth tasks`.
 ## §T TASKS
 
 T3|x|`OptionsHelpTests`: help ↔ parser (`.:T8`)|V3
+T4|x|`ForkCLITests`: prompt env, denial marker, B1 to B3 (`.:T9`, `.:T10`, `.:T11`, `.:T25`, `.:T26`). denial marker: `DenialMarkerTests` in `Fork/PluginForkTests.swift`|V3

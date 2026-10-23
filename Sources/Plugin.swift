@@ -2,6 +2,7 @@ import Foundation
 
 #if !os(Linux) && !os(Windows)
   import CryptoKit
+  import LocalAuthentication
 #else
   import Crypto
 #endif
@@ -416,7 +417,7 @@ class Plugin {
               body: unwrappedKey
             )
           } catch {
-            Stanza(type: "msg", body: Data(error.localizedDescription.utf8)).writeTo(
+            Stanza(type: "msg", body: Data(Plugin.message(for: error).utf8)).writeTo(
               stream: stream)
             let resp = try! Stanza.readFrom(stream: self.stream)
             assert(resp.type == "ok")
@@ -433,6 +434,44 @@ class Plugin {
       assert(resp.type == "ok")
     }
     Stanza(type: "done").writeTo(stream: stream)
+  }
+
+  /// Fork: opens the message of an error the user caused by denying
+  /// Touch ID, so a caller can match it (root V13).
+  static let denialMarker = "AGE_PLUGIN_SE_DENIED_V1"
+
+  /// Fork: `error`'s text, after `denialMarker` iff the user denied Touch ID.
+  static func message(for error: Swift.Error) -> String {
+    let text = error.localizedDescription
+    return isDenial(error) ? "\(denialMarker): \(text)" : text
+  }
+
+  /// Fork: the user cancelled or failed Touch ID. Read from error codes,
+  /// never message text (Sources V1), here or in an underlying error, as
+  /// Security may wrap LocalAuthentication's error and CryptoKit passes it on.
+  static func isDenial(_ error: Swift.Error) -> Bool {
+    #if !os(Linux) && !os(Windows)
+      let error = error as NSError
+      switch error.domain {
+      case LAError.errorDomain:
+        if [LAError.Code.userCancel, .authenticationFailed].map(\.rawValue).contains(error.code) {
+          return true
+        }
+      case NSOSStatusErrorDomain:
+        if [errSecUserCanceled, errSecAuthFailed].map(Int.init).contains(error.code) {
+          return true
+        }
+      default:
+        break
+      }
+      var underlying = error.userInfo[NSMultipleUnderlyingErrorsKey] as? [Swift.Error] ?? []
+      if let first = error.userInfo[NSUnderlyingErrorKey] as? Swift.Error {
+        underlying.insert(first, at: 0)
+      }
+      return underlying.contains(where: isDenial)
+    #else
+      return false
+    #endif
   }
 
   enum Error: LocalizedError, Equatable {
