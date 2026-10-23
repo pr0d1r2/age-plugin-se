@@ -50,7 +50,7 @@ self|.|-
 - cmd: `age-plugin-se --age-plugin=recipient-v1|identity-v1` — age plugin protocol over stdio, upstream, frozen.
 - format: identity `AGE-PLUGIN-SE-1…`; recipients `age1se1…`, `age1tag1…`, `age1tagpq1…` (bech32, `Sources/Plugin.swift`). frozen (D2).
 - env: `AGE_PLUGIN_SE_PROMPT=<text>` — Touch ID prompt text; unset → upstream text. carried, offered upstream (PR 18).
-- error: denial marker — fixed documented string in the plugin error when user denies Touch ID; ⊥ in any other error. carried, offered upstream.
+- error: denial marker `AGE_PLUGIN_SE_DENIED_V1: <error text>` opens identity-v1 unwrap `msg` iff user cancelled | failed Touch ID; callers match prefix (owner 2026-10-23). carried, offered upstream.
 - nix: `packages.<sys>.default` (`age-plugin-se`), `checks.<sys>.*` & `devShells.<sys>.default`, sys `{aarch64,x86_64}-darwin` (`nix` node).
 - file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`, `gate/universal.sh [BIN]` (push: arm64 & x86_64, `minos` 14.0), `gate/coverage.sh` (push: `sherd coverage --check`; macOS < 26 → notice, exit 0; `AGE_PLUGIN_SE_MACOS_MAJOR` overrides); `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
@@ -91,7 +91,7 @@ V9: ⊥ force unwrap `!`, `try!`, `as!`, `fatalError` in fork-written Swift (swi
 V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only fns exempt by `.coverage` `exclude` row w/ reason; `excluded` cap only falls (D14). target 100% of rest (D1). floor measured on macOS 26 ∵ PQ tests skip below ∴ `coverage` row (`gate/coverage.sh`) skips w/ notice on macOS < 26; CI & macOS 26 hosts hold it.
 V11: ∀ option in `Options.help` parses & ∀ parsed option appears in `Options.help` (D15).
 V12: `AGE_PLUGIN_SE_PROMPT` set & non-empty → Touch ID prompt = its text; unset | empty → upstream prompt text.
-V13: Touch ID denied by user → plugin error carries denial marker; ∀ other error ∌ it.
+V13: Touch ID denied by user → plugin error carries denial marker; ∀ other error ∌ it. denial = user acts only (owner 2026-10-23): cancel | failed match; lockout, unavailable, system | app cancel, fallback, non-interactive ⊥ denial.
 V14: `keygen -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT, ⊥ `Public key:` line ∵ B1.
 V15: `swift test` needs ⊥ SE, ⊥ Touch ID (`DummyCrypto`); real SE: `Tests/§I` gated | `fixtures/README.md` manual.
 V16: ∀ commit from `5fffb16` on passes hk hooks, ⊥ `--no-verify`: pre-commit checks, ⊥ stash (`paradigm/V15`); commit-msg: parsed `Paradigm-Stage:` & cited id (`paradigm/V43`, `paradigm/V27`); name guard on files & message (`paradigm/V37`); pre-push adds tests & coverage (`paradigm/V24`).
@@ -111,7 +111,7 @@ T6|~|gate via pklith, one check per commit, planted violation each: name guard, 
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
 T9|~|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval. fork half done (`CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`)|V12,V5,V3
-T10|.|`Sources`: denial marker RED → GREEN; upstream PR w/ approval|V13,V5
+T10|~|`Sources`: denial marker RED → GREEN; upstream PR w/ approval. fork half done (`Plugin.isDenial`, `Plugin.message(for:)`)|V13,V5
 T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`)|V14,V5
 T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10

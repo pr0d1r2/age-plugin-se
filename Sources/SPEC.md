@@ -34,11 +34,13 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 - file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`), `isMLKEMAvailable` (test seam, `.:T30`).
 - file: `HPKE.swift` — HPKE seal/open, P-256 & ML-KEM-768 hybrid; fork: ML-KEM-768 encap & decap guard on `crypto.isMLKEMAvailable`, decap takes `crypto:` (`.:T29`).
 - file: `Bech32.swift`, `Base64.swift` — encodings. `Stream.swift` — `StandardIOStream`.
-- env: `AGE_PLUGIN_SE_PROMPT` (`.:V12`). error: denial marker (`.:V13`).
+- env: `AGE_PLUGIN_SE_PROMPT` (`.:V12`).
+- error: `Plugin.denialMarker` `AGE_PLUGIN_SE_DENIED_V1`; `Plugin.message(for:)` → `<marker>: <localizedDescription>` iff `Plugin.isDenial`, else text alone; used by identity-v1 unwrap `msg` (`.:V13`, `.:T10`).
+- denial codes (owner 2026-10-23): `LAError` `userCancel`, `authenticationFailed`; OSStatus `errSecUserCanceled`, `errSecAuthFailed`; found at top | under `NSUnderlyingErrorKey` | `NSMultipleUnderlyingErrorsKey`, recursive. ∀ other code ⊥ denial.
 
 ## §V INVARIANTS
 
-V1: denial classified from `LAError` code, ⊥ from message text ∴ locale-proof (`.:V13`).
+V1: denial classified from `LAError` | OSStatus code, ⊥ from message text ∴ locale-proof (`.:V13`).
 V2: prompt text read once per process, ⊥ logged, ⊥ in any stanza (`.:V12`).
 V3: ∀ carried change reverts cleanly once upstream merges its equivalent ∴ diff stays local to its feature.
 
@@ -46,7 +48,7 @@ V3: ∀ carried change reverts cleanly once upstream merges its equivalent ∴ d
 
 id|status|task|cites
 T1|x|ARCHIVED to SPEC-ARCHIVE.md|V2,V3
-T2|.|denial marker, RED → GREEN (`.:T10`)|V1,V3
+T2|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V3
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T5|x|ARCHIVED to SPEC-ARCHIVE.md|V3
