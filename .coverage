@@ -67,9 +67,17 @@
 # 3 still unrun: CLI.swift 2 (`default:` and its `assert(false)` in
 # Options.parse) and Plugin.swift 1 (the SecAccessControl failure in
 # generateKey), both a refactor's to remove. `excluded 22` is unchanged.
+#
+# Raised 2026-10-23 by `sherd coverage --record` (root V10, D1's
+# target): 100.00%, 1,220 of 1,220 lines under Sources/. 0 unrun lines.
+# Options.parse switches on the `Options.ValueOption` table, so its
+# `default:` and `assert(false)` are gone, and generateKey makes its
+# access control through `Plugin.newAccessControl`, which a test makes
+# fail. The enum and the seam account for the 40 new lines. `excluded 22`
+# is unchanged: the 4 rows above are the only lines left out.
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(accessControl:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(accessControl:) needs a real Secure Enclave
 excluded 22
-lines 99.75
+lines 100.00

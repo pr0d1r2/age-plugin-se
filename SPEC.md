@@ -110,10 +110,10 @@ T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
-T9|~|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; upstream PR from `upstream/main` w/ approval. fork half done (`CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`)|V12,V5,V3
-T10|~|`Sources`: denial marker RED → GREEN; upstream PR w/ approval. fork half done (`Plugin.isDenial`, `Plugin.message(for:)`)|V13,V5
-T11|~|`Sources`: B1 fix RED → GREEN; upstream PR w/ approval. fork half done (`keygenOutput` throws `CLIError.cannotWriteOutput`)|V14,V5
-T12|~|`#unavailable(macOS 21.0)` → `26.0` (R7): fixed in fork PR #3 (`f62703c`, issue #2); offer to `remko/age-plugin-se` w/ approval|V7
+T9|x|ARCHIVED to SPEC-ARCHIVE.md|V12,V3
+T10|x|ARCHIVED to SPEC-ARCHIVE.md|V13
+T11|x|ARCHIVED to SPEC-ARCHIVE.md|V14
+T12|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swift coverage (sherd#138; Swift data on #126, #132), paradigm Swift page & seed (paradigm#1), `paradigm/V20` `paradigm/V28` `paradigm/V29` (paradigm#2) (D16, D20); open until each lands|V8,V9,V10
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
@@ -126,10 +126,10 @@ T21|.|itok ⊥ laid: `.context-limits` = sherd chain ceilings, itok reads it as 
 T22|.|owner: require `gate (macos-latest)` on `main` (D8); run `nix develop -c release/alpine-keygen.sh`, re-run `build (macos-26)`; Actions on, first run green|V6
 T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T24|.|deferred until official releases: distribution key replaces T23's. private key only in ALPINE_KEY, made in memory; `--rotate` ⊥ recovery; pubs append-only in `release/keys/` w/ `revoked/`; ALPINE_KEY_NAME var names `.SIGN.RSA.<name>.pub`; fork script calls `dir2apk.go --key=`; reconcile w/ D12|-
-T25|~|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. fork half done (`writeOutput`, shared w/ B1)|V18,V5
-T26|~|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. fork half done|V19,V5
+T25|x|ARCHIVED to SPEC-ARCHIVE.md|V18
+T26|x|ARCHIVED to SPEC-ARCHIVE.md|V19
 T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
-T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
+T28|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T29|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 ported + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
 T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), `swift package resolve` once before 1st push (else pre-push hook may fail on SwiftPM's dependency clone), hooks, `swift test`, `hardware` row. `coverage` row skips there (V10)|V6,V15,V10

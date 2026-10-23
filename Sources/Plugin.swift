@@ -10,6 +10,15 @@ import Foundation
 class Plugin {
   var crypto: Crypto
   var stream: Stream
+  #if !os(Linux) && !os(Windows)
+    /// Fork: makes the key's access control in `generateKey`. It is
+    /// `SecAccessControlCreateWithFlags` unless a test swaps in one that fails.
+    var newAccessControl:
+      (
+        CFAllocator?, CFTypeRef, SecAccessControlCreateFlags,
+        UnsafeMutablePointer<Unmanaged<CFError>?>?
+      ) -> SecAccessControl? = SecAccessControlCreateWithFlags
+  #endif
 
   init(crypto: Crypto, stream: Stream) {
     self.crypto = crypto
@@ -45,7 +54,7 @@ class Plugin {
       }
       var error: Unmanaged<CFError>?
       guard
-        let secAccessControl = SecAccessControlCreateWithFlags(
+        let secAccessControl = newAccessControl(
           kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
           accessControlFlags,
           &error)

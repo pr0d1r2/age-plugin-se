@@ -421,3 +421,55 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
     }
   }
 #endif
+
+#if !os(Linux) && !os(Windows)
+  /// `generateKey` makes its access control through `Plugin.newAccessControl`,
+  /// with upstream's protection and flags, and throws the error that creation
+  /// reports (root V10).
+  final class AccessControlSeamTests: XCTestCase {
+    func testGenerateKey_Flags() throws {
+      let cases: [(KeyAccessControl, SecAccessControlCreateFlags)] = [
+        (.none, [.privateKeyUsage]),
+        (.passcode, [.privateKeyUsage, .devicePasscode]),
+        (.anyBiometry, [.privateKeyUsage, .biometryAny]),
+        (.anyBiometryOrPasscode, [.privateKeyUsage, .userPresence]),
+        (.anyBiometryAndPasscode, [.privateKeyUsage, .biometryAny, .devicePasscode]),
+        (.currentBiometry, [.privateKeyUsage, .biometryCurrentSet]),
+        (
+          .currentBiometryAndPasscode,
+          [.privateKeyUsage, .biometryCurrentSet, .devicePasscode]
+        ),
+      ]
+      for (accessControl, expected) in cases {
+        let plugin = Plugin(crypto: DummyCrypto(), stream: MemoryStream())
+        var calls: [SecAccessControlCreateFlags] = []
+        plugin.newAccessControl = { allocator, protection, flags, error in
+          XCTAssertNil(allocator)
+          XCTAssertTrue(
+            CFEqual(protection, kSecAttrAccessibleWhenUnlockedThisDeviceOnly),
+            "\(protection)")
+          calls.append(flags)
+          return SecAccessControlCreateWithFlags(allocator, protection, flags, error)
+        }
+        _ = try plugin.generateKey(accessControl: accessControl, recipientType: .se, now: Date())
+        XCTAssertEqual([expected], calls, "\(accessControl)")
+      }
+    }
+
+    func testGenerateKey_AccessControlFails() throws {
+      let plugin = Plugin(crypto: DummyCrypto(), stream: MemoryStream())
+      plugin.newAccessControl = { _, _, _, error in
+        error?.pointee = Unmanaged.passRetained(
+          CFErrorCreate(nil, kCFErrorDomainOSStatus, CFIndex(errSecParam), nil))
+        return nil
+      }
+      XCTAssertThrowsError(
+        try plugin.generateKey(accessControl: .none, recipientType: .se, now: Date())
+      ) { error in
+        let error = error as NSError
+        XCTAssertEqual(kCFErrorDomainOSStatus as String, error.domain)
+        XCTAssertEqual(Int(errSecParam), error.code)
+      }
+    }
+  }
+#endif

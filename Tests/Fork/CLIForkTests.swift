@@ -45,6 +45,80 @@ final class OptionsCoverageTests: XCTestCase {
   }
 }
 
+/// `Options.ValueOption`, the table of options that take a value, and the
+/// parse behaviour it must keep: upstream's names, `name=value` or the next
+/// argument as the value, and the same errors (root V10, V11).
+final class OptionsValueOptionTests: XCTestCase {
+  static let names: [String: Options.ValueOption] = [
+    "--age-plugin": .agePlugin, "-i": .input, "--input": .input, "-o": .output,
+    "--output": .output, "--access-control": .accessControl,
+    "--recipient-type": .recipientType,
+  ]
+
+  func testNames() {
+    var table: [String: Options.ValueOption] = [:]
+    for option in Options.ValueOption.allCases {
+      for name in option.names {
+        XCTAssertNil(table.updateValue(option, forKey: name), "`\(name)` named twice")
+      }
+    }
+    XCTAssertEqual(Self.names, table)
+  }
+
+  func testMatching() {
+    for (name, option) in Self.names {
+      XCTAssertEqual(option, Options.ValueOption(matching: name), name)
+      XCTAssertEqual(option, Options.ValueOption(matching: name + "="), name + "=")
+      XCTAssertEqual(option, Options.ValueOption(matching: name + "=a=b"), name + "=a=b")
+      XCTAssertNil(Options.ValueOption(matching: name + "x"), name + "x")
+    }
+    for arg in ["keygen", "--pq", "--pq=1", "-h", "--help", "--version", "-x", "", "="] {
+      XCTAssertNil(Options.ValueOption(matching: arg), arg)
+    }
+  }
+
+  func testParse_Values() throws {
+    let options = try Options.parse([
+      "_", "recipients", "-i", "in", "--output=a=b", "--recipient-type", "tag", "--pq",
+      "--access-control=none",
+    ])
+    XCTAssertEqual(.recipients, options.command)
+    XCTAssertEqual("in", options.input)
+    XCTAssertEqual("a=b", options.output)
+    XCTAssertEqual(.tag, options.recipientType)
+    XCTAssertEqual(Options.AccessControl.none, options.accessControl)
+    XCTAssertTrue(options.pq)
+    XCTAssertEqual(
+      .plugin(.identityV1), try Options.parse(["_", "--age-plugin=identity-v1"]).command)
+    XCTAssertEqual(
+      .plugin(.recipientV1), try Options.parse(["_", "--age-plugin", "recipient-v1"]).command)
+  }
+
+  /// `--input=` has no value after `=`, so the next argument is the value.
+  func testParse_EmptyValueTakesNext() throws {
+    XCTAssertEqual("next", try Options.parse(["_", "--input=", "next"]).input)
+  }
+
+  func testParse_Errors() {
+    let cases: [([String], Options.Error)] = [
+      (["--input"], .missingValue("--input")),
+      (["-o"], .missingValue("-o")),
+      (["--input="], .missingValue("--input=")),
+      (["--age-plugin"], .missingValue("--age-plugin")),
+      (["--age-plugin=bogus"], .invalidValue("--age-plugin", "bogus")),
+      (["--access-control", "bogus"], .invalidValue("--access-control", "bogus")),
+      (["--recipient-type=bogus"], .invalidValue("--recipient-type", "bogus")),
+      (["--pq=1"], .unknownOption("--pq=1")),
+      (["--inputx"], .unknownOption("--inputx")),
+    ]
+    for (args, expected) in cases {
+      XCTAssertThrowsError(try Options.parse(["_"] + args), "\(args)") { error in
+        XCTAssertEqual(expected, error as? Options.Error, "\(args)")
+      }
+    }
+  }
+}
+
 /// `CLI.run`, the dispatch `CLI.main` hands its arguments to: every command
 /// on `DummyCrypto` and `MemoryStream`, with printed lines captured.
 final class CLIRunCoverageTests: XCTestCase {
