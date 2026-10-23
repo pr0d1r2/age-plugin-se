@@ -58,9 +58,18 @@
 # new `#available(macOS 26)` fallback runs on this host through the
 # `Crypto.isMLKEMAvailable` seam, so no row and no cap changed; the same
 # 5 lines stay unrun.
+#
+# Raised 2026-10-23 by `sherd coverage --record` (root T29, resolved):
+# 99.75%, 1,177 of 1,180 lines under Sources/. HPKE.mlkemp256Encap and
+# mlkemp256Decap now guard on `crypto.isMLKEMAvailable`, so their 2
+# `throw Plugin.Error.pqUnavailable` lines run through the seam, with no
+# row. Decap's new `crypto:` argument in Plugin.swift added 1 line. The
+# 3 still unrun: CLI.swift 2 (`default:` and its `assert(false)` in
+# Options.parse) and Plugin.swift 1 (the SecAccessControl failure in
+# generateKey), both a refactor's to remove. `excluded 22` is unchanged.
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveP256PrivateKey(accessControl:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(dataRepresentation:) needs a real Secure Enclave
 exclude Sources/Crypto.swift:CryptoKitCrypto.newSecureEnclaveMLKEM768PrivateKey(accessControl:) needs a real Secure Enclave
 excluded 22
-lines 99.58
+lines 99.75
