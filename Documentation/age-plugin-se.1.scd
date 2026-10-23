@@ -65,6 +65,14 @@ output.
 	Default: *se*.
 	The default will change to *tag* in future versions.
 
+*-h*, *--help*
+
+	Print the help and exit.
+
+*--version*
+
+	Print the version and exit.
+
 
 # EXAMPLES
 
