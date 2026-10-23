@@ -243,11 +243,7 @@ struct Options {
         break
       } else if ["--pq"].contains(arg) {
         opts.pq = true
-      } else if [
-        "--age-plugin", "-i", "--input", "-o", "--output", "--access-control", "--recipient-type",
-      ].contains(where: {
-        arg == $0 || arg.hasPrefix($0 + "=")
-      }) {
+      } else if let option = ValueOption(matching: arg) {
         let argps = arg.split(separator: "=", maxSplits: 1)
         let value: String
         if argps.count == 1 {
@@ -260,22 +256,20 @@ struct Options {
           value = String(argps[1])
         }
         let arg = String(argps[0])
-        switch arg {
-        case "--age-plugin":
+        switch option {
+        case .agePlugin:
           opts.command = try .plugin(
             StateMachine(rawValue: value) ?? { throw Error.invalidValue(arg, value) }())
-        case "-i", "--input":
+        case .input:
           opts.input = value
-        case "-o", "--output":
+        case .output:
           opts.output = value
-        case "--access-control":
+        case .accessControl:
           opts.accessControl =
             try AccessControl(rawValue: value) ?? { throw Error.invalidValue(arg, value) }()
-        case "--recipient-type":
+        case .recipientType:
           opts.recipientType =
             try RecipientType(rawValue: value) ?? { throw Error.invalidValue(arg, value) }()
-        default:
-          assert(false)
         }
       } else {
         throw Error.unknownOption(arg)
@@ -286,16 +280,28 @@ struct Options {
   }
 
   /// Fork: the options that take a value, each with the names it answers to.
+  /// `parse` switches on the case, so every option it matches has a branch.
   enum ValueOption: CaseIterable {
     case agePlugin, input, output, accessControl, recipientType
 
     var names: [String] {
-      return []
+      switch self {
+      case .agePlugin: return ["--age-plugin"]
+      case .input: return ["-i", "--input"]
+      case .output: return ["-o", "--output"]
+      case .accessControl: return ["--access-control"]
+      case .recipientType: return ["--recipient-type"]
+      }
     }
 
     /// The option `arg` names, alone or as `name=value`.
     init?(matching arg: String) {
-      return nil
+      guard
+        let option = Self.allCases.first(where: {
+          $0.names.contains { arg == $0 || arg.hasPrefix($0 + "=") }
+        })
+      else { return nil }
+      self = option
     }
   }
 }
