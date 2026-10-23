@@ -64,3 +64,18 @@ final class Bech32CoverageTests: XCTestCase {
     }
   }
 }
+
+/// An empty string is a decode error, not a trap (root V20, bug B4): a
+/// whitespace-only line in `recipients` input trims to one. The built binary
+/// exits 255 with the error on stdout (root R13).
+final class Bech32EmptyProcessTests: XCTestCase {
+  func testRecipients_WhitespaceLine() throws {
+    let path = BuiltBinary.url().path
+    let result = try BuiltBinary.runCapturingAll(["recipients"], standardInput: "   \n")
+    XCTAssertEqual(.exit, result.reason, "trapped: signal \(result.status)")
+    XCTAssertEqual(255, result.status)
+    XCTAssertEqual(
+      "\(path): error: \(Bech32.DecodingError.noChecksumMarker.localizedDescription)\n",
+      result.output)
+  }
+}

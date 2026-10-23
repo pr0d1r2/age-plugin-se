@@ -473,3 +473,62 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
     }
   }
 #endif
+
+/// Malformed plugin-protocol input from age over real stdin (root V20,
+/// bug B4): a command missing an argument it needs, a recipient stanza
+/// without a file index, and an answer other than `ok` are protocol errors,
+/// exit 255, never a trap. No input reaches the Secure Enclave (root V15).
+final class PluginProtocolErrorProcessTests: XCTestCase {
+  let invalid = "invalid stanza"
+
+  func testRecipientV1_AddRecipientNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "recipient-v1", input: "-> add-recipient\n\n-> done\n\n", message: invalid)
+  }
+
+  func testRecipientV1_AddIdentityNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "recipient-v1", input: "-> add-identity\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_AddIdentityNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> add-identity\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_RecipientStanzaNoType() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> recipient-stanza 0\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_RecipientStanzaNoFileIndex() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> recipient-stanza x X25519 abc\n\n-> done\n\n",
+      message: invalid)
+  }
+
+  /// age answers the identity error with `fail`, not `ok`.
+  func testIdentityV1_NotOK() throws {
+    let body = Data(
+      Bech32.DecodingError.incorrectChecksumSize.localizedDescription.utf8
+    ).base64RawEncodedString(wrap: true)
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1",
+      input: "-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\n-> fail\n\n",
+      message: "unexpected response: `fail`", output: "-> error identity 0\n\(body)\n")
+  }
+
+  /// age answers the recipient error with `fail`, not `ok`. An empty
+  /// argument (`-> add-recipient ` with its trailing space) is a recipient
+  /// error, not a protocol one: age sent the argument, and it is not bech32.
+  func testRecipientV1_EmptyRecipientNotOK() throws {
+    let body = Data(
+      Bech32.DecodingError.noChecksumMarker.localizedDescription.utf8
+    ).base64RawEncodedString(wrap: true)
+    try BuiltBinary.assertProtocolError(
+      machine: "recipient-v1",
+      input:
+        "-> add-recipient \n\n-> wrap-file-key\nezXgNAcK/Fet+1A7Q08TBg\n-> done\n\n-> fail\n\n",
+      message: "unexpected response: `fail`", output: "-> error recipient 0\n\(body)\n")
+  }
+}

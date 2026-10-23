@@ -274,6 +274,17 @@ final class CLIProcessCoverageTests: XCTestCase {
     XCTAssertEqual("\(path): error: unknown option: `--bogus`\n", output)
   }
 
+  /// Plugin mode is R13's exception (root V20): stdout carries the
+  /// protocol, so the error goes to stderr; the exit status is still 255.
+  func testPluginProtocolError() throws {
+    let path = BuiltBinary.url().path
+    let result = try BuiltBinary.runCapturingAll(["--age-plugin=recipient-v1"], standardInput: "")
+    XCTAssertEqual(.exit, result.reason, "trapped: signal \(result.status)")
+    XCTAssertEqual(255, result.status)
+    XCTAssertEqual("", result.output)
+    XCTAssertEqual("\(path): error: plugin protocol: incomplete stanza\n", result.error)
+  }
+
   /// Comment lines only: real stdin is read, no identity is parsed.
   func testRecipientsFromStandardInput() throws {
     let (status, output) = try BuiltBinary.run(["recipients"], standardInput: "# no identity\n")
