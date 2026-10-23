@@ -10,6 +10,7 @@ T1|x|`nix` node: flake builds `57ccea1` (+ `f62703c`) w/o source change w/ host 
 T2|x|owner installed Xcode 27.1 machine-wide via the owner's machine config, outside this repo (D21, R3, R9); dev shell sets `DEVELOPER_DIR` & refuses w/o XCTest; CI runner's Xcode → T14|V6,V15
 T3|x|`Package.swift`: exclude `SPEC.md` from `Sources` & `Tests` targets (D22, R7)|V7
 T4|x|`fixtures` node: corpus made w/ upstream `v0.2.1` & `57ccea1` binaries on `MacBookPro18,3` w/ Secure Enclave, 2026-10-18; commands in `fixtures/README.md`|V1,V2,V15
+T5|x|`Tests`: format-freeze tests over `fixtures/` (`Tests` T1, T2): `FormatFreezeTests` (V1) & `FormatFreezeSessionTests` (V2, structural) in `Fork/PluginForkTests.swift`; real-identity replay in `CryptoKitHardwareTests`. characterization ∴ red run = planted byte in a fixture copy|V1,V2,V4
 T7|x|`.context-limits` measured w/ slack per node (`paradigm/V12`)|-
 T8|x|`Tests`: help ↔ parser drift test `OptionsHelpTests` (R11)|V11
 T9|x|`Sources`: `AGE_PLUGIN_SE_PROMPT` RED → GREEN; `CryptoKitCrypto(environment:)` sets `LAContext.localizedReason`. fork only (V5 off)|V12,V3

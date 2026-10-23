@@ -109,7 +109,7 @@ T1|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T2|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V15
-T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
+T5|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
@@ -121,7 +121,7 @@ T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swif
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
-T17|~|wave plan by hand ∵ `sherd wave` reads only Rust edges (sherd#132): W1 = T4 ∥ T8 ∥ T11, merged & reconciled (`reconcile-1`); W2 = T5 `Tests` ∥ T9 `Sources`; W3 = T10 `Sources`; each ends w/ reconcile commit (`paradigm/V18`). `Sources` task's RED test in its `Tests/Fork` mirror ∴ ⊥ `Tests` worker there. T5 waits on owner (`Tests` T1, T2)|V5,V15
+T17|~|wave plan by hand ∵ `sherd wave` reads only Rust edges (sherd#132): W1 = T4 ∥ T8 ∥ T11, merged & reconciled (`reconcile-1`); W2 = T5 `Tests` ∥ T9 `Sources`; W3 = T10 `Sources`; each ends w/ reconcile commit (`paradigm/V18`). `Sources` task's RED test in its `Tests/Fork` mirror ∴ ⊥ `Tests` worker there|V5,V15
 T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|x|ARCHIVED to SPEC-ARCHIVE.md|V10
