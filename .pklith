@@ -16,6 +16,12 @@ format 1
 # tests. `bats-changed` runs a changed script's spec, found through the
 # `gate-bats` and `release-bats` rules; `bats-unit` runs them all.
 #
+# `mth-fmt` replaces the catalog row to read SPEC-ARCHIVE.md files too:
+# `mth archive` rewrites each archive's header hard-wrapped on every run,
+# and the catalog row's `**/SPEC.md` glob let that drift land unseen.
+# `mth check` stays SPEC.md only: an archive is a sink whose citations
+# point into its SPEC.md, so it would report every one as dangling.
+#
 # `coverage` runs gate/coverage.sh, which skips with a notice below macOS
 # 26: the floor was measured where the ML-KEM-768 tests run, and they
 # skip on older macOS, so CI and macOS 26 hosts hold it (root V10).
@@ -37,6 +43,7 @@ format 1
 ## checks
 id|category|nix|glob|check|fix|env|msg
 shellcheck|lint|shellcheck|.githooks/*, .envrc, **/*.sh|shellcheck --shell=bash {{files}}|-|-|shell script finding
+mth-fmt|lint|-|**/SPEC.md, **/SPEC-ARCHIVE.md|(for f in {{files}}; do mth fmt --check "$f" \|\| exit 1; done)|(for f in {{files}}; do mth fmt "$f" \|\| exit 1; done)|-|a SPEC.md or SPEC-ARCHIVE.md is hard-wrapped or over the line cap; after `mth archive`, run `mth fmt` on the archive
 build|lint|-|**/*.swift, Package.swift, Package.resolved|swift build --build-tests -Xswiftc -warnings-as-errors|-|-|the build or a compiler warning failed (root V7)
 test|test|-|**/*.swift, Package.swift, Package.resolved, nix/test.sh|nix/test.sh swift|-|-|a test failed (root V15, nix V2)
 hardware|test|-|**/*.swift, Package.swift, Package.resolved|test -n "${CI:-}" && echo 'hardware: CI is set, so the Secure Enclave suite is not run here (Tests §I)' \|\| AGE_PLUGIN_SE_HARDWARE=1 swift test --filter CryptoKitHardwareTests|-|-|a Secure Enclave hardware test failed on this Mac (Tests §I, root V15)
@@ -71,6 +78,7 @@ lock|flake-lock-graph|-|-
 markdownlintignore|-|-|ignore patterns, no linter reads them
 md|markdownlint|-|-
 nix|nixfmt, statix, deadnix|-|-
+path:**/SPEC-ARCHIVE.md|markdownlint, mth-fmt|-|-
 path:**/SPEC.md|markdownlint, mth-fmt, mth-check, sherd-check, sherd-nav, sherd-budget|-|-
 path:.github/actions/**|-|-|upstream composite action, untouched (root §C); the upstream workflows use it
 path:.github/workflows/build-main.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
