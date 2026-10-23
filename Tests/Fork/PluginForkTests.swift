@@ -532,3 +532,132 @@ final class PluginProtocolErrorProcessTests: XCTestCase {
       message: "unexpected response: `fail`", output: "-> error recipient 0\n\(body)\n")
   }
 }
+
+/// Early or malformed plugin-protocol input on a `MemoryStream` (root V20,
+/// bug B4): each state machine throws at every place upstream trapped, and
+/// upstream's `runRecipientV1()` and `runIdentityV1()` end the session
+/// without the trap. Valid sessions keep their bytes (root V2): upstream's
+/// PluginTests and the fork tests above run them unchanged.
+final class PluginProtocolErrorTests: XCTestCase {
+  let recipient = "age1se1qd8k3whkdlquhxp3uhhenptvtxmcxkhasj58s3hgak74s48x2mhp62z4zzr"
+  let identity = "AGE-PLUGIN-SE-18YNMANPJKHE2ZAZJHRCKZKFXCT78YYWUTY0F730TMTZFV0CM9YHSRP8GPG"
+  let recipientStanza = """
+    -> recipient-stanza 0 piv-p256 14yi6A Az7IeMpB4oX0CHt/Bc9xzk6x1K262zNxoUtfAikZa5T7
+    SLgnrcnHLaJHCx+fwSEWWoflDgL91oDGCGNwb2YaT+4
+    """
+  var crypto = DummyCrypto()
+  var stream = MemoryStream()
+
+  override func setUp() {
+    crypto = DummyCrypto()
+    stream = MemoryStream()
+  }
+
+  var plugin: Plugin { Plugin(crypto: crypto, stream: stream) }
+
+  func assertError(
+    _ expected: Plugin.Error, _ run: () throws -> Void, file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    XCTAssertThrowsError(try run(), file: file, line: line) { error in
+      XCTAssertEqual(expected, error as? Plugin.Error, file: file, line: line)
+    }
+  }
+
+  /// MemoryStream reads `""` as no line at all, as an empty stdin.
+  func feed(_ input: String) {
+    stream.inputLines = input.isEmpty ? [] : input.components(separatedBy: "\n")
+  }
+
+  func testRecipientV1_Empty() {
+    assertError(.incompleteStanza) { try plugin.recipientV1() }
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testRecipientV1_TruncatedStanza() {
+    feed("-> add-recipient \(recipient)")
+    assertError(.incompleteStanza) { try plugin.recipientV1() }
+  }
+
+  func testRecipientV1_MissingArgument() {
+    for command in ["add-recipient", "add-identity"] {
+      setUp()
+      feed("-> \(command)\n\n-> done\n")
+      assertError(.invalidStanza) { try plugin.recipientV1() }
+    }
+  }
+
+  /// age never answers the recipient stanza, or answers `fail`.
+  func testRecipientV1_Answer() {
+    for (answer, expected) in [
+      ("", Plugin.Error.incompleteStanza), ("\n-> fail\n", .unexpectedResponse("fail")),
+    ] {
+      setUp()
+      feed(
+        "-> add-recipient \(recipient)\n\n-> wrap-file-key\nezXgNAcK/Fet+1A7Q08TBg\n-> done\n\(answer)"
+      )
+      assertError(expected) { try plugin.recipientV1() }
+      XCTAssertTrue(
+        stream.output.hasPrefix("-> recipient-stanza 0 piv-p256 dsZPVg "), stream.output)
+      XCTAssertFalse(stream.output.contains("-> done"), stream.output)
+    }
+  }
+
+  /// Upstream's entry point: the session ends where the input does.
+  func testRunRecipientV1_Empty() {
+    plugin.runRecipientV1()
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testIdentityV1_Empty() {
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testIdentityV1_TruncatedStanza() {
+    feed("-> add-identity \(identity)\n\n-> recipient-stanza 0 piv-p256 14yi6A")
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+  }
+
+  func testIdentityV1_MalformedStanza() {
+    for header in [
+      "add-identity", "recipient-stanza", "recipient-stanza 0", "recipient-stanza x X25519 a",
+    ] {
+      setUp()
+      feed("-> \(header)\n\n-> done\n")
+      assertError(.invalidStanza) { try plugin.identityV1() }
+      XCTAssertEqual("", stream.output, header)
+    }
+  }
+
+  /// The unwrap fails, the plugin sends `msg`, and age never answers it.
+  func testIdentityV1_MessageNoAnswer() {
+    crypto.failingOperations = true
+    feed("-> add-identity \(identity)\n\n\(recipientStanza)\n-> done\n")
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+    XCTAssertTrue(stream.output.hasPrefix("-> msg\n"), stream.output)
+  }
+
+  /// age answers the identity error with `fail`, or not at all.
+  func testIdentityV1_Answer() {
+    for (answer, expected) in [
+      ("", Plugin.Error.incompleteStanza), ("\n-> fail\n", .unexpectedResponse("fail")),
+    ] {
+      setUp()
+      feed("-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\(answer)")
+      assertError(expected) { try plugin.identityV1() }
+      XCTAssertTrue(stream.output.hasPrefix("-> error identity 0\n"), stream.output)
+      XCTAssertFalse(stream.output.contains("-> done"), stream.output)
+    }
+  }
+
+  func testRunIdentityV1_Empty() {
+    plugin.runIdentityV1()
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testUnexpectedResponse_Description() {
+    XCTAssertEqual(
+      "unexpected response: `fail`", Plugin.Error.unexpectedResponse("fail").localizedDescription)
+  }
+}

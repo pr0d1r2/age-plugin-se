@@ -9,7 +9,14 @@ struct CLI {
       let plugin = Plugin(crypto: CryptoKitCrypto(), stream: StandardIOStream())
       try run(CommandLine.arguments, plugin: plugin)
     } catch {
-      print("\(CommandLine.arguments[0]): error: \(error.localizedDescription)")
+      let line = "\(CommandLine.arguments[0]): error: \(error.localizedDescription)"
+      if case CLIError.pluginProtocol = error {
+        // Fork: stdout carries the plugin protocol, so this error goes to
+        // stderr (root V20); every other error stays on stdout (root R13).
+        FileHandle.standardError.write(Data((line + "\n").utf8))
+      } else {
+        print(line)
+      }
       exit(-1)
     }
   }
@@ -52,11 +59,15 @@ struct CLI {
         print(result)
       }
     case .plugin(let sm):
-      switch sm {
-      case .recipientV1:
-        plugin.runRecipientV1()
-      case .identityV1:
-        plugin.runIdentityV1()
+      do {
+        switch sm {
+        case .recipientV1:
+          try plugin.recipientV1()
+        case .identityV1:
+          try plugin.identityV1()
+        }
+      } catch {
+        throw CLIError.pluginProtocol(error.localizedDescription)
       }
     }
   }
@@ -88,11 +99,14 @@ func writeOutput(_ contents: String, to outputFile: String) throws {
 enum CLIError: LocalizedError, Equatable {
   case cannotWriteOutput(String)
   case invalidStandardInput
+  /// Fork: age's plugin-protocol input ended early or was malformed (root V20).
+  case pluginProtocol(String)
 
   public var errorDescription: String? {
     switch self {
     case .cannotWriteOutput(let file): return "cannot write output file `\(file)`"
     case .invalidStandardInput: return "standard input is not valid UTF-8"
+    case .pluginProtocol(let message): return "plugin protocol: \(message)"
     }
   }
 }

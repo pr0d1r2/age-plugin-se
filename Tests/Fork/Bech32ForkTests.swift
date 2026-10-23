@@ -28,6 +28,12 @@ final class Bech32CoverageTests: XCTestCase {
     assertDecodeError("1qqqqqqqq", .incorrectHrpSize)
   }
 
+  /// An empty string has no first character to read the case from; it is
+  /// a decode error, not a trap (root V20, bug B4).
+  func testDecode_Empty() {
+    assertDecodeError("", .noChecksumMarker)
+  }
+
   func testDecode_ShortChecksum() {
     assertDecodeError("a1qqqqq", .incorrectChecksumSize)
   }

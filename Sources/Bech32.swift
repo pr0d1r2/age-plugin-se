@@ -184,7 +184,8 @@ public class Bech32 {
   }
 
   public func decode(_ str: String) throws -> (hrp: String, data: Data) {
-    let isUpper = str[str.startIndex].isUppercase
+    // Fork: "" has no first character; decodeBech32 rejects it (root V20).
+    let isUpper = str.first?.isUppercase ?? false
     let result = try decodeBech32(isUpper ? str.lowercased() : str)
     return (
       isUpper ? result.hrp.uppercased() : result.hrp,

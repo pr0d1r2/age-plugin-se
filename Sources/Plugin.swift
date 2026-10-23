@@ -124,19 +124,28 @@ class Plugin {
     return recipients.joined(separator: "\n")
   }
 
+  /// Upstream's entry point for `recipientV1()`, kept so upstream's tests
+  /// run as-is (root V4). A protocol error ends the session, as upstream's
+  /// trap did, without the crash; `CLI.run` calls `recipientV1()`.
   func runRecipientV1() {
+    _ = try? recipientV1()
+  }
+
+  /// The recipient-v1 state machine. Fork: input that ends early or is
+  /// malformed throws, where upstream trapped (root V20, bug B4).
+  func recipientV1() throws {
     var recipients: [String] = []
     var identities: [String] = []
     var fileKeys: [Data] = []
 
     // Phase 1
     loop: while true {
-      let stanza = try! Stanza.readFrom(stream: stream)
+      let stanza = try Stanza.readFrom(stream: stream)
       switch stanza.type {
       case "add-recipient":
-        recipients.append(stanza.args[0])
+        recipients.append(try stanza.argument(0))
       case "add-identity":
-        identities.append(stanza.args[0])
+        identities.append(try stanza.argument(0))
       case "wrap-file-key":
         fileKeys.append(stanza.body)
       case "done":
@@ -261,22 +270,33 @@ class Plugin {
     }
     for stanza in (errors.isEmpty ? stanzas : errors) {
       stanza.writeTo(stream: stream)
-      let resp = try! Stanza.readFrom(stream: stream)
-      assert(resp.type == "ok")
+      try Stanza.readOK(from: stream)
     }
     Stanza(type: "done").writeTo(stream: stream)
   }
 
+  /// Upstream's entry point for `identityV1()`, kept so upstream's tests
+  /// run as-is (root V4), as `runRecipientV1()` is.
   func runIdentityV1() {
+    _ = try? identityV1()
+  }
+
+  /// The identity-v1 state machine. Fork: input that ends early or is
+  /// malformed throws, where upstream trapped (root V20, bug B4).
+  func identityV1() throws {
     // Phase 1
     var identities: [String] = []
     var recipientStanzas: [Stanza] = []
     loop: while true {
-      let stanza = try! Stanza.readFrom(stream: stream)
+      let stanza = try Stanza.readFrom(stream: stream)
       switch stanza.type {
       case "add-identity":
-        identities.append(stanza.args[0])
+        identities.append(try stanza.argument(0))
       case "recipient-stanza":
+        // Fork: phase 2 reads a file index and a type from every one.
+        guard stanza.args.count >= 2, Int(stanza.args[0]) != nil else {
+          throw Error.invalidStanza
+        }
         recipientStanzas.append(stanza)
       case "done":
         break loop
@@ -428,8 +448,7 @@ class Plugin {
           } catch {
             Stanza(type: "msg", body: Data(Plugin.message(for: error).utf8)).writeTo(
               stream: stream)
-            let resp = try! Stanza.readFrom(stream: self.stream)
-            assert(resp.type == "ok")
+            try Stanza.readOK(from: self.stream)
             // continue
           }
         }
@@ -439,8 +458,7 @@ class Plugin {
     let responses = fileResponses.keys.sorted().map({ k in fileResponses[k]! })
     for stanza in (errors.isEmpty ? responses : errors) {
       stanza.writeTo(stream: stream)
-      let resp = try! Stanza.readFrom(stream: stream)
-      assert(resp.type == "ok")
+      try Stanza.readOK(from: stream)
     }
     Stanza(type: "done").writeTo(stream: stream)
   }
@@ -492,6 +510,8 @@ class Plugin {
     case invalidRecipient
     case unknownHRP(String)
     case missingPQ
+    /// Fork: age answered with something other than `ok` (root V20).
+    case unexpectedResponse(String)
 
     public var errorDescription: String? {
       switch self {
@@ -503,6 +523,7 @@ class Plugin {
       case .invalidRecipient: return "invalid recipient"
       case .unknownHRP(let hrp): return "unknown HRP: \(hrp)"
       case .missingPQ: return "missing post-quantum key support"
+      case .unexpectedResponse(let type): return "unexpected response: `\(type)`"
       }
     }
   }
@@ -552,6 +573,25 @@ struct Stanza: Equatable {
 }
 
 extension Stanza {
+  /// Fork: argument `index`; age always sends the ones a command needs, so a
+  /// missing one is a protocol error (root V20).
+  func argument(_ index: Int) throws -> String {
+    guard index < args.count else {
+      throw Plugin.Error.invalidStanza
+    }
+    return args[index]
+  }
+
+  /// Fork: reads age's answer to a stanza the plugin sent. Anything but `ok`
+  /// is a protocol error (root V20); upstream asserted, so a release build
+  /// went on and a debug build trapped.
+  static func readOK(from stream: Stream) throws {
+    let response = try readFrom(stream: stream)
+    if response.type != "ok" {
+      throw Plugin.Error.unexpectedResponse(response.type)
+    }
+  }
+
   init(error type: String, args: [String] = [], message: String) {
     self.type = "error"
     self.args = [type] + args

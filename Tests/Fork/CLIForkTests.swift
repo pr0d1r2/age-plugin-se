@@ -242,6 +242,19 @@ final class CLIRunCoverageTests: XCTestCase {
     XCTAssertEqual([], printed)
   }
 
+  /// Empty stdin in plugin mode: `CLI.run` throws `pluginProtocol`, which
+  /// `CLI.main` prints on stderr (root V20, bug B4).
+  func testPlugin_EmptyInput() throws {
+    for machine in ["recipient-v1", "identity-v1"] {
+      XCTAssertThrowsError(try run(["--age-plugin=\(machine)"]), machine) { error in
+        XCTAssertEqual(CLIError.pluginProtocol("incomplete stanza"), error as? CLIError)
+        XCTAssertEqual("plugin protocol: incomplete stanza", error.localizedDescription)
+      }
+    }
+    XCTAssertEqual("", stream.output)
+    XCTAssertEqual([], printed)
+  }
+
   func testError_Thrown() throws {
     XCTAssertThrowsError(try run(["--bogus"])) { error in
       XCTAssertEqual(Options.Error.unknownOption("--bogus"), error as? Options.Error)
