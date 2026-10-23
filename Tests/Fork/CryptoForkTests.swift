@@ -189,6 +189,93 @@ import XCTest
       #endif
     }
 
+    /// Root V2's replay with the real fixture identities (owner 2026-10-23):
+    /// every decrypt session's age side, as recorded, through identity-v1 on
+    /// this Mac's Secure Enclave gives the recorded plugin side byte for
+    /// byte, so the recorded file key. The keys are `--access-control none`,
+    /// so nothing prompts. They load only in the Secure Enclave that made
+    /// them (`fixtures/README.md`); on another Mac this skips with a notice.
+    func testFixtures_DecryptReplay() throws {
+      var replayed = 0
+      for path in try Fixtures.files("-decrypt.session") {
+        let session = try SessionFixture(path)
+        guard try fixtureKeyLoads(session, path) else { continue }
+        let stream = MemoryStream()
+        stream.add(input: session.toPlugin.joined(separator: "\n"))
+        try Plugin(crypto: crypto, stream: stream).identityV1()
+        Fixtures.assertSameBytes(
+          session.fromPlugin.joined(separator: "\n"), stream.output, path, "hardware replay")
+        replayed += 1
+      }
+      print("hardware: replayed \(replayed) fixture decrypt sessions on this Secure Enclave")
+    }
+
+    /// Each encrypt session's age side through this build's recipient-v1,
+    /// on real randomness; the stanza it sends unwraps with the set's real
+    /// identity to the decrypt session's recorded plugin side, whose file
+    /// key is the one age asked to wrap.
+    func testFixtures_EncryptThenUnwrap() throws {
+      for path in try Fixtures.files("-encrypt.session") {
+        let session = try SessionFixture(path)
+        let decrypt = try SessionFixture(
+          path.replacingOccurrences(of: "-encrypt.", with: "-decrypt."))
+        guard try fixtureKeyLoads(decrypt, path) else { continue }
+        let wrapping = MemoryStream()
+        wrapping.add(input: session.toPlugin.joined(separator: "\n"))
+        try Plugin(crypto: crypto, stream: wrapping).recipientV1()
+        let stanza = try XCTUnwrap(try Message.parse(wrapping.outputLines, path).first)
+        XCTAssertEqual("recipient-stanza", stanza.stanza.type, path)
+
+        let identity = try XCTUnwrap(try Message.parse(decrypt.toPlugin, path).first)
+        let stream = MemoryStream()
+        stream.add(
+          input: (identity.lines + stanza.lines + ["-> done", "", "-> ok", ""]).joined(
+            separator: "\n"))
+        try Plugin(crypto: crypto, stream: stream).identityV1()
+        Fixtures.assertSameBytes(
+          decrypt.fromPlugin.joined(separator: "\n"), stream.output, path, "hardware unwrap")
+      }
+    }
+
+    /// Whether the session's fixture identity works in this Secure Enclave.
+    /// A key made here first must work, or the Secure Enclave is unusable
+    /// now (a locked Mac, say) and the test fails, as the other tests here
+    /// do. If it works and no fixture key does, another Mac made them: skip
+    /// with a notice. Some working and others not is a failure. A
+    /// post-quantum stanza needs macOS 26.
+    private func fixtureKeyLoads(_ session: SessionFixture, _ path: String) throws -> Bool {
+      if session.toPlugin.contains(where: { $0.contains(" mlkem768p256tag ") }) {
+        guard #available(macOS 26.0, *) else {
+          print("hardware: fixtures/\(path): ML-KEM-768 needs macOS 26; skipped")
+          return false
+        }
+      }
+      try agrees(
+        crypto.newSecureEnclaveP256PrivateKey(accessControl: Hardware.accessControl())
+          .dataRepresentation)
+      let identity = path.components(separatedBy: "/")[0] + "/\(Fixtures.set(path)).identity"
+      do {
+        try agrees(try IdentityFixture(identity).blobs().p256)
+        return true
+      } catch {
+        let working = try Fixtures.files(".identity").filter { other in
+          (try? agrees(try IdentityFixture(other).blobs().p256)) != nil
+        }
+        XCTAssertEqual([], working, "fixtures/\(path): its key does not work here, but these do")
+        throw XCTSkip(
+          "hardware: the fixture keys were made in another Mac's Secure Enclave "
+            + "(fixtures/README.md) and do not work here: \(error.localizedDescription); skipped")
+      }
+    }
+
+    /// Loads the P-256 Secure Enclave key `blob` and agrees with a fresh
+    /// software key; throws if the key does not work here.
+    private func agrees(_ blob: Data) throws {
+      let key = try crypto.newSecureEnclaveP256PrivateKey(dataRepresentation: blob)
+      _ = try key.sharedSecretFromKeyAgreement(
+        with: P256.KeyAgreement.PrivateKey().publicKey)
+    }
+
     /// `keygen --access-control none` into a temporary file under
     /// `.build/tmp-hw/`, `age -e` to its recipient, `age -d -i` through the
     /// plugin; the plaintext must come back.

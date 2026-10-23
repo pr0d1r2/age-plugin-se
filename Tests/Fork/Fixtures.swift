@@ -117,6 +117,10 @@ struct IdentityFixture {
   func blobs() throws -> (p256: Data, mlkem: Data?) {
     let data = try Bech32().decode(try XCTUnwrap(identity, "fixtures/\(path): no key line")).data
     guard pqPublicKey != nil else { return (data, nil) }
+    return try Self.split(data, path)
+  }
+
+  private static func split(_ data: Data, _ path: String) throws -> (p256: Data, mlkem: Data?) {
     let bytes = [UInt8](data)
     let p256Count = Int(bytes[0]) << 8 | Int(bytes[1])
     let p256 = Data(bytes[2..<(2 + p256Count)])
