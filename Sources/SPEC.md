@@ -29,8 +29,8 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §I INTERFACES
 
-- file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `writeOutput(_:to:)`, `CLIError` (B1 to B3, `.:T11`, `.:T25`, `.:T26`); `CLI.run` (`.:T28`).
-- file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`.
+- file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `writeOutput(_:to:)`, `CLIError` (B1 to B3, `.:T11`, `.:T25`, `.:T26`); `CLI.run` (`.:T28`); `Options.ValueOption`, table of value options `parse` switches on (`.:V10`).
+- file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`; fork: `newAccessControl` (test seam, default `SecAccessControlCreateWithFlags`, `.:V10`).
 - file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`), `isMLKEMAvailable` (test seam, `.:T30`).
 - file: `HPKE.swift` — HPKE seal/open, P-256 & ML-KEM-768 hybrid; fork: ML-KEM-768 encap & decap guard on `crypto.isMLKEMAvailable`, decap takes `crypto:` (`.:T29`).
 - file: `Bech32.swift`, `Base64.swift` — encodings. `Stream.swift` — `StandardIOStream`.
