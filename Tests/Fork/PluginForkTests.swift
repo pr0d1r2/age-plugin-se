@@ -684,3 +684,136 @@ final class PluginProtocolErrorTests: XCTestCase {
     }
   }
 }
+
+/// Format freeze, root V1 (Tests T1): every identity and recipient in
+/// `fixtures/`, made by upstream `v0.2.1` and `57ccea1`, parses and
+/// re-encodes byte-identical in this build, and `keygen` and `recipients`
+/// write the same files from the same keys. No Secure Enclave: root R14's
+/// stand-in (`FixtureCrypto`) answers each fixture blob with the public key
+/// its identity file names. `v0.2.1/tag-pq.recipient` is a classic
+/// `age1tag1` recipient, as `v0.2.1` wrote it (owner 2026-10-23).
+final class FormatFreezeTests: XCTestCase {
+  /// `v0.2.1` ignored `recipients --pq` (fixed upstream by `19c59f2`).
+  static let classicPQRecipient = "v0.2.1/tag-pq.recipient"
+
+  func identities() throws -> [IdentityFixture] {
+    try Fixtures.files(".identity").map(IdentityFixture.init)
+  }
+
+  func identity(for recipientPath: String) throws -> IdentityFixture {
+    try IdentityFixture(String(recipientPath.dropLast(".recipient".count)) + ".identity")
+  }
+
+  func pqAvailable() -> Bool {
+    if #available(macOS 26.0, *) { return true }
+    return false
+  }
+
+  /// Both producers are here, and every file is a kind these tests read.
+  func testCorpus() throws {
+    XCTAssert(Set(try Fixtures.revisions()).isSuperset(of: ["57ccea1", "v0.2.1"]))
+    let kinds = [".identity", ".recipient", "-encrypt.session", "-decrypt.session"]
+    for path in try Fixtures.all() {
+      XCTAssert(kinds.contains(where: path.hasSuffix), "fixtures/\(path): not read by any test")
+    }
+    for path in try Fixtures.files(".identity") {
+      let stem = String(path.dropLast(".identity".count))
+      for suffix in [".recipient", "-decrypt.session"] {
+        XCTAssert(try Fixtures.all().contains(stem + suffix), "fixtures/\(stem)\(suffix) missing")
+      }
+    }
+    XCTAssertEqual(6, try Fixtures.files(".identity").count)
+    XCTAssertEqual(6, try Fixtures.files(".recipient").count)
+  }
+
+  /// The key line parses and re-encodes to the same bytes; the classic
+  /// recipient it gives is the one its `# public key:` line names.
+  func testIdentities_ReEncode() throws {
+    let fixtures = try identities()
+    let crypto = try FixtureCrypto(fixtures)
+    for fixture in fixtures {
+      let line = try XCTUnwrap(fixture.identity, fixture.path)
+      let identity = try Identity(ageIdentity: line, crypto: crypto)
+      Fixtures.assertSameBytes(line, identity.ageIdentity, fixture.path, "identity")
+      XCTAssertEqual(fixture.isPQ, identity.mlkemPrivateKeyData != nil, fixture.path)
+      Fixtures.assertSameBytes(
+        try XCTUnwrap(fixture.publicKey),
+        identity.recipient.ageRecipient(type: fixture.recipientType),
+        fixture.path, "# public key")
+      if fixture.isPQ, #available(macOS 26.0, *) {
+        Fixtures.assertSameBytes(
+          try XCTUnwrap(fixture.pqPublicKey),
+          try identity.pqRecipient(crypto: crypto).ageTagPQRecipient, fixture.path,
+          "# public key (post-quantum)")
+      }
+    }
+  }
+
+  /// `keygen --access-control none` from the same Secure Enclave keys and
+  /// clock writes the whole identity file, comments included.
+  func testIdentities_Keygen() throws {
+    let fixtures = try identities()
+    for fixture in fixtures {
+      if fixture.isPQ && !pqAvailable() {
+        print("format-freeze: fixtures/\(fixture.path): keygen --pq needs macOS 26; skipped")
+        continue
+      }
+      let crypto = try FixtureCrypto(fixtures)
+      let (p256, mlkem) = try fixture.blobs()
+      crypto.made = [p256] + (mlkem.map { [$0] } ?? [])
+      let now = try XCTUnwrap(
+        ISO8601DateFormatter().date(from: try XCTUnwrap(fixture.created)), fixture.path)
+      let (contents, recipient) = try Plugin(crypto: crypto, stream: MemoryStream()).generateKey(
+        accessControl: .none, recipientType: fixture.recipientType, now: now, pq: fixture.isPQ)
+      Fixtures.assertSameBytes(fixture.text, contents, fixture.path, "keygen output")
+      XCTAssertEqual(fixture.isPQ ? fixture.pqPublicKey : fixture.publicKey, recipient)
+      XCTAssert(crypto.made.isEmpty, fixture.path)
+    }
+  }
+
+  /// Each recipient decodes and re-encodes to the file's bytes.
+  func testRecipients_ReEncode() throws {
+    for path in try Fixtures.files(".recipient") {
+      let text = try Fixtures.text(path)
+      let recipient = try Recipient(ageRecipient: text)
+      let encoded =
+        text.hasPrefix("age1tagpq1")
+        ? try recipient.ageTagPQRecipient
+        : recipient.ageRecipient(type: text.hasPrefix("age1se1") ? .se : .tag)
+      Fixtures.assertSameBytes(text, encoded, path, "recipient")
+    }
+  }
+
+  /// `recipients` (`--pq` for a `tag-pq` set) on the identity file writes
+  /// the recipient file, with no final newline, as upstream's `-o` did.
+  func testRecipients_FromIdentity() throws {
+    let crypto = try FixtureCrypto(try identities())
+    for path in try Fixtures.files(".recipient") {
+      let fixture = try identity(for: path)
+      let pq = fixture.isPQ && path != Self.classicPQRecipient
+      if pq && !pqAvailable() {
+        print("format-freeze: fixtures/\(path): recipients --pq needs macOS 26; skipped")
+        continue
+      }
+      let output = try Plugin(crypto: crypto, stream: MemoryStream()).generateRecipients(
+        input: fixture.text, recipientType: fixture.recipientType, pq: pq)
+      Fixtures.assertSameBytes(try Fixtures.data(path), Data(output.utf8), path, "recipients")
+    }
+  }
+
+  /// The `v0.2.1` quirk, kept as a classic recipient (owner 2026-10-23):
+  /// `recipients --pq` wrote the identity's classic `age1tag1` recipient.
+  /// It decodes as one; this build's `--pq` gives the post-quantum one.
+  func testTagPQ_V021_IsClassic() throws {
+    let path = Self.classicPQRecipient
+    let text = try Fixtures.text(path)
+    let fixture = try identity(for: path)
+    XCTAssert(text.hasPrefix("age1tag1"), text)
+    XCTAssertNil(try Recipient(ageRecipient: text).mlkem768PublicKeyData)
+    XCTAssertEqual(fixture.publicKey, text)
+    guard #available(macOS 26.0, *) else { return }
+    let output = try Plugin(crypto: try FixtureCrypto([fixture]), stream: MemoryStream())
+      .generateRecipients(input: fixture.text, recipientType: .tag, pq: true)
+    XCTAssertEqual(fixture.pqPublicKey, output)
+  }
+}
