@@ -233,6 +233,10 @@ struct Options {
                                         Default: se.
                                         The default will change to `tag` in future versions.
 
+      -h, --help                        Print this help and exit.
+
+      --version                         Print the version and exit.
+
     Example:
       $ age-plugin-se keygen -o key.txt
       Public key: age1se1qg8vwwqhztnh3vpt2nf2xwn7famktxlmp0nmkfltp8lkvzp8nafkqleh258

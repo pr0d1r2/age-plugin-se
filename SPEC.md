@@ -16,7 +16,7 @@ Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `Dum
 fixtures|format-freeze corpus: identities, recipients & stanzas made by upstream `v0.2.1` & `57ccea1`; how each was made|tests reading it (`Tests`), the formats (upstream)|-
 nix|flake parts: package, checks, dev shell, host-toolchain guard|gate rows (root `.pklith`), CI workflow (root)|-
 Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node|fork gate & coverage ratchet (root)|-
-Documentation|upstream man page sources, unchanged; ⊥ node|fork docs (`docs`; root `README.md` stays upstream's)|-
+Documentation|upstream man page sources + fork help option lines; ⊥ node|fork docs (`docs`; root `README.md` stays upstream's)|-
 docs|fork notices & LLM disclaimer; ⊥ node|`LICENSE.txt` (root)|-
 gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node|gate rows (root `.pklith`), hooks (root `hk.pkl`)|-
 release|fork CI-only Alpine keygen & its bats test; ⊥ node|upstream packaging|-
@@ -72,7 +72,7 @@ R7|upstream warnings 2026-10-18|`swift build` on `57ccea1`: 4× `'21.0' is not a
 R8|argument parsing 2026-10-18|`Options.parse` hand-written in `Sources/CLI.swift`; help text separate string|`Sources/CLI.swift`
 R9|build Mac Xcode 2026-10-18|Xcode 27.1 installed (D21 said 26): Swift 6.4, `xcrun --find xctest` resolves. nix darwin stdenv sets `DEVELOPER_DIR` & `SDKROOT` to apple-sdk 14.4 ∴ `/usr/bin/swift` → `tool 'swift' not found` until reset. recount: `xcodebuild -version`|local probe
 R10|gate 2026-10-18|39 steps on commit, +4 on push, 2 on commit-msg (after T14, T23); coverage 88.57% (1,015/1,146 `Sources/` lines) after W1. recount: `hk.pklith.pkl`, `sherd coverage --check`|`.pklith`
-R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; `Options.help` names none ∴ upstream drift, baselined in `OptionsHelpTests.undocumented`, only shrinks (D13)|`Tests/Fork/CLIForkTests.swift`
+R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--help`, `-h`, `--version`; upstream `Options.help` names none ∴ drift. fork lists `-h`, `--help`, `--version` (T27) ∴ `OptionsHelpTests.undocumented` = `--age-plugin` only ∵ age runs it, ⊥ user (owner 2026-10-23); only shrinks (D13)|`Tests/Fork/CLIForkTests.swift`
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
 R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
 R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner; pklith shell since `028c65c` (pklith PR 103)|local probe, PR body
@@ -130,7 +130,7 @@ T23|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T24|.|deferred until official releases: distribution key replaces T23's. private key only in ALPINE_KEY, made in memory; `--rotate` ⊥ recovery; pubs append-only in `release/keys/` w/ `revoked/`; ALPINE_KEY_NAME var names `.SIGN.RSA.<name>.pub`; fork script calls `dir2apk.go --key=`; reconcile w/ D12|-
 T25|x|ARCHIVED to SPEC-ARCHIVE.md|V18
 T26|x|ARCHIVED to SPEC-ARCHIVE.md|V19
-T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
+T27|x|ARCHIVED to SPEC-ARCHIVE.md|V11
 T28|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T29|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 ported + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2

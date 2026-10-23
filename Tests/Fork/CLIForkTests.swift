@@ -418,13 +418,14 @@ final class ForkCLITests: XCTestCase {
 ///
 /// The parser is upstream's hand-written `Options.parse` (D15), so the options
 /// it accepts are read from the string literals in its source, and each one is
-/// then fed to the parser itself. Upstream's help leaves out four options the
-/// parser accepts; they sit in `undocumented`, a baseline that only shrinks
+/// then fed to the parser itself. Upstream's help left out four options the
+/// parser accepts; the fork documents `-h`, `--help` and `--version` (root
+/// T27). What is left sits in `undocumented`, a baseline that only shrinks
 /// (D13): an entry that turns up in the help, or stops being parsed, fails.
 final class OptionsHelpTests: XCTestCase {
-  /// Options upstream parses but its help omits (root R11). Remove an entry
-  /// once upstream documents it; never add one.
-  static let undocumented: Set<String> = ["--age-plugin", "--help", "--version", "-h"]
+  /// Options the parser accepts but the help omits (root R11). Only
+  /// `--age-plugin` stays: age runs it, people do not. Never add one.
+  static let undocumented: Set<String> = ["--age-plugin"]
 
   /// Value enums behind the options that take a fixed set of values.
   static let valueEnums = [

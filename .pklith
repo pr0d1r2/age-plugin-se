@@ -86,7 +86,7 @@ path:.github/workflows/build.yml|-|-|upstream CI, untouched (root §C, D12); lis
 path:.github/workflows/ci.yml|actionlint, zizmor, yamllint|-|-
 path:.github/workflows/release.yml|-|-|upstream CI, untouched (root §C, D12); listed hand-written in .actlith
 path:fixtures/*/*|-|-|fixture bytes written by upstream, frozen (fixtures V2): no linter reads keys, recipients or protocol transcripts; the * steps still read them, blank, newline and editorconfig steps skip them (hk.pkl)
-path:Documentation/**|-|-|upstream man page and design notes, unchanged, not a node (root §F); not reformatted (D3)
+path:Documentation/**|-|-|upstream man page and design notes, not a node (root §F); not reformatted (D3); the man page lists the help options (root T27)
 path:README.md|-|-|upstream page, unchanged (D3); its trailing blanks are markdown line breaks; baseline in hk.pkl and .markdownlintignore (D13)
 path:Scripts/**|-|-|upstream build and coverage scripts, unchanged, not a node (root §F); not reformatted (D3)
 path:Sources/CLI.swift|-|-|upstream file whose help text literal ends lines in blanks (D3, root V11): trailing-whitespace and editorconfig-checker skip it (hk.pkl baseline, D13); every other step still reads it, nothing is claimed until upstream strips them

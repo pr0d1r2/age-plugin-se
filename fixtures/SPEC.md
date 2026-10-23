@@ -19,7 +19,7 @@ sib|Sources|upstream plugin code: CLI & option parser, plugin protocol, stanzas,
 sib|Tests|XCTest target `Tests`: upstream tests as-is & fork tests beside them; `DummyCrypto`, `MemoryStream`
 sib|nix|flake parts: package, checks, dev shell, host-toolchain guard
 sib|Scripts|upstream build & coverage scripts (`ProcessCoverage.swift`), unchanged; ⊥ node
-sib|Documentation|upstream man page sources, unchanged; ⊥ node
+sib|Documentation|upstream man page sources + fork help option lines; ⊥ node
 sib|docs|fork notices & LLM disclaimer; ⊥ node
 sib|gate|fork gate scripts: name guard (denylist half), commit-msg check & their bats tests; ⊥ node
 sib|release|fork CI-only Alpine keygen & its bats test; ⊥ node
