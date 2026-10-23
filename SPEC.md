@@ -52,7 +52,7 @@ self|.|-
 - env: `AGE_PLUGIN_SE_PROMPT=<text>` — Touch ID prompt text; unset → upstream text. carried, offered upstream (PR 18).
 - error: denial marker — fixed documented string in the plugin error when user denies Touch ID; ⊥ in any other error. carried, offered upstream.
 - nix: `packages.<sys>.default` (`age-plugin-se`), `checks.<sys>.*` & `devShells.<sys>.default`, sys `{aarch64,x86_64}-darwin` (`nix` node).
-- file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`, `gate/universal.sh [BIN]` (push: arm64 & x86_64, `minos` 14.0); `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
+- file: `gate/names.sh FILE…` (denylist `.private/denylist`, gitignored), `gate/commit-msg.sh MSG`, `gate/universal.sh [BIN]` (push: arm64 & x86_64, `minos` 14.0), `gate/coverage.sh` (push: `sherd coverage --check`; macOS < 26 → notice, exit 0; `AGE_PLUGIN_SE_MACOS_MAJOR` overrides); `.bats` beside each & `release/*.sh` (`exists` rules); push: `bats-changed` for changed, `bats-unit` all.
 - file: `.actlith` → `.github/workflows/ci.yml` (fork CI, job `gate`).
 - file: `release/alpine-keygen.sh [--rotate]` — PKCS#8 RSA 4096 made in memory → `gh secret set ALPINE_KEY` stdin; ⊥ file; ALPINE_KEY set → nothing done.
 - file: `.pklith` → `hk.pkl` (gate, amends `pkl/Config.pkl`), `.coverage` (line-coverage ratchet floor, `paradigm/V25`), `.context-limits` (chain ceilings, `paradigm/V12`).
@@ -88,7 +88,7 @@ V6: build & dev shell refuse Swift < 6.2 ∵ `--pq` would silently become `pqUna
 V7: ⊥ compiler warning: clean build has 0 since `f62703c` (R7) ∴ build runs `-warnings-as-errors`. warning arriving by upstream sync → baseline entry in that sync PR, baseline only shrinks (D13).
 V8: `swift format lint --strict` clean on fork-written & fork-changed lines; upstream violations in baseline that only shrinks (D13).
 V9: ⊥ force unwrap `!`, `try!`, `as!`, `fatalError` in fork-written Swift (swiftlint) (D13).
-V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only fns exempt by `.coverage` `exclude` row w/ reason; `excluded` cap only falls (D14). target 100% of rest (D1).
+V10: line coverage ≥ `.coverage` floor, floor only rises; Secure-Enclave-only fns exempt by `.coverage` `exclude` row w/ reason; `excluded` cap only falls (D14). target 100% of rest (D1). floor measured on macOS 26 ∵ PQ tests skip below ∴ `coverage` row (`gate/coverage.sh`) skips w/ notice on macOS < 26; CI & macOS 26 hosts hold it.
 V11: ∀ option in `Options.help` parses & ∀ parsed option appears in `Options.help` (D15).
 V12: `AGE_PLUGIN_SE_PROMPT` set & non-empty → Touch ID prompt = its text; unset | empty → upstream prompt text.
 V13: Touch ID denied by user → plugin error carries denial marker; ∀ other error ∌ it.
@@ -132,7 +132,7 @@ T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ ow
 T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
 T29|.|owner: HPKE `#unavailable(macOS 26)` guard in `mlkemp256Encap`: extract to own fn & exclude (carried), or 2 lines stay uncovered|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 carried + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
-T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), hooks, `swift test`, `hardware` row. `coverage` floor measured on macOS 26, ⊥ on 15 (PQ tests skip) ∴ may fall short there → owner|V6,V15,V10
+T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), `swift package resolve` once before 1st push (else pre-push hook may fail on SwiftPM's dependency clone), hooks, `swift test`, `hardware` row. `coverage` row skips there (V10)|V6,V15,V10
 T32|~|`x86_64-darwin` shell done (pklith `028c65c`); macOS 15 CI row ⊥ in actlith (`macos-latest` only); issue w/ approval|V6
 
 ## §B BUGS

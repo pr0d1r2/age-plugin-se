@@ -188,7 +188,7 @@ push: Mapping<String, Config.Step> = new {
     check = "command -v pklith >/dev/null 2>&1 || { echo 'tdd-order: pklith is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; pklith check --pushed || { echo 'tdd-order: a commit changed a file before its test; commit the test first or with it' >&2; exit 1; }"
   }
   ["coverage"] {
-    glob = List("**/*.swift", "Package.swift", ".coverage")
-    check = "command -v sherd >/dev/null 2>&1 || { echo 'coverage: sherd is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; sherd coverage --check || { echo 'coverage: line coverage fell below the floor in .coverage (root V10)' >&2; exit 1; }"
+    glob = List("**/*.swift", "Package.swift", ".coverage", "gate/coverage.sh")
+    check = "command -v gate/coverage.sh >/dev/null 2>&1 || { echo 'coverage: gate/coverage.sh is not on PATH; re-enter the dev shell. A MISSING TOOL, not a finding.' >&2; exit 1; }; gate/coverage.sh || { echo 'coverage: line coverage fell below the floor in .coverage (root V10)' >&2; exit 1; }"
   }
 }
