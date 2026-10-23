@@ -435,6 +435,15 @@ class Plugin {
     Stanza(type: "done").writeTo(stream: stream)
   }
 
+  /// Fork: opens the message of an error the user caused by denying
+  /// Touch ID, so a caller can match it (root V13).
+  static let denialMarker = "AGE_PLUGIN_SE_DENIED_V1"
+
+  /// Fork: `error`'s text, after `denialMarker` iff the user denied Touch ID.
+  static func message(for error: Swift.Error) -> String {
+    return error.localizedDescription
+  }
+
   enum Error: LocalizedError, Equatable {
     case seUnsupported
     case pqUnsupported
