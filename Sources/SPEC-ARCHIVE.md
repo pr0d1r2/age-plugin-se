@@ -11,3 +11,4 @@ T2|x|denial marker, RED → GREEN (`.:T10`): `Plugin.isDenial` by code, 4 codes,
 T3|x|B1: `keygen -o` write failure → error, RED → GREEN (`.:T11`)|V3
 T4|x|B2: `recipients -o` write failure → error, RED → GREEN (`.:T25`)|V3
 T5|x|B3: `recipients` empty or non-UTF-8 input → error ⊥ trap, RED → GREEN (`.:T26`)|V3
+T6|x|`CLI.run`: `CLI.main`'s dispatch, injectable (`.:T28`). fork only (`.:V5` off)|V3

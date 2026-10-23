@@ -52,4 +52,4 @@ T2|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V3
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T5|x|ARCHIVED to SPEC-ARCHIVE.md|V3
-T6|~|`CLI.run`: `CLI.main`'s dispatch, injectable (`.:T28`). fork half done; upstream PR w/ approval|V3
+T6|x|ARCHIVED to SPEC-ARCHIVE.md|V3
