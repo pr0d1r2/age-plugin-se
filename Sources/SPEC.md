@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here (hard fork, owner 2026-10-23): prompt env, denial marker, B1 to B3 fixes, `CLI.run` seam, upstream PR 15 (`.:T30`).
+upstream plugin code, flat SwiftPM target `age-plugin-se`. fork changes here (hard fork, owner 2026-10-23): prompt env, denial marker, B1 to B4 fixes, `CLI.run` seam, upstream PR 15 (`.:T30`).
 
 ## §N NAV
 
@@ -29,11 +29,11 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 ## §I INTERFACES
 
-- file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `writeOutput(_:to:)`, `CLIError` (B1 to B3, `.:T11`, `.:T25`, `.:T26`); `CLI.run` (`.:T28`); `Options.ValueOption`, table of value options `parse` switches on (`.:V10`).
-- file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`; fork: `newAccessControl` (test seam, default `SecAccessControlCreateWithFlags`, `.:V10`).
+- file: `CLI.swift` — `@main CLI`, `Options.parse`, `Options.help`, version string (upstream's, D19); fork: `keygenOutput(_:output:)`, `writeOutput(_:to:)`, `CLIError` (B1 to B3, `.:T11`, `.:T25`, `.:T26`); `CLIError.pluginProtocol` → stderr in `CLI.main` (B4, `.:V20`); `CLI.run` (`.:T28`); `Options.ValueOption`, table of value options `parse` switches on (`.:V10`).
+- file: `Plugin.swift` — plugin state machines `runRecipientV1` / `runIdentityV1`, stanza I/O, identity & recipient encode/decode, `Plugin.Error`; fork: `newAccessControl` (test seam, default `SecAccessControlCreateWithFlags`, `.:V10`); throwing `recipientV1()` / `identityV1()`, upstream `runRecipientV1()` / `runIdentityV1()` wrap them w/ `try?` for upstream tests (`.:V4`); `Stanza.argument(_:)`, `Stanza.readAnswer(from:)` (B4, `.:V20`).
 - file: `Crypto.swift` — `protocol Crypto` (test seam; `DummyCrypto` in `Tests`), `CryptoKitCrypto` (Secure Enclave, `LAContext`); fork: `init(environment:)` sets prompt (`.:T9`), `isMLKEMAvailable` (test seam, `.:T30`).
 - file: `HPKE.swift` — HPKE seal/open, P-256 & ML-KEM-768 hybrid; fork: ML-KEM-768 encap & decap guard on `crypto.isMLKEMAvailable`, decap takes `crypto:` (`.:T29`).
-- file: `Bech32.swift`, `Base64.swift` — encodings. `Stream.swift` — `StandardIOStream`.
+- file: `Bech32.swift`, `Base64.swift` — encodings; fork: `Bech32.decode("")` throws (B4). `Stream.swift` — `StandardIOStream`.
 - env: `AGE_PLUGIN_SE_PROMPT` (`.:V12`).
 - error: `Plugin.denialMarker` `AGE_PLUGIN_SE_DENIED_V1`; `Plugin.message(for:)` → `<marker>: <localizedDescription>` iff `Plugin.isDenial`, else text alone; used by identity-v1 unwrap `msg` (`.:V13`, `.:T10`).
 - denial codes (owner 2026-10-23): `LAError` `userCancel`, `authenticationFailed`; OSStatus `errSecUserCanceled`, `errSecAuthFailed`; found at top | under `NSUnderlyingErrorKey` | `NSMultipleUnderlyingErrorsKey`, recursive. ∀ other code ⊥ denial.
