@@ -21,6 +21,7 @@ T20|x|coverage exclusions w/ reasons (D14) as `.coverage` fn rows + cap (sherd P
 T23|x|CI-only throwaway Alpine signing key (`release/alpine-keygen.sh`) so upstream `Package (Alpine)` stays green for regression; ⊥ distribution key ∴ D12 (darwin only) unaffected; owner run in T22|-
 T25|x|`Sources`: B2 fix RED → GREEN (`writeOutput`, shared w/ B1). fork only (V5 off)|V18
 T26|x|`Sources`: B3 fix RED → GREEN. fork only (V5 off)|V19
+T27|x|`-h`, `--help`, `--version` in `Options.help` & man page (R11), owner approved; hard fork ∴ fork edits help alone. `--age-plugin` stays baselined ∵ age runs it, ⊥ user|V11
 T28|x|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork only (V5 off)|V10
 T29|x|owner 2026-10-23: HPKE ML-KEM-768 guards in `mlkemp256Encap` & `mlkemp256Decap` read `crypto.isMLKEMAvailable` (carried), RED → GREEN; 2 lines covered, floor 99.75%, 3 unrun (CLI 2, Plugin 1)|V10
 T33|x|B4 fix: `try!` → `try`, `assert` → `Stanza.readAnswer`, `Stanza.argument`, `recipient-stanza` checked at read, `Bech32.decode("")`; throwing `recipientV1()` / `identityV1()`, upstream `run*V1()` wrap them (V4); `CLIError.pluginProtocol` on stderr. fixture probe: 8 sessions same bytes (PR body)|V20,V2,V4
