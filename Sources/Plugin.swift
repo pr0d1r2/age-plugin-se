@@ -396,7 +396,8 @@ class Plugin {
                 let sharedSecret = try HPKE.mlkemp256Decap(
                   enc: shareKeyData,
                   recipientP256Key: identity.p256PrivateKey,
-                  recipientMLKEM768Key: try identity.mlkemPrivateKey(crypto: self.crypto))
+                  recipientMLKEM768Key: try identity.mlkemPrivateKey(crypto: self.crypto),
+                  crypto: crypto)
                 (wrapKey, nonce) = HPKE.context(
                   kem: .mlkem768P256,
                   sharedSecret: sharedSecret,

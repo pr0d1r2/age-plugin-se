@@ -219,6 +219,22 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
         """, unwrap(stanza, identity: identity, crypto: plugin().crypto))
     }
 
+    /// Plugin's checks pass, then HPKE's own guard finds ML-KEM-768 gone:
+    /// the unwrap passes its crypto to `HPKE.mlkemp256Decap` (root T29).
+    func testIdentityV1_PQIdentity_GoneAtDecap() throws {
+      let (identity, recipient) = try pqKey()
+      let stanza = try wrap(to: recipient)
+      let crypto = MLKEMUnavailableCrypto()
+      crypto.answers = [true, true]
+      XCTAssertEqual(
+        """
+        -> msg
+        \(Data(pqUnavailable.utf8).base64RawEncodedString())
+        -> done
+
+        """, unwrap(stanza, identity: identity, crypto: crypto))
+    }
+
     /// An `mlkem768p256tag` stanza for another key is skipped by a classic
     /// identity without a `msg`, as before lazy loading (root V2).
     func testIdentityV1_ClassicIdentityOtherPQStanza() throws {

@@ -85,7 +85,7 @@ enum HPKE {
     sharedSecret: SymmetricKey, enc: Data
   ) {
     #if compiler(>=6.2)
-      if #unavailable(macOS 26.0) {
+      guard crypto.isMLKEMAvailable else {
         throw Plugin.Error.pqUnavailable
       }
       let pq = try crypto.encapsulate(mlkem768Key: recipientMLKEM768Key)
@@ -114,12 +114,12 @@ enum HPKE {
   @available(macOS 26.0, *)
   static func mlkemp256Decap(
     enc: Data, recipientP256Key: SecureEnclaveP256PrivateKey,
-    recipientMLKEM768Key: SecureEnclaveMLKEM768PrivateKey
+    recipientMLKEM768Key: SecureEnclaveMLKEM768PrivateKey, crypto: Crypto
   ) throws
     -> SymmetricKey
   {
     #if compiler(>=6.2)
-      if #unavailable(macOS 26.0) {
+      guard crypto.isMLKEMAvailable else {
         throw Plugin.Error.pqUnavailable
       }
 

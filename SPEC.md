@@ -130,7 +130,7 @@ T25|~|`Sources`: B2 fix RED → GREEN; upstream PR w/ approval. fork half done (
 T26|~|`Sources`: B3 fix RED → GREEN; upstream PR w/ approval. fork half done|V19,V5
 T27|.|offer upstream: `--help`, `-h`, `--version` in `Options.help` (R11), w/ owner approval; owner picks if age-facing `--age-plugin` is listed or stays baselined. fork ⊥ edits help alone (D3); `OptionsHelpTests.undocumented` shrinks on upstream sync|V11,V5
 T28|~|`Sources`: `CLI.main` dispatch → `CLI.run` w/ injected stdin & print, ∴ testable; behaviour same (R13). fork half done; upstream PR w/ approval|V10,V5
-T29|.|owner: HPKE `#unavailable(macOS 26)` guard in `mlkemp256Encap`: extract to own fn & exclude (carried), or 2 lines stay uncovered|V10
+T29|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 carried + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
 T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), `swift package resolve` once before 1st push (else pre-push hook may fail on SwiftPM's dependency clone), hooks, `swift test`, `hardware` row. `coverage` row skips there (V10)|V6,V15,V10
 T32|~|`x86_64-darwin` shell done (pklith `028c65c`); macOS 15 CI row ⊥ in actlith (`macos-latest` only); issue w/ approval|V6
