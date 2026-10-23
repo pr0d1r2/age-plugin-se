@@ -77,6 +77,7 @@ R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.
 R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
 R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner; pklith shell since `028c65c` (pklith PR 103)|local probe, PR body
 R15|age plugin protocol on early end 2026-10-23|spec names ⊥ exit code & ⊥ rule for stdin ending early; plugin ending early w/ error → client propagates it (encrypt) \| may ignore (decrypt), may show plugin stderr. client may answer `fail` (plugin decides if fatal) \| `unsupported`; unknown commands & stanzas ignored. plugin stdout = stanza channel ∴ ⊥ error text there|c2sp.org/age-plugin
+R16|denial marker on hardware 2026-10-23|owner pressed Cancel at a real Touch ID prompt on decrypt (`keygen` default access control, age 1.3.2): `age: se plugin: AGE_PLUGIN_SE_DENIED_V1: Authentication canceled.`, exit 1 ∴ cancel reaches `Plugin.isDenial` & V13 holds on hardware|manual run, owner (T10)
 
 ## §V INVARIANTS
 
