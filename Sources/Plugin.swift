@@ -54,7 +54,7 @@ class Plugin {
       }
       var error: Unmanaged<CFError>?
       guard
-        let secAccessControl = SecAccessControlCreateWithFlags(
+        let secAccessControl = newAccessControl(
           kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
           accessControlFlags,
           &error)
