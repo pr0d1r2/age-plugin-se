@@ -81,8 +81,8 @@ R16|denial marker on hardware 2026-10-23|owner pressed Cancel at a real Touch ID
 
 ## §V INVARIANTS
 
-V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; sets `se-classic`, `tag-classic`, `tag-pq`; ⊥ `se-pq` ∵ `--pq` always `tag`) parses & re-encodes byte-identical in this build (D2).
-V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness pinned by `DummyCrypto` (D2).
+V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; sets `se-classic`, `tag-classic`, `tag-pq`; ⊥ `se-pq` ∵ `--pq` always `tag`) parses & re-encodes byte-identical in this build (D2). `v0.2.1/tag-pq.recipient` = classic `age1tag1` ∵ `v0.2.1` ignored `--pq` ∴ expected as classic: re-encodes same & decodes as tag recipient; quirk of that rev, ⊥ skip (owner 2026-10-23).
+V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness (D2). sessions hold age's random grease & real CryptoKit randomness, SE identity loads only on its Mac ∴ CI compares structurally: stanza types, args & body lengths, exact bytes where deterministic; decrypt replay w/ real identities only in hardware suite (`Tests` §I), other Mac → skip w/ notice (owner 2026-10-23).
 V3: `Sources/Crypto.swift` & `Sources/HPKE.swift` ≠ upstream only in commits citing a failing test, an upstream commit | the upstream PR they carry (D4).
 V4: upstream test files ⊥ edited, except by a hand port of upstream | a fork change's test seam (D7).
 V5: ∀ upstream PR branch ∌ fork file (§C list) (D3). deferred (owner 2026-10-21); off for good unless owner reopens (owner 2026-10-23).
