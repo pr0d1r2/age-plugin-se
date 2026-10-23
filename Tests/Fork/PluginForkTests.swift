@@ -475,9 +475,10 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
 #endif
 
 /// Malformed plugin-protocol input from age over real stdin (root V20,
-/// bug B4): a command missing an argument it needs, a recipient stanza
-/// without a file index, and an answer other than `ok` are protocol errors,
-/// exit 255, never a trap. No input reaches the Secure Enclave (root V15).
+/// bug B4): a command missing an argument it needs and a recipient stanza
+/// without a file index are protocol errors, exit 255, never a trap. An
+/// answer other than `ok` is not: the session goes on, as upstream's
+/// release build did. No input reaches the Secure Enclave (root V15).
 final class PluginProtocolErrorProcessTests: XCTestCase {
   let invalid = "invalid stanza"
 
@@ -507,15 +508,29 @@ final class PluginProtocolErrorProcessTests: XCTestCase {
       message: invalid)
   }
 
-  /// age answers the identity error with `fail`, not `ok`.
+  /// The session `machine` runs on `input` ends with `-> done`, exit 0.
+  func assertCarriesOn(
+    machine: String, input: String, output: String, file: StaticString = #filePath,
+    line: UInt = #line
+  ) throws {
+    let result = try BuiltBinary.runCapturingAll(
+      ["--age-plugin=\(machine)"], standardInput: input)
+    XCTAssertEqual(.exit, result.reason, "trapped: signal \(result.status)", file: file, line: line)
+    XCTAssertEqual(0, result.status, file: file, line: line)
+    XCTAssertEqual(output, result.output, file: file, line: line)
+    XCTAssertEqual("", result.error, file: file, line: line)
+  }
+
+  /// age answers the identity error with `fail`, not `ok`: a debug build
+  /// asserted, a release build went on; now both go on.
   func testIdentityV1_NotOK() throws {
     let body = Data(
       Bech32.DecodingError.incorrectChecksumSize.localizedDescription.utf8
     ).base64RawEncodedString(wrap: true)
-    try BuiltBinary.assertProtocolError(
+    try assertCarriesOn(
       machine: "identity-v1",
       input: "-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\n-> fail\n\n",
-      message: "unexpected response: `fail`", output: "-> error identity 0\n\(body)\n")
+      output: "-> error identity 0\n\(body)\n-> done\n\n")
   }
 
   /// age answers the recipient error with `fail`, not `ok`. An empty
@@ -525,11 +540,11 @@ final class PluginProtocolErrorProcessTests: XCTestCase {
     let body = Data(
       Bech32.DecodingError.noChecksumMarker.localizedDescription.utf8
     ).base64RawEncodedString(wrap: true)
-    try BuiltBinary.assertProtocolError(
+    try assertCarriesOn(
       machine: "recipient-v1",
       input:
         "-> add-recipient \n\n-> wrap-file-key\nezXgNAcK/Fet+1A7Q08TBg\n-> done\n\n-> fail\n\n",
-      message: "unexpected response: `fail`", output: "-> error recipient 0\n\(body)\n")
+      output: "-> error recipient 0\n\(body)\n-> done\n\n")
   }
 }
 
@@ -587,10 +602,11 @@ final class PluginProtocolErrorTests: XCTestCase {
     }
   }
 
-  /// age never answers the recipient stanza, or answers `fail`.
+  /// age never answers the recipient stanza, or its answer is cut short.
   func testRecipientV1_Answer() {
     for (answer, expected) in [
-      ("", Plugin.Error.incompleteStanza), ("\n-> fail\n", .unexpectedResponse("fail")),
+      ("", Plugin.Error.incompleteStanza), ("\n-> ok", .incompleteStanza),
+      ("\n->", .invalidStanza),
     ] {
       setUp()
       feed(
@@ -638,10 +654,11 @@ final class PluginProtocolErrorTests: XCTestCase {
     XCTAssertTrue(stream.output.hasPrefix("-> msg\n"), stream.output)
   }
 
-  /// age answers the identity error with `fail`, or not at all.
+  /// age never answers the identity error, or its answer is cut short.
   func testIdentityV1_Answer() {
     for (answer, expected) in [
-      ("", Plugin.Error.incompleteStanza), ("\n-> fail\n", .unexpectedResponse("fail")),
+      ("", Plugin.Error.incompleteStanza), ("\n-> ok", .incompleteStanza),
+      ("\n->", .invalidStanza),
     ] {
       setUp()
       feed("-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\(answer)")
@@ -656,8 +673,14 @@ final class PluginProtocolErrorTests: XCTestCase {
     XCTAssertEqual("", stream.output)
   }
 
-  func testUnexpectedResponse_Description() {
-    XCTAssertEqual(
-      "unexpected response: `fail`", Plugin.Error.unexpectedResponse("fail").localizedDescription)
+  /// Any whole answer lets the session go on: `fail` and `unsupported` are
+  /// answers the protocol allows (root V20).
+  func testIdentityV1_AnyAnswer() throws {
+    for answer in ["ok", "fail", "unsupported"] {
+      setUp()
+      feed("-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\n-> \(answer)\n")
+      try plugin.identityV1()
+      XCTAssertTrue(stream.output.hasSuffix("\n-> done\n"), stream.output)
+    }
   }
 }

@@ -270,7 +270,7 @@ class Plugin {
     }
     for stanza in (errors.isEmpty ? stanzas : errors) {
       stanza.writeTo(stream: stream)
-      try Stanza.readOK(from: stream)
+      try Stanza.readAnswer(from: stream)
     }
     Stanza(type: "done").writeTo(stream: stream)
   }
@@ -448,7 +448,7 @@ class Plugin {
           } catch {
             Stanza(type: "msg", body: Data(Plugin.message(for: error).utf8)).writeTo(
               stream: stream)
-            try Stanza.readOK(from: self.stream)
+            try Stanza.readAnswer(from: self.stream)
             // continue
           }
         }
@@ -458,7 +458,7 @@ class Plugin {
     let responses = fileResponses.keys.sorted().map({ k in fileResponses[k]! })
     for stanza in (errors.isEmpty ? responses : errors) {
       stanza.writeTo(stream: stream)
-      try Stanza.readOK(from: stream)
+      try Stanza.readAnswer(from: stream)
     }
     Stanza(type: "done").writeTo(stream: stream)
   }
@@ -510,8 +510,6 @@ class Plugin {
     case invalidRecipient
     case unknownHRP(String)
     case missingPQ
-    /// Fork: age answered with something other than `ok` (root V20).
-    case unexpectedResponse(String)
 
     public var errorDescription: String? {
       switch self {
@@ -523,7 +521,6 @@ class Plugin {
       case .invalidRecipient: return "invalid recipient"
       case .unknownHRP(let hrp): return "unknown HRP: \(hrp)"
       case .missingPQ: return "missing post-quantum key support"
-      case .unexpectedResponse(let type): return "unexpected response: `\(type)`"
       }
     }
   }
@@ -582,14 +579,12 @@ extension Stanza {
     return args[index]
   }
 
-  /// Fork: reads age's answer to a stanza the plugin sent. Anything but `ok`
-  /// is a protocol error (root V20); upstream asserted, so a release build
-  /// went on and a debug build trapped.
-  static func readOK(from stream: Stream) throws {
-    let response = try readFrom(stream: stream)
-    if response.type != "ok" {
-      throw Plugin.Error.unexpectedResponse(response.type)
-    }
+  /// Fork: reads age's answer to a stanza the plugin sent; only a missing
+  /// or malformed one throws (root V20). Its type is not checked: the
+  /// protocol lets a client answer `fail` or `unsupported`, and upstream's
+  /// release build, where `assert` is compiled out, went on after any.
+  static func readAnswer(from stream: Stream) throws {
+    _ = try readFrom(stream: stream)
   }
 
   init(error type: String, args: [String] = [], message: String) {
