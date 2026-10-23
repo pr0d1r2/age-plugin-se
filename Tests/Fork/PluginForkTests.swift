@@ -473,3 +473,214 @@ final class MLKEMUnavailableCrypto: DummyCrypto {
     }
   }
 #endif
+
+/// Malformed plugin-protocol input from age over real stdin (root V20,
+/// bug B4): a command missing an argument it needs and a recipient stanza
+/// without a file index are protocol errors, exit 255, never a trap. An
+/// answer other than `ok` is not: the session goes on, as upstream's
+/// release build did. No input reaches the Secure Enclave (root V15).
+final class PluginProtocolErrorProcessTests: XCTestCase {
+  let invalid = "invalid stanza"
+
+  func testRecipientV1_AddRecipientNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "recipient-v1", input: "-> add-recipient\n\n-> done\n\n", message: invalid)
+  }
+
+  func testRecipientV1_AddIdentityNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "recipient-v1", input: "-> add-identity\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_AddIdentityNoArgument() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> add-identity\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_RecipientStanzaNoType() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> recipient-stanza 0\n\n-> done\n\n", message: invalid)
+  }
+
+  func testIdentityV1_RecipientStanzaNoFileIndex() throws {
+    try BuiltBinary.assertProtocolError(
+      machine: "identity-v1", input: "-> recipient-stanza x X25519 abc\n\n-> done\n\n",
+      message: invalid)
+  }
+
+  /// The session `machine` runs on `input` ends with `-> done`, exit 0.
+  func assertCarriesOn(
+    machine: String, input: String, output: String, file: StaticString = #filePath,
+    line: UInt = #line
+  ) throws {
+    let result = try BuiltBinary.runCapturingAll(
+      ["--age-plugin=\(machine)"], standardInput: input)
+    XCTAssertEqual(.exit, result.reason, "trapped: signal \(result.status)", file: file, line: line)
+    XCTAssertEqual(0, result.status, file: file, line: line)
+    XCTAssertEqual(output, result.output, file: file, line: line)
+    XCTAssertEqual("", result.error, file: file, line: line)
+  }
+
+  /// age answers the identity error with `fail`, not `ok`: a debug build
+  /// asserted, a release build went on; now both go on.
+  func testIdentityV1_NotOK() throws {
+    let body = Data(
+      Bech32.DecodingError.incorrectChecksumSize.localizedDescription.utf8
+    ).base64RawEncodedString(wrap: true)
+    try assertCarriesOn(
+      machine: "identity-v1",
+      input: "-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\n-> fail\n\n",
+      output: "-> error identity 0\n\(body)\n-> done\n\n")
+  }
+
+  /// age answers the recipient error with `fail`, not `ok`. An empty
+  /// argument (`-> add-recipient ` with its trailing space) is a recipient
+  /// error, not a protocol one: age sent the argument, and it is not bech32.
+  func testRecipientV1_EmptyRecipientNotOK() throws {
+    let body = Data(
+      Bech32.DecodingError.noChecksumMarker.localizedDescription.utf8
+    ).base64RawEncodedString(wrap: true)
+    try assertCarriesOn(
+      machine: "recipient-v1",
+      input:
+        "-> add-recipient \n\n-> wrap-file-key\nezXgNAcK/Fet+1A7Q08TBg\n-> done\n\n-> fail\n\n",
+      output: "-> error recipient 0\n\(body)\n-> done\n\n")
+  }
+}
+
+/// Early or malformed plugin-protocol input on a `MemoryStream` (root V20,
+/// bug B4): each state machine throws at every place upstream trapped, and
+/// upstream's `runRecipientV1()` and `runIdentityV1()` end the session
+/// without the trap. Valid sessions keep their bytes (root V2): upstream's
+/// PluginTests and the fork tests above run them unchanged.
+final class PluginProtocolErrorTests: XCTestCase {
+  let recipient = "age1se1qd8k3whkdlquhxp3uhhenptvtxmcxkhasj58s3hgak74s48x2mhp62z4zzr"
+  let identity = "AGE-PLUGIN-SE-18YNMANPJKHE2ZAZJHRCKZKFXCT78YYWUTY0F730TMTZFV0CM9YHSRP8GPG"
+  let recipientStanza = """
+    -> recipient-stanza 0 piv-p256 14yi6A Az7IeMpB4oX0CHt/Bc9xzk6x1K262zNxoUtfAikZa5T7
+    SLgnrcnHLaJHCx+fwSEWWoflDgL91oDGCGNwb2YaT+4
+    """
+  var crypto = DummyCrypto()
+  var stream = MemoryStream()
+
+  override func setUp() {
+    crypto = DummyCrypto()
+    stream = MemoryStream()
+  }
+
+  var plugin: Plugin { Plugin(crypto: crypto, stream: stream) }
+
+  func assertError(
+    _ expected: Plugin.Error, _ run: () throws -> Void, file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    XCTAssertThrowsError(try run(), file: file, line: line) { error in
+      XCTAssertEqual(expected, error as? Plugin.Error, file: file, line: line)
+    }
+  }
+
+  /// MemoryStream reads `""` as no line at all, as an empty stdin.
+  func feed(_ input: String) {
+    stream.inputLines = input.isEmpty ? [] : input.components(separatedBy: "\n")
+  }
+
+  func testRecipientV1_Empty() {
+    assertError(.incompleteStanza) { try plugin.recipientV1() }
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testRecipientV1_TruncatedStanza() {
+    feed("-> add-recipient \(recipient)")
+    assertError(.incompleteStanza) { try plugin.recipientV1() }
+  }
+
+  func testRecipientV1_MissingArgument() {
+    for command in ["add-recipient", "add-identity"] {
+      setUp()
+      feed("-> \(command)\n\n-> done\n")
+      assertError(.invalidStanza) { try plugin.recipientV1() }
+    }
+  }
+
+  /// age never answers the recipient stanza, or its answer is cut short.
+  func testRecipientV1_Answer() {
+    for (answer, expected) in [
+      ("", Plugin.Error.incompleteStanza), ("\n-> ok", .incompleteStanza),
+      ("\n->", .invalidStanza),
+    ] {
+      setUp()
+      feed(
+        "-> add-recipient \(recipient)\n\n-> wrap-file-key\nezXgNAcK/Fet+1A7Q08TBg\n-> done\n\(answer)"
+      )
+      assertError(expected) { try plugin.recipientV1() }
+      XCTAssertTrue(
+        stream.output.hasPrefix("-> recipient-stanza 0 piv-p256 dsZPVg "), stream.output)
+      XCTAssertFalse(stream.output.contains("-> done"), stream.output)
+    }
+  }
+
+  /// Upstream's entry point: the session ends where the input does.
+  func testRunRecipientV1_Empty() {
+    plugin.runRecipientV1()
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testIdentityV1_Empty() {
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+    XCTAssertEqual("", stream.output)
+  }
+
+  func testIdentityV1_TruncatedStanza() {
+    feed("-> add-identity \(identity)\n\n-> recipient-stanza 0 piv-p256 14yi6A")
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+  }
+
+  func testIdentityV1_MalformedStanza() {
+    for header in [
+      "add-identity", "recipient-stanza", "recipient-stanza 0", "recipient-stanza x X25519 a",
+    ] {
+      setUp()
+      feed("-> \(header)\n\n-> done\n")
+      assertError(.invalidStanza) { try plugin.identityV1() }
+      XCTAssertEqual("", stream.output, header)
+    }
+  }
+
+  /// The unwrap fails, the plugin sends `msg`, and age never answers it.
+  func testIdentityV1_MessageNoAnswer() {
+    crypto.failingOperations = true
+    feed("-> add-identity \(identity)\n\n\(recipientStanza)\n-> done\n")
+    assertError(.incompleteStanza) { try plugin.identityV1() }
+    XCTAssertTrue(stream.output.hasPrefix("-> msg\n"), stream.output)
+  }
+
+  /// age never answers the identity error, or its answer is cut short.
+  func testIdentityV1_Answer() {
+    for (answer, expected) in [
+      ("", Plugin.Error.incompleteStanza), ("\n-> ok", .incompleteStanza),
+      ("\n->", .invalidStanza),
+    ] {
+      setUp()
+      feed("-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\(answer)")
+      assertError(expected) { try plugin.identityV1() }
+      XCTAssertTrue(stream.output.hasPrefix("-> error identity 0\n"), stream.output)
+      XCTAssertFalse(stream.output.contains("-> done"), stream.output)
+    }
+  }
+
+  func testRunIdentityV1_Empty() {
+    plugin.runIdentityV1()
+    XCTAssertEqual("", stream.output)
+  }
+
+  /// Any whole answer lets the session go on: `fail` and `unsupported` are
+  /// answers the protocol allows (root V20).
+  func testIdentityV1_AnyAnswer() throws {
+    for answer in ["ok", "fail", "unsupported"] {
+      setUp()
+      feed("-> add-identity AGE-PLUGIN-SE-1BOGUS\n\n-> done\n\n-> \(answer)\n")
+      try plugin.identityV1()
+      XCTAssertTrue(stream.output.hasSuffix("\n-> done\n"), stream.output)
+    }
+  }
+}

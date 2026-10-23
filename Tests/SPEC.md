@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-XCTest target `Tests`: upstream's suite as-is & fork tests in `Tests/Fork/`, 1 file per source (V4), all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `CLIProcessCoverageTests` & `StandardIOStreamProcessTests` run the built binary as a child (`BuiltBinary`), ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`. exception: `CryptoKitHardwareTests` (§I): real SE, gated.
+XCTest target `Tests`: upstream's suite as-is & fork tests in `Tests/Fork/`, 1 file per source (V4), all on `DummyCrypto` & `MemoryStream`, ⊥ Secure Enclave. exception: `*ProcessTests`, `CLIProcessCoverageTests` & `StandardIOStreamEndTests` run the built binary as a child (`BuiltBinary`), ⊥ SE key; its profile merges via inherited `LLVM_PROFILE_FILE`. exception: `CryptoKitHardwareTests` (§I): real SE, gated.
 
 ## §N NAV
 
@@ -31,7 +31,7 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 - cmd: `swift test` — whole suite; pre-push & `checks.<sys>` (`nix`).
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
-- helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift`. fork seam `DummyCrypto.operationError`: set → P-256 key agreement throws it (`.:T10`).
+- helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift` (`run`; `runCapturingAll` adds stderr & termination reason; `assertProtocolError`: exit 255 ⊥ trap, `.:V20`). fork seam `DummyCrypto.operationError`: set → P-256 key agreement throws it (`.:T10`).
 - hardware: `CryptoKitHardwareTests` (`Fork/CryptoForkTests.swift`): 4 `.coverage`-excluded `newSecureEnclave*` fns & age round trip (classic, `--pq`). runs iff `AGE_PLUGIN_SE_HARDWARE=1` ∧ `SecureEnclave.isAvailable`, else `XCTSkip` w/ why.
 - hardware safety: `.privateKeyUsage` only ∴ ⊥ Touch ID; keys = `dataRepresentation` in memory | removed `.build/tmp-hw/`; ⊥ keychain.
 - `.pklith` row `hardware` (pre-push) sets the var; `CI` set → ⊥ run. `test`, `coverage` ⊥ set it ∴ floor = CI's. `coverage` skips on macOS < 26 (`.:V10`).

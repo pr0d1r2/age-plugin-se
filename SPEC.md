@@ -76,6 +76,7 @@ R11|help ↔ parser drift 2026-10-18|`Options.parse` accepts `--age-plugin`, `--
 R12|CI runner 2026-10-18|`macos-latest` = `macos-26-arm64`, Xcode 26.0.1 … 26.6; 26.6 pin ran green. `nix develop` overwrites `DEVELOPER_DIR` ∴ pin passed as `HOST_DEVELOPER_DIR`. recount: job log|runner-images readme, run 39133346951
 R13|CLI error path 2026-10-18|`CLI.main` prints errors to stdout (`print`), ⊥ stderr, & exits 255 (`exit(-1)`); B1's error too. upstream style or bug: owner's call|`Sources/CLI.swift:49`, local probe
 R14|macOS 14 port 2026-10-21|∀ `fixtures/` identity & recipient re-encodes same; ∀ session replayed on stand-in keys → same bytes before & after (`.:T30`). w/ Swift ≥ 6.2 below macOS 26, 7 upstream PQ tests fail or trap ∴ skip there. nixpkgs 26.05 = last w/ `x86_64-darwin`; pklith & actlith ⊥ `x86_64-darwin` shell or runner; pklith shell since `028c65c` (pklith PR 103)|local probe, PR body
+R15|age plugin protocol on early end 2026-10-23|spec names ⊥ exit code & ⊥ rule for stdin ending early; plugin ending early w/ error → client propagates it (encrypt) \| may ignore (decrypt), may show plugin stderr. client may answer `fail` (plugin decides if fatal) \| `unsupported`; unknown commands & stanzas ignored. plugin stdout = stanza channel ∴ ⊥ error text there|c2sp.org/age-plugin
 
 ## §V INVARIANTS
 
@@ -98,6 +99,7 @@ V16: ∀ commit from `5fffb16` on passes hk hooks, ⊥ `--no-verify`: pre-commit
 V17: upstream findings → baseline naming each file | string (`hk.pkl`, `.typos.toml`, `.secretsignore`, `.markdownlintignore`, `.pklith` exempt); only shrinks (D13).
 V18: `recipients -o OUTPUT` write fails → exit ≠ 0, error names OUTPUT ∵ B2.
 V19: `recipients` stdin ⊥ UTF-8 → error, exit ≠ 0, ⊥ trap; empty = empty `-i` file: ⊥ recipient, exit 0 ∵ B3.
+V20: plugin mode (`recipient-v1`, `identity-v1`): stdin ends early (empty, mid-stanza, before an answer) | malformed (bad header, command missing its argument, `recipient-stanza` w/o type | w/ non-numeric file index) → exit 255, `<argv0>: error: plugin protocol: <text>` on stderr (R13's exception ∵ stdout = protocol, R15), ⊥ more stdout after last whole stanza, ⊥ trap ∵ B4. answer ≠ `ok` read & ignored, as upstream release (R15). ∀ valid session → same bytes (V2).
 
 ## §T TASKS
 
@@ -134,6 +136,7 @@ T29|x|ARCHIVED to SPEC-ARCHIVE.md|V10
 T30|~|macOS 14 & Intel (owner 2026-10-21): PR 15 ported + `isMLKEMAvailable` seam; `x86_64-darwin` package & checks; `universal` row|V6,V1,V2
 T31|.|owner: Intel Mac (A1990): macOS 15.6+, Xcode 26, clone, `nix develop` (1st run builds hk, sherd, mth, itok, pklith, actlith from source: ⊥ x86_64 cache), `swift package resolve` once before 1st push (else pre-push hook may fail on SwiftPM's dependency clone), hooks, `swift test`, `hardware` row. `coverage` row skips there (V10)|V6,V15,V10
 T32|~|`x86_64-darwin` shell done (pklith `028c65c`); macOS 15 CI row ⊥ in actlith (`macos-latest` only); issue w/ approval|V6
+T33|x|ARCHIVED to SPEC-ARCHIVE.md|V20,V2,V4
 
 ## §B BUGS
 
@@ -141,3 +144,4 @@ id|date|cause|fix
 B1|2026-10-18|`keygen -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:23`) ∴ failed write loses identity yet prints `Public key:`; upstream bug, found in spec run|V14
 B2|2026-10-18|`recipients -o` ignores `FileManager.createFile` result (`Sources/CLI.swift:32`), B1's cause in its sibling ∴ failed write exits 0, writes nothing, says nothing; upstream bug, found in W1 (PR #6), probed. sweep (`paradigm/V19`): `Sources/` has 2 `createFile` calls, both rowed|V18; fork fixed (T25)
 B3|2026-10-18|`recipients` force-unwraps stdin (`Sources/CLI.swift:27`) ∴ empty or non-UTF-8 stdin traps, exit 133; upstream bug, probed in W1 reconcile|V19; fork fixed (T26)
+B4|2026-10-23|plugin mode traps (exit 133) on early \| malformed stdin: `try! Stanza.readFrom` (`Sources/Plugin.swift:134,264,275,431,442` on `0ff82a3`); upstream bug, found in PR #27, probed. sweep (`paradigm/V19`), input-derived, all fixed here: `assert(resp.type == "ok")` ×3 (debug trap); `stanza.args[0]` add-recipient & add-identity ×3; identity-v1 `Int(args[0])!` & `args[1]` (`:309,346`); `Bech32.decode` `str[str.startIndex]` on "" (empty arg, whitespace `recipients` line). ⊥ input-derived, kept: `tag!` `share!` (nil-checked), `Data(base64RawEncoded: share)!` (checked), `fileResponses[k]!`, `mlkemData!` (nil-checked), `Nonce` `try!` (12 zero bytes), `.data(using:)!` constants, `Bech32.encode` `try!` & `hrp[startIndex]`, `asciiValue!`, `generateKey` `error!` (set when `nil`), `Crypto.swift` `fatalError` (compiler < 6.2 stub, V6), HPKE `enc` slices (length checked)|V20; fork fixed (T33)

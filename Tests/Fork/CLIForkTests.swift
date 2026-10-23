@@ -242,6 +242,19 @@ final class CLIRunCoverageTests: XCTestCase {
     XCTAssertEqual([], printed)
   }
 
+  /// Empty stdin in plugin mode: `CLI.run` throws `pluginProtocol`, which
+  /// `CLI.main` prints on stderr (root V20, bug B4).
+  func testPlugin_EmptyInput() throws {
+    for machine in ["recipient-v1", "identity-v1"] {
+      XCTAssertThrowsError(try run(["--age-plugin=\(machine)"]), machine) { error in
+        XCTAssertEqual(CLIError.pluginProtocol("incomplete stanza"), error as? CLIError)
+        XCTAssertEqual("plugin protocol: incomplete stanza", error.localizedDescription)
+      }
+    }
+    XCTAssertEqual("", stream.output)
+    XCTAssertEqual([], printed)
+  }
+
   func testError_Thrown() throws {
     XCTAssertThrowsError(try run(["--bogus"])) { error in
       XCTAssertEqual(Options.Error.unknownOption("--bogus"), error as? Options.Error)
@@ -272,6 +285,17 @@ final class CLIProcessCoverageTests: XCTestCase {
     let (status, output) = try BuiltBinary.run(["--bogus"])
     XCTAssertEqual(255, status)
     XCTAssertEqual("\(path): error: unknown option: `--bogus`\n", output)
+  }
+
+  /// Plugin mode is R13's exception (root V20): stdout carries the
+  /// protocol, so the error goes to stderr; the exit status is still 255.
+  func testPluginProtocolError() throws {
+    let path = BuiltBinary.url().path
+    let result = try BuiltBinary.runCapturingAll(["--age-plugin=recipient-v1"], standardInput: "")
+    XCTAssertEqual(.exit, result.reason, "trapped: signal \(result.status)")
+    XCTAssertEqual(255, result.status)
+    XCTAssertEqual("", result.output)
+    XCTAssertEqual("\(path): error: plugin protocol: incomplete stanza\n", result.error)
   }
 
   /// Comment lines only: real stdin is read, no identity is parsed.
