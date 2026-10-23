@@ -284,4 +284,18 @@ struct Options {
     }
     return opts
   }
+
+  /// Fork: the options that take a value, each with the names it answers to.
+  enum ValueOption: CaseIterable {
+    case agePlugin, input, output, accessControl, recipientType
+
+    var names: [String] {
+      return []
+    }
+
+    /// The option `arg` names, alone or as `name=value`.
+    init?(matching arg: String) {
+      return nil
+    }
+  }
 }
