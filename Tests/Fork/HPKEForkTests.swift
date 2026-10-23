@@ -66,7 +66,38 @@ final class HPKEForkTests: XCTestCase {
       XCTAssertEqual(1088 + 65, enc.count)
       XCTAssertEqual(
         sharedSecret,
-        try HPKE.mlkemp256Decap(enc: enc, recipientP256Key: p256, recipientMLKEM768Key: mlkem))
+        try HPKE.mlkemp256Decap(
+          enc: enc, recipientP256Key: p256, recipientMLKEM768Key: mlkem, crypto: crypto))
+    }
+
+    /// Where ML-KEM-768 is unavailable (`MLKEMUnavailableCrypto`, standing in
+    /// for macOS older than 26), encapsulation and decapsulation throw
+    /// `pqUnavailable` (root V6).
+    func testMLKEMP256Encap_PQUnavailable() throws {
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
+      let crypto = MLKEMUnavailableCrypto()
+      let p256 = try crypto.newSecureEnclaveP256PrivateKey(dataRepresentation: crypto.dummyKeys[0])
+      let mlkem = try crypto.newSecureEnclaveMLKEM768PrivateKey(
+        dataRepresentation: crypto.dummyMLKEM768Keys[0])
+      XCTAssertThrowsError(
+        try HPKE.mlkemp256Encap(
+          recipientP256Key: p256.publicKey, recipientMLKEM768Key: mlkem.publicKey, crypto: crypto)
+      ) { XCTAssertEqual(Plugin.Error.pqUnavailable.localizedDescription, $0.localizedDescription) }
+    }
+
+    func testMLKEMP256Decap_PQUnavailable() throws {
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
+      let crypto = EncapsulatingCrypto()
+      let p256 = try crypto.newSecureEnclaveP256PrivateKey(dataRepresentation: crypto.dummyKeys[0])
+      let mlkem = try crypto.newSecureEnclaveMLKEM768PrivateKey(
+        dataRepresentation: crypto.dummyMLKEM768Keys[0])
+      let (_, enc) = try HPKE.mlkemp256Encap(
+        recipientP256Key: p256.publicKey, recipientMLKEM768Key: mlkem.publicKey, crypto: crypto)
+      XCTAssertThrowsError(
+        try HPKE.mlkemp256Decap(
+          enc: enc, recipientP256Key: p256, recipientMLKEM768Key: mlkem,
+          crypto: MLKEMUnavailableCrypto())
+      ) { XCTAssertEqual(Plugin.Error.pqUnavailable.localizedDescription, $0.localizedDescription) }
     }
   #endif
 }

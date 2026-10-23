@@ -114,7 +114,7 @@ enum HPKE {
   @available(macOS 26.0, *)
   static func mlkemp256Decap(
     enc: Data, recipientP256Key: SecureEnclaveP256PrivateKey,
-    recipientMLKEM768Key: SecureEnclaveMLKEM768PrivateKey
+    recipientMLKEM768Key: SecureEnclaveMLKEM768PrivateKey, crypto: Crypto
   ) throws
     -> SymmetricKey
   {
