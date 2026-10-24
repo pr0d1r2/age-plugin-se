@@ -39,6 +39,14 @@ format 1
 #   denylist, would check every repository named or linked against a
 #   committed list of public ones; the text already names third-party
 #   repositories, so which go on that list is the owner's call (T19).
+#
+# Waived (paradigm/V38), each with its reason (root §C, owner 2026-10-24):
+# - paradigm/V28 for x86_64-linux and aarch64-linux: no Secure Enclave on
+#   Linux; no Linux packages (root T24 deferred). Upstream build.yml's
+#   ubuntu-24.04 job builds with Linux Swift, but it is upstream CI,
+#   untouched (root §C), not this gate. pklith's `exempt` cell is per
+#   type, with no row for a paradigm invariant, so this comment is the
+#   waiver until pklith has one.
 
 ## checks
 id|category|nix|glob|check|fix|env|msg

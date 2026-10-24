@@ -37,6 +37,7 @@ self|.|-
 - upstream tests kept & run as-is (D7); fork tests in own files beside them.
 - Swift ≥ 6.2 & macOS SDK from host; nix pins every other tool (D11). tests need Xcode's XCTest (D21). `.macOS(.v14)`; ML-KEM `@available(macOS 26)` (V6).
 - darwin aarch64 & x86_64 (owner 2026-10-21, amends D12). fork CI = GitHub macOS runner running same `hk.pkl`; upstream `build.yml` untouched.
+- `paradigm/V28` waived for x86_64-linux & aarch64-linux (owner 2026-10-24, `paradigm/V38`): ⊥ Secure Enclave on Linux; ⊥ Linux packages (T24 deferred). upstream `build.yml` ubuntu job builds w/ Linux Swift: upstream CI, ⊥ fork gate. pklith `exempt` cell is per type ∴ waiver = `.pklith` comment.
 - `Sources/` & `Tests/` flat, ⊥ moved (D17). ⊥ 2 workers in `Sources` in one wave. node `SPEC.md` inside a SwiftPM target dir excluded in `Package.swift` (D22).
 - gate = one `hk.pkl` from `.pklith` (`paradigm/V23`). Swift rows local first, then filed upstream (D13, D16). upstream code ⊥ reformatted; its debt baselined (V17).
 - `main` protected, PR-only (D8). ∀ PR human review (D5).
