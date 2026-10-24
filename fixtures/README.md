@@ -123,9 +123,11 @@ the tests decide what this build must match.
 - A protocol message with an empty body ends in an empty line; the
   recorder writes it as the prefix alone, `>` or `<` and its space, so
   the line ends in a blank.
-- age adds a random `grease-…` stanza to each identity-v1 request, so the
-  sessions are not reproducible byte for byte; the tests pin randomness
-  with `DummyCrypto` (root V2).
+- age adds a random `grease-…` stanza to each identity-v1 request, and
+  the stanzas hold real CryptoKit randomness, so the sessions are not
+  reproducible byte for byte. The tests compare them structurally, and
+  replay them with the real identities only in the gated hardware suite
+  (root V2, owner decision of 2026-10-23).
 
 `.gitattributes` here marks the files `-text`, so git never rewrites their
 line endings, and the hk steps that would fix blanks and final newlines
@@ -138,7 +140,9 @@ or Touch ID (root V15). Run by hand on the Mac named above:
 
 1. Each `*.identity` here decrypts on that Mac with the fork's build:
    `age -d -i fixtures/<rev>/<set>.identity` on a file encrypted to the
-   matching `.recipient`, with the fork's `age-plugin-se` on `PATH`.
+   matching `.recipient`, with the fork's `age-plugin-se` on `PATH`. The
+   hardware suite (pre-push `hardware` row) replays every session with
+   these identities; on another Mac it skips with a notice.
 2. The same identity on any other Mac fails to decrypt (the key is bound
    to the Secure Enclave that made it).
 3. A key made with the default access control asks for Touch ID on

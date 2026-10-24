@@ -81,8 +81,8 @@ R16|denial marker on hardware 2026-10-23|owner pressed Cancel at a real Touch ID
 
 ## §V INVARIANTS
 
-V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; sets `se-classic`, `tag-classic`, `tag-pq`; ⊥ `se-pq` ∵ `--pq` always `tag`) parses & re-encodes byte-identical in this build (D2).
-V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness pinned by `DummyCrypto` (D2).
+V1: ∀ identity & recipient in `fixtures/` (made by upstream `v0.2.1` & `57ccea1`; sets `se-classic`, `tag-classic`, `tag-pq`; ⊥ `se-pq` ∵ `--pq` always `tag`) parses & re-encodes byte-identical in this build (D2). `v0.2.1/tag-pq.recipient` = classic `age1tag1` ∵ `v0.2.1` ignored `--pq` ∴ expected as classic: re-encodes same & decodes as tag recipient; quirk of that rev, ⊥ skip (owner 2026-10-23).
+V2: ∀ fixture plugin session (recipient-v1, identity-v1) → this build emits same protocol messages & stanza bytes as upstream, modulo fresh randomness (D2). sessions hold age's random grease & real CryptoKit randomness, SE identity loads only on its Mac ∴ CI compares structurally: stanza types, args & body lengths, exact bytes where deterministic; decrypt replay w/ real identities only in hardware suite (`Tests` §I), other Mac → skip w/ notice (owner 2026-10-23).
 V3: `Sources/Crypto.swift` & `Sources/HPKE.swift` ≠ upstream only in commits citing a failing test, an upstream commit | the upstream PR they carry (D4).
 V4: upstream test files ⊥ edited, except by a hand port of upstream | a fork change's test seam (D7).
 V5: ∀ upstream PR branch ∌ fork file (§C list) (D3). deferred (owner 2026-10-21); off for good unless owner reopens (owner 2026-10-23).
@@ -109,7 +109,7 @@ T1|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T2|x|ARCHIVED to SPEC-ARCHIVE.md|V6,V15
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V7
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V15
-T5|.|`Tests`: format-freeze tests over `fixtures/`, RED → GREEN|V1,V2,V4
+T5|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2,V4
 T6|~|gate via pklith, one check per commit, planted violation each: name guard, mth & sherd steps, commit-msg, swift-format, swiftlint, warnings-as-errors, Swift ≥ 6.2, `swift test` pre-push, coverage ratchet. laid (R10) ⊥ swiftlint T18, allowlist T19, itok T21|V6,V7,V8,V9,V10,V16,V17
 T7|x|ARCHIVED to SPEC-ARCHIVE.md|-
 T8|x|ARCHIVED to SPEC-ARCHIVE.md|V11
@@ -121,7 +121,7 @@ T13|~|issues w/ approval: pklith Swift catalog rows (pklith#87, #88), sherd Swif
 T14|x|ARCHIVED to SPEC-ARCHIVE.md|V6
 T15|.|first tag `v0.2.1-fork.1`; T switches its input (D19)|V1
 T16|.|force-push `spec-prompt` after private-name rewrite; scrub PR #1 body (`paradigm/V37`), w/ approval|-
-T17|~|wave plan by hand ∵ `sherd wave` reads only Rust edges (sherd#132): W1 = T4 ∥ T8 ∥ T11, merged & reconciled (`reconcile-1`); W2 = T5 `Tests` ∥ T9 `Sources`; W3 = T10 `Sources`; each ends w/ reconcile commit (`paradigm/V18`). `Sources` task's RED test in its `Tests/Fork` mirror ∴ ⊥ `Tests` worker there. T5 waits on owner (`Tests` T1, T2)|V5,V15
+T17|~|wave plan by hand ∵ `sherd wave` reads only Rust edges (sherd#132): W1 = T4 ∥ T8 ∥ T11, merged & reconciled (`reconcile-1`); W2 = T5 `Tests` ∥ T9 `Sources`; W3 = T10 `Sources`; each ends w/ reconcile commit (`paradigm/V18`). `Sources` task's RED test in its `Tests/Fork` mirror ∴ ⊥ `Tests` worker there|V5,V15
 T18|.|swiftlint: seeded `.swiftlint.yml` → 120 upstream findings; owner picks baseline convention (D13), then row laid|V9
 T19|.|name guard allowlist half (`paradigm/V37`) for CI, which has ⊥ denylist; owner picks its rows|V16
 T20|x|ARCHIVED to SPEC-ARCHIVE.md|V10

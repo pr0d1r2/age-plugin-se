@@ -31,8 +31,8 @@ sib|pkl|hk `Config.pkl` vendored by `pklith seed`, unchanged; ⊥ node
 
 - cmd: `swift test` — whole suite; pre-push & `checks.<sys>` (`nix`).
 - cmd: `swift test --enable-code-coverage` → `.build/debug/codecov/*.json` read by the coverage ratchet (`.:V10`).
-- helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift` (`run`; `runCapturingAll` adds stderr & termination reason; `assertProtocolError`: exit 255 ⊥ trap, `.:V20`). fork seam `DummyCrypto.operationError`: set → P-256 key agreement throws it (`.:T10`).
-- hardware: `CryptoKitHardwareTests` (`Fork/CryptoForkTests.swift`): 4 `.coverage`-excluded `newSecureEnclave*` fns & age round trip (classic, `--pq`). runs iff `AGE_PLUGIN_SE_HARDWARE=1` ∧ `SecureEnclave.isAvailable`, else `XCTSkip` w/ why.
+- helpers ⊥ `*Tests.swift`: upstream `DummyCrypto`, `MemoryStream`; fork `Fork/BuiltBinary.swift` (`run`; `runCapturingAll` adds stderr & termination reason; `assertProtocolError`: exit 255 ⊥ trap, `.:V20`). fork `Fork/Fixtures.swift`: reads `fixtures/`; `FixtureCrypto` = `.:R14` stand-in (blob → public key its fixture names, ⊥ private key); `SessionFixture`, `Message` (own parser ⊥ `Stanza.readFrom`), `assertSameBytes` (V2), `assertSameShape` (`.:V2`). fork seam `DummyCrypto.operationError`: set → P-256 key agreement throws it (`.:T10`).
+- hardware: `CryptoKitHardwareTests` (`Fork/CryptoForkTests.swift`): 4 `.coverage`-excluded `newSecureEnclave*` fns & age round trip (classic, `--pq`) & fixture replay: ∀ session w/ real fixture identity → recorded bytes; fresh SE key fails → fail; ⊥ fixture key works → skip (other Mac). runs iff `AGE_PLUGIN_SE_HARDWARE=1` ∧ `SecureEnclave.isAvailable`, else `XCTSkip` w/ why.
 - hardware safety: `.privateKeyUsage` only ∴ ⊥ Touch ID; keys = `dataRepresentation` in memory | removed `.build/tmp-hw/`; ⊥ keychain.
 - `.pklith` row `hardware` (pre-push) sets the var; `CI` set → ⊥ run. `test`, `coverage` ⊥ set it ∴ floor = CI's. `coverage` skips on macOS < 26 (`.:V10`).
 - `.pklith` rules (V4): `swift-test` exists `Sources/*.swift` → `Tests/Fork/{stem}ForkTests.swift`, ⊥ except; `swift-orphan` orphan `Tests/*Tests.swift` (`*` crosses `/` ∴ `Fork/` too) → `Sources/{stem\|chop:ForkTests\|chop:Tests}.swift`, except `Tests/StanzaTests.swift` ∵ upstream's, tests `Stanza` in `Plugin.swift`. upstream has no `HPKE`, `Stream` test ∴ ⊥ upstream exists row.
@@ -49,7 +49,7 @@ V5: ∀ commit changing `Sources/X.swift` changes `Tests/Fork/XForkTests.swift` 
 ## §T TASKS
 
 id|status|task|cites
-T1|.|`FormatFreezeTests`: parse & re-encode ∀ fixture (`.:T5`). open, owner reads `.:V1` before RED: `v0.2.1/tag-pq.recipient` is classic `age1tag1` (`v0.2.1` ignores `recipients --pq`); `DummyCrypto` reads identity data as raw P-256 (`DummyCrypto.swift:53`), fixture identities hold Secure Enclave blobs ∴ identity → recipient ⊥ derivable here, bech32 round trip is|V2
-T2|.|`FormatFreezeTests`: replay recipient-v1 & identity-v1 sessions (`.:T5`). open, owner reads `.:V2` before RED: sessions hold age's random `grease` stanza & real CryptoKit randomness, ⊥ `DummyCrypto`'s; identity-v1 unwrap needs the Secure Enclave that made the key (`.:V15`)|V1,V2
+T1|x|ARCHIVED to SPEC-ARCHIVE.md|V2
+T2|x|ARCHIVED to SPEC-ARCHIVE.md|V1,V2
 T3|x|ARCHIVED to SPEC-ARCHIVE.md|V3
 T4|x|ARCHIVED to SPEC-ARCHIVE.md|V3

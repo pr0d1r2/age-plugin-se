@@ -684,3 +684,294 @@ final class PluginProtocolErrorTests: XCTestCase {
     }
   }
 }
+
+/// Format freeze, root V1 (Tests T1): every identity and recipient in
+/// `fixtures/`, made by upstream `v0.2.1` and `57ccea1`, parses and
+/// re-encodes byte-identical in this build, and `keygen` and `recipients`
+/// write the same files from the same keys. No Secure Enclave: root R14's
+/// stand-in (`FixtureCrypto`) answers each fixture blob with the public key
+/// its identity file names. `v0.2.1/tag-pq.recipient` is a classic
+/// `age1tag1` recipient, as `v0.2.1` wrote it (owner 2026-10-23).
+final class FormatFreezeTests: XCTestCase {
+  /// `v0.2.1` ignored `recipients --pq` (fixed upstream by `19c59f2`).
+  static let classicPQRecipient = "v0.2.1/tag-pq.recipient"
+
+  func identities() throws -> [IdentityFixture] {
+    try Fixtures.files(".identity").map(IdentityFixture.init)
+  }
+
+  func identity(for recipientPath: String) throws -> IdentityFixture {
+    try IdentityFixture(String(recipientPath.dropLast(".recipient".count)) + ".identity")
+  }
+
+  func pqAvailable() -> Bool {
+    if #available(macOS 26.0, *) { return true }
+    return false
+  }
+
+  /// Both producers are here, and every file is a kind these tests read.
+  func testCorpus() throws {
+    XCTAssert(Set(try Fixtures.revisions()).isSuperset(of: ["57ccea1", "v0.2.1"]))
+    let kinds = [".identity", ".recipient", "-encrypt.session", "-decrypt.session"]
+    for path in try Fixtures.all() {
+      XCTAssert(kinds.contains(where: path.hasSuffix), "fixtures/\(path): not read by any test")
+    }
+    for path in try Fixtures.files(".identity") {
+      let stem = String(path.dropLast(".identity".count))
+      for suffix in [".recipient", "-decrypt.session"] {
+        XCTAssert(try Fixtures.all().contains(stem + suffix), "fixtures/\(stem)\(suffix) missing")
+      }
+    }
+    XCTAssertEqual(6, try Fixtures.files(".identity").count)
+    XCTAssertEqual(6, try Fixtures.files(".recipient").count)
+  }
+
+  /// The key line parses and re-encodes to the same bytes; the classic
+  /// recipient it gives is the one its `# public key:` line names.
+  func testIdentities_ReEncode() throws {
+    let fixtures = try identities()
+    let crypto = try FixtureCrypto(fixtures)
+    for fixture in fixtures {
+      let line = try XCTUnwrap(fixture.identity, fixture.path)
+      let identity = try Identity(ageIdentity: line, crypto: crypto)
+      Fixtures.assertSameBytes(line, identity.ageIdentity, fixture.path, "identity")
+      XCTAssertEqual(fixture.isPQ, identity.mlkemPrivateKeyData != nil, fixture.path)
+      Fixtures.assertSameBytes(
+        try XCTUnwrap(fixture.publicKey),
+        identity.recipient.ageRecipient(type: fixture.recipientType),
+        fixture.path, "# public key")
+      if fixture.isPQ, #available(macOS 26.0, *) {
+        Fixtures.assertSameBytes(
+          try XCTUnwrap(fixture.pqPublicKey),
+          try identity.pqRecipient(crypto: crypto).ageTagPQRecipient, fixture.path,
+          "# public key (post-quantum)")
+      }
+    }
+  }
+
+  /// `keygen --access-control none` from the same Secure Enclave keys and
+  /// clock writes the whole identity file, comments included.
+  func testIdentities_Keygen() throws {
+    let fixtures = try identities()
+    for fixture in fixtures {
+      if fixture.isPQ && !pqAvailable() {
+        print("format-freeze: fixtures/\(fixture.path): keygen --pq needs macOS 26; skipped")
+        continue
+      }
+      let crypto = try FixtureCrypto(fixtures)
+      let (p256, mlkem) = try fixture.blobs()
+      crypto.made = [p256] + (mlkem.map { [$0] } ?? [])
+      let now = try XCTUnwrap(
+        ISO8601DateFormatter().date(from: try XCTUnwrap(fixture.created)), fixture.path)
+      let (contents, recipient) = try Plugin(crypto: crypto, stream: MemoryStream()).generateKey(
+        accessControl: .none, recipientType: fixture.recipientType, now: now, pq: fixture.isPQ)
+      Fixtures.assertSameBytes(fixture.text, contents, fixture.path, "keygen output")
+      XCTAssertEqual(fixture.isPQ ? fixture.pqPublicKey : fixture.publicKey, recipient)
+      XCTAssert(crypto.made.isEmpty, fixture.path)
+    }
+  }
+
+  /// Each recipient decodes and re-encodes to the file's bytes.
+  func testRecipients_ReEncode() throws {
+    for path in try Fixtures.files(".recipient") {
+      let text = try Fixtures.text(path)
+      let recipient = try Recipient(ageRecipient: text)
+      let encoded =
+        text.hasPrefix("age1tagpq1")
+        ? try recipient.ageTagPQRecipient
+        : recipient.ageRecipient(type: text.hasPrefix("age1se1") ? .se : .tag)
+      Fixtures.assertSameBytes(text, encoded, path, "recipient")
+    }
+  }
+
+  /// `recipients` (`--pq` for a `tag-pq` set) on the identity file writes
+  /// the recipient file, with no final newline, as upstream's `-o` did.
+  func testRecipients_FromIdentity() throws {
+    let crypto = try FixtureCrypto(try identities())
+    for path in try Fixtures.files(".recipient") {
+      let fixture = try identity(for: path)
+      let pq = fixture.isPQ && path != Self.classicPQRecipient
+      if pq && !pqAvailable() {
+        print("format-freeze: fixtures/\(path): recipients --pq needs macOS 26; skipped")
+        continue
+      }
+      let output = try Plugin(crypto: crypto, stream: MemoryStream()).generateRecipients(
+        input: fixture.text, recipientType: fixture.recipientType, pq: pq)
+      Fixtures.assertSameBytes(try Fixtures.data(path), Data(output.utf8), path, "recipients")
+    }
+  }
+
+  /// The `v0.2.1` quirk, kept as a classic recipient (owner 2026-10-23):
+  /// `recipients --pq` wrote the identity's classic `age1tag1` recipient.
+  /// It decodes as one; this build's `--pq` gives the post-quantum one.
+  func testTagPQ_V021_IsClassic() throws {
+    let path = Self.classicPQRecipient
+    let text = try Fixtures.text(path)
+    let fixture = try identity(for: path)
+    XCTAssert(text.hasPrefix("age1tag1"), text)
+    XCTAssertNil(try Recipient(ageRecipient: text).mlkem768PublicKeyData)
+    XCTAssertEqual(fixture.publicKey, text)
+    guard #available(macOS 26.0, *) else { return }
+    let output = try Plugin(crypto: try FixtureCrypto([fixture]), stream: MemoryStream())
+      .generateRecipients(input: fixture.text, recipientType: .tag, pq: true)
+    XCTAssertEqual(fixture.pqPublicKey, output)
+  }
+}
+
+/// `DummyCrypto` whose ML-KEM-768 encapsulation is real, so a stanza it
+/// wraps opens with any ML-KEM-768 key, not only the one its fixed
+/// encapsulation was made for.
+final class SoftwareEncapsulationCrypto: DummyCrypto {
+  @available(macOS 26.0, *)
+  override func encapsulate(mlkem768Key: MLKEM768.PublicKey) throws -> KEM.EncapsulationResult {
+    try mlkem768Key.encapsulate()
+  }
+}
+
+/// Format freeze, root V2 (Tests T2): this build's state machines against
+/// the recorded sessions, compared structurally (owner 2026-10-23). The
+/// sessions hold age's random grease and real CryptoKit randomness, and a
+/// fixture identity unwraps only in the Secure Enclave that made it, so:
+/// - recipient-v1: age's side as recorded; the plugin's side has the
+///   recorded stanza types and arguments, exact bytes where they are
+///   deterministic, and the same lengths where they are random;
+/// - identity-v1: age's side with a software key in place of the Secure
+///   Enclave one and the recorded file key wrapped to it in the recorded
+///   stanza type (same shape, checked), all else verbatim, grease
+///   included; the plugin's side is then the recorded bytes exactly.
+/// The real identities replay in the hardware suite (`CryptoKitHardwareTests`).
+final class FormatFreezeSessionTests: XCTestCase {
+  /// The random parts of a recipient stanza: the share, its tag where the
+  /// tag hashes the share (all but `piv-p256`), and the sealed file key.
+  static func random(_ stanza: Stanza) -> (args: [Int: Match], body: Match) {
+    guard stanza.type == "recipient-stanza", stanza.args.count > 1 else { return ([:], .exact) }
+    return (stanza.args[1] == "piv-p256" ? [3: .length] : [2: .length, 3: .length], .length)
+  }
+
+  func pqAvailable() -> Bool {
+    if #available(macOS 26.0, *) { return true }
+    return false
+  }
+
+  /// Each session names its own set's fixture: the recipient age encrypts
+  /// to, the identity age decrypts with.
+  func testSessions_NameTheirFixtures() throws {
+    for path in try Fixtures.files(".session") {
+      let stem = path.components(separatedBy: "/")[0] + "/" + Fixtures.set(path)
+      let first = try XCTUnwrap(try Message.parse(SessionFixture(path).toPlugin, path).first)
+      if path.hasSuffix("-encrypt.session") {
+        XCTAssertEqual("add-recipient", first.stanza.type, path)
+        XCTAssertEqual(try Fixtures.text(stem + ".recipient"), first.stanza.args.first, path)
+      } else {
+        XCTAssertEqual("add-identity", first.stanza.type, path)
+        XCTAssertEqual(
+          try IdentityFixture(stem + ".identity").identity, first.stanza.args.first, path)
+      }
+    }
+  }
+
+  /// recipient-v1: age's side as recorded, needing no Secure Enclave; the
+  /// plugin answers with the recorded shape: one `piv-p256` stanza whose
+  /// tag (the recipient's) is the recorded one, then `done`.
+  func testRecipientV1_Sessions() throws {
+    let paths = try Fixtures.files("-encrypt.session")
+    XCTAssertEqual(2, paths.count)
+    for path in paths {
+      let session = try SessionFixture(path)
+      let stream = MemoryStream()
+      stream.add(input: session.toPlugin.joined(separator: "\n"))
+      try Plugin(crypto: DummyCrypto(), stream: stream).recipientV1()
+      let recorded = try Message.parse(session.fromPlugin, path)
+      XCTAssertEqual(["recipient-stanza", "done"], recorded.map(\.stanza.type), path)
+      Fixtures.assertSameShape(
+        recorded, try Message.parse(stream.outputLines, path), path, "plugin's side",
+        rule: Self.random)
+      XCTAssert(stream.inputLines.isEmpty, "fixtures/\(path): age's side not all read")
+    }
+  }
+
+  /// identity-v1: the recorded file key comes back, byte for byte, as the
+  /// recorded `file-key` and `done`, after the recorded grease.
+  func testIdentityV1_Sessions() throws {
+    let paths = try Fixtures.files("-decrypt.session")
+    XCTAssertEqual(6, paths.count)
+    for path in paths {
+      let session = try SessionFixture(path)
+      let age = try Message.parse(session.toPlugin, path)
+      let recorded = try Message.parse(session.fromPlugin, path)
+      XCTAssertEqual(["file-key", "done"], recorded.map(\.stanza.type), path)
+      let fileKey = try XCTUnwrap(recorded.first?.stanza.body, path)
+      let pq = Fixtures.set(path).hasSuffix("-pq")
+      if pq && !pqAvailable() {
+        print("format-freeze: fixtures/\(path): a post-quantum identity needs macOS 26; skipped")
+        continue
+      }
+
+      let (contents, _) = try Plugin(crypto: DummyCrypto(), stream: MemoryStream()).generateKey(
+        accessControl: .none, recipientType: .tag, now: Date(timeIntervalSince1970: 0), pq: pq)
+      let key = try XCTUnwrap(
+        contents.split(separator: "\n").first(where: { $0.hasPrefix("AGE-PLUGIN-SE-") }))
+      let identity = try Identity(ageIdentity: String(key), crypto: DummyCrypto())
+      let transplanted = try age.map { message -> Message in
+        var stanza = message.stanza
+        switch stanza.type {
+        case "add-identity":
+          stanza.args[0] = String(key)
+          return Message(stanza)
+        case "recipient-stanza":
+          return try wrap(fileKey, as: stanza, to: identity)
+        default:
+          return message
+        }
+      }
+      Fixtures.assertSameShape(
+        age, transplanted, path, "age's side, software key",
+        rule: { stanza in
+          // Another key: the identity differs, and so does even a `piv-p256` tag.
+          switch stanza.type {
+          case "add-identity": return ([0: .any], .exact)
+          case "recipient-stanza": return ([2: .length, 3: .length], .length)
+          default: return ([:], .exact)
+          }
+        })
+
+      let stream = MemoryStream()
+      stream.add(input: transplanted.flatMap(\.lines).joined(separator: "\n"))
+      try Plugin(crypto: DummyCrypto(), stream: stream).identityV1()
+      Fixtures.assertSameBytes(
+        session.fromPlugin.joined(separator: "\n"), stream.output, path, "plugin's side")
+    }
+  }
+
+  /// `fileKey` wrapped to `identity` by recipient-v1 in `recorded`'s stanza
+  /// type, with `recorded`'s file index.
+  func wrap(_ fileKey: Data, as recorded: Stanza, to identity: Identity) throws -> Message {
+    let recipient: String
+    switch recorded.args[1] {
+    case "piv-p256":
+      recipient = identity.recipient.ageRecipient(type: .se)
+    case "p256tag":
+      recipient = identity.recipient.ageRecipient(type: .tag)
+    default:
+      guard #available(macOS 26.0, *) else { throw XCTSkip("ML-KEM-768 needs macOS 26") }
+      recipient = try identity.pqRecipient(crypto: DummyCrypto()).ageTagPQRecipient
+    }
+    let stream = MemoryStream()
+    stream.add(
+      input: """
+        -> add-recipient \(recipient)
+
+        -> wrap-file-key
+        \(fileKey.base64RawEncodedString(wrap: true))
+        -> done
+
+        -> ok
+
+        """)
+    try Plugin(crypto: SoftwareEncapsulationCrypto(), stream: stream).recipientV1()
+    var stanza = try XCTUnwrap(try Message.parse(stream.outputLines, "wrap").first).stanza
+    XCTAssertEqual(recorded.args[1], stanza.args[1])
+    stanza.args[0] = recorded.args[0]
+    return Message(stanza)
+  }
+}
